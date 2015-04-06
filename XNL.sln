@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM.SingNo.XNLEngine", "XNLEngine\COM.SingNo.XNLEngine.csproj", "{8349CBF6-7F34-47C2-99DE-E3227516316F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM.SingNo.XNLCore", "COM.SingNo.Core\COM.SingNo.XNLCore.csproj", "{11790C63-E330-4095-A183-2870BB63D109}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWeb", "TestWeb\TestWeb.csproj", "{9D1313E6-3DAA-4C37-B35F-6D58F8C6A1EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11790C63-E330-4095-A183-2870BB63D109}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11790C63-E330-4095-A183-2870BB63D109}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11790C63-E330-4095-A183-2870BB63D109}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11790C63-E330-4095-A183-2870BB63D109}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D1313E6-3DAA-4C37-B35F-6D58F8C6A1EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D1313E6-3DAA-4C37-B35F-6D58F8C6A1EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D1313E6-3DAA-4C37-B35F-6D58F8C6A1EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D1313E6-3DAA-4C37-B35F-6D58F8C6A1EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
