@@ -50,7 +50,6 @@
     <Compile Include="IXNLParser.cs" />
     <Compile Include="Labels\BaseTag.cs" />
     <Compile Include="Labels\For.cs" />
-    <Compile Include="Labels\Forin.cs" />
     <Compile Include="Labels\If.cs" />
     <Compile Include="Labels\Set.cs" />
     <Compile Include="ParserEngine.cs" />
@@ -64,7 +63,6 @@
     <Compile Include="XNLBaseCommon.cs" />
     <Compile Include="XNLConfig.cs" />
     <Compile Include="XNLContext.cs" />
-    <Compile Include="XNLDebug.cs" />
     <Compile Include="IXNLTag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="XNLParam.cs" />

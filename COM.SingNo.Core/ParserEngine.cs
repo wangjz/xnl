@@ -10,53 +10,99 @@ namespace COM.SingNo.XNLCore
     {
         public static IXNLParser<T> xnlParser { get; set; }
 
-        public static string parse(string templateStr, T xnlContext) //, OnTagDelegate<T> tagDelegate = null
+        public static string parse(string templateStr, T xnlContext,ParseMode parseMode = ParseMode.Static)
         {
             if (xnlParser == null)
             {
                 return "解析引擎未设置";
             }
-            if (string.IsNullOrEmpty(templateStr)) return string.Empty;
 
-            //OnTagDelegate<T> _tagDelegate = onTagAction;
+            bool isNested = false;
 
-            //if (tagDelegate != null) _tagDelegate = tagDelegate;
-            
-            //清除xnl注释标签
-            templateStr = xnlParser.RemoveXNLNotes(templateStr);
+            XNLTagStruct tagStruct=null;
+
+            if (templateStr == null)
+            {
+                object nestedTag = XNLContext.getItem(xnlContext, "$__nestedTag");
+                if (nestedTag != null)
+                {
+                    isNested = true;
+                    tagStruct = (XNLTagStruct)nestedTag;
+                    XNLContext.setItem(xnlContext, "$__nestedTag",null); //清除
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            if (isNested == false && string.IsNullOrEmpty(templateStr))
+            {
+                return string.Empty;
+            }
 
             StringBuilder strBuilder = xnlContext.response.buffer;
 
             XNLResponse response = xnlContext.response;
 
-            strBuilder.Capacity = Convert.ToInt32(templateStr.Length*1.5);
+            if (isNested == false)
+            {
+                //清除xnl注释标签
+                templateStr = xnlParser.RemoveXNLNotes(templateStr);
+                strBuilder.Capacity = Convert.ToInt32(templateStr.Length * 1.5);
+                //构建标签结构
+                tagStruct = xnlParser.GetTagStruct(templateStr);
+            }
+            
             //try
             //{
-                //构建标签结构
-                XNLTagStruct tagStruct = xnlParser.GetTagStruct(templateStr);
-
+                
                 if (tagStruct == null) return string.Empty;
-                IXNLTag<T> tagObj = null;
 
+                Dictionary<string, IXNLTag<T>> tagsObj = null;
+                Dictionary<string, IXNLTag<T>> nameTags = null;  //命名标签对象
+                //StringBuilder codeStrBuilder = null;
+                
+                int tagId = 0;
+                int index = 0;
+                if (isNested)
+                {
+                    parseMode = (ParseMode)XNLContext.getItem(xnlContext, "$__parseMode");
+                    tagsObj = (Dictionary<string, IXNLTag<T>>)XNLContext.getItem(xnlContext, "$__tags");
+                    nameTags = (Dictionary<string, IXNLTag<T>>)XNLContext.getItem(xnlContext, "$__nameTags");
+                    //codeStrBuilder = (StringBuilder)XNLContext.getItem(xnlContext, "$__codeBuffer");
+                    tagId = (int)XNLContext.getItem(xnlContext, "$__tagid");
+                    index = strBuilder.Length;
+                }
+                else
+                {
+                    XNLContext.setItem(xnlContext, "$__parseMode", parseMode);
+
+                    tagsObj = new Dictionary<string, IXNLTag<T>>();
+
+                    nameTags = new Dictionary<string, IXNLTag<T>>();
+
+                    XNLContext.setItem(xnlContext, "$__tags", tagsObj);
+
+                    XNLContext.setItem(xnlContext, "$__nameTags", nameTags);
+
+                    if (parseMode == ParseMode.Dynamic)
+                    {
+                        //codeStrBuilder = new StringBuilder(Convert.ToInt32(templateStr.Length * 1.5));
+                       // XNLContext.setItem(xnlContext, "$__codeBuffer", codeStrBuilder);
+                        strBuilder.AppendLine("System.Text.StringBuilder buffer = xnlContext.response.buffer;");
+                    }
+                }
+                IXNLTag<T> tagObj = null;
                 XNLTagStruct curStruct = tagStruct;
                 int subTagCount = 0;
                 bool isNoSubTag = false;            
                 bool isTagName = false;
-                Dictionary<string,IXNLTag<T>> tagsObj = new Dictionary<string,IXNLTag<T>>();
-                int tagId = 0;
                 string instanceName = "";
-                int index=0;
                 string tmpStr = null;
                 bool isEnd = false;
                 string fullTagName = null;
                 bool isTagNew = false;
-                StringBuilder codeStrBuilder = null;
-                if (xnlContext.parseMode == ParseMode.Dynamic)
-                {
-                    codeStrBuilder = new StringBuilder(Convert.ToInt32(templateStr.Length * 1.5));
-                    XNLContext.setItem(xnlContext,"__codeBuffer",codeStrBuilder);
-                    codeStrBuilder.AppendLine("System.Text.StringBuilder buffer = xnlContext.response.buffer" );
-                }
+                       
                 while(true)
                 {
                     subTagCount = 0;
@@ -91,7 +137,7 @@ namespace COM.SingNo.XNLCore
                                 isTagNew = true;
                                 try
                                 {
-                                    tagObj = XNLLib<T>.getTagInstance(curStruct.nameSpace, curStruct.tagName);
+                                    tagObj = XNLLib<T>.getTagInstance(curStruct.nameSpace, curStruct.tagName).Create();
                                 }
                                 catch
                                 {
@@ -110,75 +156,99 @@ namespace COM.SingNo.XNLCore
                                     curStruct.instanceName = "";// instanceName;
                                     tagId += 1;
                                 }
-
-                                if (codeStrBuilder != null)
+                                tagObj.OnInit(xnlContext, instanceName);
+                                if(parseMode==ParseMode.Dynamic)
                                 {
-                                    codeStrBuilder.AppendLine("IXNLTag<T> " + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\");");
-                                    codeStrBuilder.AppendLine(instanceName + ".onInit(xnlContext, \"" + instanceName + "\");");
+                                    strBuilder.Insert(0, "IXNLTag<T> " + instanceName + "= null;\n"); //"IXNLTag<T> " +
+                                    strBuilder.AppendLine("\n" + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
+                                    strBuilder.AppendLine(instanceName + ".OnInit(xnlContext, \"" + instanceName + "\");");
                                 }
-                                tagObj.onInit(xnlContext, instanceName);
                             }
-                            else if (string.IsNullOrEmpty(instanceName)==false)
+                            else if (string.IsNullOrEmpty(instanceName)==false) //命名tag
                             {
-                                if (codeStrBuilder != null)
+                                IXNLTag<T> newTagObj ;
+                                var fullInsName=fullTagName+"_"+instanceName;
+                                bool isCreate = nameTags.TryGetValue(fullInsName, out newTagObj);
+                                if (isCreate == false)
                                 {
-                                    codeStrBuilder.AppendLine("IXNLTag<T> " + instanceName + " = "+tagObj.instanceName+".create();");
-                                    codeStrBuilder.AppendLine(instanceName + ".onInit(xnlContext, \"" + instanceName + "\");");
+                                    newTagObj = tagObj.Create();
+                                    nameTags[fullInsName] = newTagObj;
+                                    if (parseMode == ParseMode.Dynamic)
+                                    {
+                                        strBuilder.Insert(0, "IXNLTag<T> " + instanceName + "=null;\n"); //"IXNLTag<T> " +
+                                        strBuilder.AppendLine("\n"+instanceName + " = " + tagObj.instanceName + ".Create();");
+                                        strBuilder.AppendLine(instanceName + ".OnInit(xnlContext, \"" + instanceName + "\");");
+                                    }
+                                    tagObj = newTagObj;
+                                    tagObj.OnInit(xnlContext, instanceName);
                                 }
-                                tagObj = tagObj.create();
-                                tagObj.onInit(xnlContext, instanceName);
+                                else
+                                {
+                                    if (parseMode == ParseMode.Dynamic)
+                                    {
+                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\tif(" + tagObj.instanceName + "==null){" + tagObj.instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();" + tagObj.instanceName + ".OnInit(xnlContext, \"" + instanceName + "\");}\n\t" + instanceName + " = " + tagObj.instanceName + ".Create();");
+                                        strBuilder.AppendLine("\t"+instanceName + ".OnInit(xnlContext, \"" + instanceName + "\");\n}");
+                                    }
+                                    tagObj = newTagObj;
+                                }
                             }
                             else if (string.IsNullOrEmpty(instanceName))
                             {
                                 instanceName = tagObj.instanceName;
+                                if (parseMode == ParseMode.Dynamic)
+                                {
+                                    strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
+                                    strBuilder.AppendLine("\t"+instanceName + ".OnInit(xnlContext, \"" + instanceName + "\");\n}");
+                                }
                             }
                             
                             if (curStruct.tagParams != null)
                             {
                                 foreach (KeyValuePair<string, XNLParam> kv in curStruct.tagParams)
                                 {
-                                    tagObj.setAttributeValue(kv.Key, kv.Value.value);
-                                    if (codeStrBuilder != null)
+                                    //todo 处理特殊kv
+                                    if (parseMode == ParseMode.Dynamic)
                                     {
-                                        //todo 处理特殊kv
-                                        codeStrBuilder.AppendLine(instanceName + ".setAttributeValue(\""+kv.Key+"\",@\""+kv.Value+"\");");
+
+                                        strBuilder.AppendLine(instanceName + ".SetAttribute(\"" + kv.Key + "\",@\"" + kv.Value.value + "\");");
+                                    }
+                                    else
+                                    {
+                                        tagObj.SetAttribute(kv.Key, kv.Value.value);
                                     }
                                 }
                             }
                             //
-                            tagObj.onStart();
-                            if (codeStrBuilder != null)
+                            if (parseMode == ParseMode.Dynamic)
                             {
-                                codeStrBuilder.AppendLine(instanceName + ".onStart();");
+                                strBuilder.AppendLine(instanceName + ".OnStart();");
                             }
+                            else
+                            {
+                                tagObj.OnStart();
+                            }
+                            
+                           
                             if (isNoSubTag)
                             {
-                                //检测是否有其它tag
-                                //如果有其它tag，保存当前标签解析状态，将新标签设为当前标签
-                                //可先用递归实现
-                                XNLTagStruct t_newTag;
-                                bool isHasNested = testNestedTag(curStruct.bodyContent, out t_newTag);
-                                if (isHasNested) //处理嵌套情况
+                                tagObj.curTag = null;
+                                if (parseMode == ParseMode.Dynamic)
                                 {
-                                    if(t_newTag.tagName!=null)
-                                    {
-                                        t_newTag.parent = curStruct;
-                                        //保存当前标签解析状态，将新标签设为当前标签
-
-                                    }
-                                    else
-                                    {
-                                        //遍历
-                                    }
+                                    strBuilder.AppendLine("OnTagDelegate " + instanceName + "_delegate=delegate (){");
+                                    XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
+                                    XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                    OnTagAction(tagObj);
+                                    strBuilder.AppendLine("};");
+                                    strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
                                 }
                                 else
                                 {
-                                    tagObj.curTag = "";
-                                    if (codeStrBuilder != null)
+                                    tagObj.OnTag(delegate()
                                     {
-                                        //创建匿名方法
-                                    }
-                                    onTagAction(tagObj, curStruct.bodyContent);
+                                        XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
+                                        XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                        OnTagAction(tagObj);
+                                    });
                                 }
                             }
                             else
@@ -189,11 +259,11 @@ namespace COM.SingNo.XNLCore
                                     tmpSubTag = curStruct.subTagStruct[i];
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
-                                        //检测是否有其它tag
-                                        //如果有其它tag，保存当前标签解析状态，将新标签设为当前标签
-
                                         tagObj.curTag = "";
-                                        onTagAction(tagObj, tmpSubTag.bodyContent);
+                                        //, tmpSubTag.bodyContent
+                                        XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
+                                        XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                        OnTagAction(tagObj);
                                     }
                                     else
                                     {
@@ -202,25 +272,48 @@ namespace COM.SingNo.XNLCore
                                         {
                                             foreach (KeyValuePair<string, XNLParam> kv in tmpSubTag.tagParams)
                                             {
-                                                tagObj.setAttributeValue(kv.Key, kv.Value.value, tmpSubTag.tagName);
-                                                if (codeStrBuilder != null)
+                                                //todo 处理特殊kv
+                                                if (parseMode == ParseMode.Dynamic)
                                                 {
-                                                    //todo 处理特殊kv
-                                                    codeStrBuilder.AppendLine(instanceName + ".setAttributeValue(\"" + kv.Key + "\",@\"" + kv.Value + "\");");
+                                                    strBuilder.AppendLine(instanceName + ".SetAttribute(\"" + kv.Key + "\",@\"" + kv.Value + "\");");
+                                                }
+                                                else
+                                                {
+                                                    tagObj.SetAttribute(kv.Key, kv.Value.value, tmpSubTag.tagName);
                                                 }
                                             }
                                         }
-                                        //检测是否有其它tag
-                                        //如果有其它tag，保存当前标签解析状态，将新标签设为当前标签
-                                        tagObj.onTag(tmpSubTag.tagName, onTagAction, tmpSubTag.bodyContent);
+                                        if (parseMode == ParseMode.Dynamic)
+                                        {
+                                            strBuilder.AppendLine("OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
+                                            XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
+                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                            OnTagAction(tagObj);
+                                            strBuilder.AppendLine("};");
+                                            strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_" + tagObj.curTag + "_delegate);");
+                                        }
+                                        else
+                                        {
+                                            //tmpSubTag  保存到context中
+                                            tagObj.OnTag(delegate()
+                                            {
+                                                XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
+                                                XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                                OnTagAction(tagObj);
+                                            });
+                                        }
                                     }
                                 }
                             }
+
                             isEnd = true;
-                            tagObj.onEnd();
-                            if (codeStrBuilder != null)
+                            if (parseMode == ParseMode.Dynamic)
                             {
-                                codeStrBuilder.AppendLine(instanceName + ".onEnd();");
+                                strBuilder.AppendLine(instanceName + ".OnEnd();");
+                            }
+                            else
+                            {
+                                tagObj.OnEnd();
                             }
                         //}
                         //catch (TagStopException)
@@ -300,8 +393,6 @@ namespace COM.SingNo.XNLCore
 
                     if (tagStruct == null)
                     {
-                        //判断是否存在压栈列表，如有，还原
-
                         break;
                     }
                 }
@@ -316,6 +407,12 @@ namespace COM.SingNo.XNLCore
 
         static bool testNestedTag(string content,out XNLTagStruct outStruct)
         {
+
+            if (string.IsNullOrEmpty(content))
+            {
+                outStruct = null;
+                return false;
+            }
             outStruct = xnlParser.GetTagStruct(content);
             //判断是否有嵌套
             if (outStruct != null && (outStruct.tagName!=null || outStruct.subTagStruct!=null))
@@ -324,110 +421,220 @@ namespace COM.SingNo.XNLCore
             }
             return false;
         }
-        public static void onTagAction(IXNLTag<T> tagObj, string body)
+     
+        
+        public static void OnTagAction(IXNLTag<T> tagObj)
         {
-            int index = tagObj.xnlContext.response.buffer.Length;
-            Object itemObj = XNLContext.getItem(tagObj.xnlContext, "__codeBuffer");
-            StringBuilder codeStrBuilder = null;
-            if (itemObj != null)
+            XNLContext xnlContext = tagObj.xnlContext;
+            XNLTagStruct curStruct = (XNLTagStruct)XNLContext.getItem(xnlContext, "$__curStruct");
+            XNLContext.setItem(xnlContext, "$__curStruct", null);
+            string body = curStruct.bodyContent;
+            //检测是否有其它tag
+            //如果有其它tag，递归解析
+            XNLTagStruct t_newTag;
+            bool isHasNested = testNestedTag(body, out t_newTag);
+            if (isHasNested) //处理嵌套情况
             {
-                codeStrBuilder = (StringBuilder)itemObj;
-            }
-            tagObj.xnlContext.response.buffer.Append(body);
-
-            List<XNLToken> tokens = xnlParser.GetTagTokens(body);
-            if (tokens != null)
-            {
-                object obj = null;
-                foreach (XNLToken token in tokens)
+                t_newTag.parent = curStruct;
+                if (t_newTag.tagName != null) //完全嵌套
                 {
-                    if(string.IsNullOrEmpty(token.Scope)||token.Name == tagObj.instanceName)
-                    {
-                        obj = tagObj.getAttributeValue(token.Name, tagObj.curTag);
-                        tagObj.xnlContext.response.buffer.Remove(index + token.Index, token.Length);
-                        if(obj != null)
-                        {
-                            tagObj.xnlContext.response.buffer.Insert(index + token.Index, obj);
-                        }
-                       
-                    }
+                    XNLContext.setItem(xnlContext, "$__nestedTag", t_newTag);
+
+                    ParserEngine<XNLContext>.parse(null, xnlContext);
+
                 }
-            }
-        }
-
-        public static void onNoTagAction(T xnlContext, string body)
-        {
-            int index = xnlContext.response.buffer.Length;
-            Object obj = XNLContext.getItem(xnlContext, "__codeBuffer");
-            StringBuilder codeStrBuilder = null;
-            if(obj!=null)
-            {
-                codeStrBuilder = (StringBuilder)obj;
-            }
-
-            List<XNLToken> tokens = xnlParser.GetTagTokens(body);
-            if (tokens == null)
-            {
-                xnlContext.response.buffer.Append(body);
-                if (codeStrBuilder!=null)
+                else
                 {
-                    codeStrBuilder.Append("\nbuffer.Write(@\"");
-                    codeStrBuilder.Append(body);
-                    codeStrBuilder.AppendLine("\");");
+                    //遍历
+                    var t_count = t_newTag.subTagStruct.Count;
+                    XNLTagStruct t_subtag = null;
+                    for (var i = 0; i < t_count; i++)
+                    {
+                        t_subtag = t_newTag.subTagStruct[i];
+                        if (t_subtag.tagName != null) //完全嵌套
+                        {
+                            t_subtag.parent = curStruct;
+                            XNLContext.setItem(xnlContext, "$__nestedTag", t_subtag);
+                            ParserEngine<XNLContext>.parse(null, xnlContext);
+                        }
+                        else
+                        {
+                            ParseAction(xnlContext, tagObj, t_subtag.bodyContent);
+                        }
+                    }
                 }
             }
             else
             {
-                //xnlContext.response.buffer.Append(body);
+                ParseAction(xnlContext, tagObj, body);
+            }
+        }
+
+
+        public static void ParseAction(XNLContext xnlContext,IXNLTag<T> tagObj,string body)
+        {
+            if (string.IsNullOrEmpty(body)) return;
+            ParseMode parseMode =(ParseMode) XNLContext.getItem(xnlContext, "$__parseMode");
+            bool isDynamic = (parseMode == ParseMode.Dynamic);
+            StringBuilder strBuilder = xnlContext.response.buffer;
+            List<XNLToken> tokens = xnlParser.GetTagTokens(body);
+            if (tokens != null)
+            {
+                int index = 0;
+                object obj = null;
+                foreach (XNLToken token in tokens)
+                {
+                    var len = token.Index - index;
+                    if (len > 0)
+                    {
+                        var str = body.Substring(index, len);
+                        if (isDynamic)
+                        {
+                            strBuilder.Append("\nbuffer.Append(@\"");
+                            strBuilder.Append(str);
+                            strBuilder.AppendLine("\");");
+                        }
+                        else
+                        {
+                            strBuilder.Append(str);
+                        }
+                    }
+                    index = token.Index + token.Length;
+                    if (string.IsNullOrEmpty(token.Scope) || token.Name == tagObj.instanceName)
+                    {
+                        if (isDynamic)
+                        {
+                            bool isHas = tagObj.ExistAttribute(token.Name, tagObj.curTag);
+                            if (isHas)
+                            {
+                                strBuilder.Append("\nbuffer.Append(");
+                                strBuilder.Append(tagObj.instanceName + ".GetAttribute(\"" + token.Name + "\",\"" + tagObj.curTag + "\"));");
+                                //strBuilder.AppendLine("\");");
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                        else
+                        {
+                            bool isHas = tagObj.TryGetAttribute(out obj,token.Name, tagObj.curTag);
+                            if (isHas && obj!=null)
+                            {
+                                strBuilder.Append(obj);
+                            }
+                        }
+                    }
+                }
+                if(index<body.Length)
+                {
+                    if (isDynamic)
+                    {
+                        strBuilder.Append("\nbuffer.Append(@\"");
+                        strBuilder.Append(body.Substring(index));
+                        strBuilder.AppendLine("\");");
+                    }
+                    else
+                    {
+                        strBuilder.Append(body.Substring(index));
+                    }
+                }
+            }
+            else
+            {
+                if (isDynamic)
+                {
+                    strBuilder.Append("\nbuffer.Append(@\"");
+                    strBuilder.Append(body);
+                    strBuilder.AppendLine("\");");
+                }
+                else
+                {
+                    strBuilder.Append(body);
+                }
+            }
+        }
+        //todo 判断是否有嵌套 ??
+        public static void onNoTagAction(T xnlContext, string body)
+        {
+            ParseMode parseMode = (ParseMode)XNLContext.getItem(xnlContext, "$__parseMode");
+            bool isDynamic = (parseMode == ParseMode.Dynamic);
+            StringBuilder strBuilder = xnlContext.response.buffer;
+            //int index = strBuilder.Length;
+
+            List<XNLToken> tokens = xnlParser.GetTagTokens(body);
+            if (tokens == null)
+            {
+                if(isDynamic)
+                {
+                    strBuilder.Append("\nbuffer.Append(@\"");
+                    strBuilder.Append(body);
+                    strBuilder.AppendLine("\");");
+                }
+                else
+                {
+                    strBuilder.Append(body);
+                }
+            }
+            else
+            {
                 //{@:site.name}
                 int inx = 0;
                 foreach (XNLToken token in tokens)
                 {
-                    if(token.Index>inx)
+                    var len = token.Index - inx;
+                    if (len > 0)
                     {
-                        xnlContext.response.buffer.Append(body.Substring(inx, token.Index));
-                        if (codeStrBuilder != null)
+                        if (isDynamic)
                         {
-                            codeStrBuilder.Append("\nbuffer.Write(@\"");
-                            codeStrBuilder.Append(body.Substring(inx, token.Index));
-                            codeStrBuilder.AppendLine("\");\n");
+                            strBuilder.Append("\nbuffer.Append(@\"");
+                            strBuilder.Append(body.Substring(inx, len));
+                            strBuilder.AppendLine("\");\n");
                         }
-                        inx=token.Index+token.Length;
+                        else
+                        {
+                            strBuilder.Append(body.Substring(inx, token.Index));
+                        }
                     }
-                    
-                    if (xnlContext.parseMode == ParseMode.Static) token.mode = ParseMode.Static;
+                    inx = token.Index + token.Length;
+                    if (isDynamic==false) token.mode = ParseMode.Static;
                     switch(token.Type)
                     {
                         case XNLTokenType.Variable:
                             switch(token.Scope.ToLower())
                             {
                                 case "app":
-                                    xnlContext.response.buffer.Append(HttpContext.Current.Application[token.Name]);
-                                    
-                                    if (codeStrBuilder != null)
+                                    if (isDynamic)
                                     {
                                         if (token.mode == ParseMode.Static)
                                         {
-                                            codeStrBuilder.Append(HttpContext.Current.Application[token.Name]);
+                                            strBuilder.Append(HttpContext.Current.Application[token.Name]);
                                         }
                                         else
                                         {
-                                            codeStrBuilder.Append("\nbuffer.Write(HttpContext.Current.Application[\"" + token.Name + "\"]);\n");
+                                            strBuilder.Append("\nbuffer.Append(HttpContext.Current.Application[\"" + token.Name + "\"]);\n");
                                         }
+                                    }
+                                    else
+                                    {
+                                        strBuilder.Append(HttpContext.Current.Application[token.Name]);
                                     }
                                     break;
                                 case "session":
-                                    xnlContext.response.buffer.Append(HttpContext.Current.Session[token.Name]);
-                                    if (codeStrBuilder != null)
+                                    if (isDynamic)
                                     {
                                         if (token.mode == ParseMode.Static)
                                         {
-                                            codeStrBuilder.Append(HttpContext.Current.Session[token.Name]);
+                                            strBuilder.Append(HttpContext.Current.Session[token.Name]);
                                         }
                                         else
                                         {
-                                            codeStrBuilder.Append("\nbuffer.Write(HttpContext.Current.Session[\"" + token.Name + "\"]);\n");
+                                            strBuilder.Append("\nbuffer.Append(HttpContext.Current.Session[\"" + token.Name + "\"]);\n");
                                         }
+                                    }
+                                    else
+                                    {
+                                        strBuilder.Append(HttpContext.Current.Session[token.Name]);
                                     }
                                     break;
                                 case "post":
@@ -468,6 +675,19 @@ namespace COM.SingNo.XNLCore
                         case XNLTokenType.Attribute:
 
                             break;
+                    }
+                }
+                if (inx < body.Length)
+                {
+                    if (isDynamic)
+                    {
+                        strBuilder.Append("\nbuffer.Append(@\"");
+                        strBuilder.Append(body.Substring(inx));
+                        strBuilder.AppendLine("\");");
+                    }
+                    else
+                    {
+                        strBuilder.Append(body.Substring(inx));
                     }
                 }
             } 

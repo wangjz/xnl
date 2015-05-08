@@ -15,36 +15,41 @@ namespace COM.SingNo.XNLCore.Labels
         public string instanceName { get; set; }
         public string curTag { get; set;}
         // //标签开始,初始化参数等 抛异常初始化失败原因
-        public void onInit(T xnlContext, string instanceName)
+        public void OnInit(T xnlContext, string instanceName)
         {
         }
 
-        public void onStart()
+        public void OnStart()
         {
         }
 
-        public void onEnd()
+        public void OnEnd()
         {
         }
         //子标签解析
-        public void onTag(string tagName, OnTagDelegate<T> tagDelegate, string body)
+        public void OnTag(OnTagDelegate tagDelegate=null)
         {
         }
-        public void setAttributeValue(string paramName, object value, string subTagName=null)
+        public void SetAttribute(string paramName, object value, string subTagName=null)
         {
 
         }
-        public object getAttributeValue(string paramName,string subTagName=null)
-        {
-            return "";
-        }       
-      
-        //创建 
-        public IXNLTag<T> create()
+        public object GetAttribute(string paramName, string tagName = null)
         {
             return null;
         }
-        public bool existAttribute(string paramName, string tagName=null)
+        public bool TryGetAttribute(out object outValue, string paramName, string tagName = null)
+        {
+            outValue = null;
+            return false;
+        }   
+      
+        //创建 
+        public IXNLTag<T> Create()
+        {
+            return null;
+        }
+        public bool ExistAttribute(string paramName, string tagName=null)
         {
             return false;
         }

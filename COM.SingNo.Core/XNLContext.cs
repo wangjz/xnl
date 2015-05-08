@@ -14,12 +14,12 @@ namespace COM.SingNo.XNLCore
     {
         public XNLContext()
         {
-            parseMode = ParseMode.Static;
+            //parseMode = ParseMode.Static;
             response = new XNLResponse();
         }
 
         public XNLResponse response { get; protected set; }
-        public ParseMode parseMode{get;set;}
+        //public ParseMode parseMode{get;set;}
         //工作目录
         public string workDirPath { get; set; }
         /// <summary>

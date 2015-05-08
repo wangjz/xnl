@@ -12,19 +12,25 @@ namespace TestWeb
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            ParserEngine<XNLContext>.xnlParser = RegexParser<XNLContext>.getInstance();
-            XNLLib<XNLContext>.initialize(new List<XNLLib<XNLContext>> { new XNLLib<XNLContext>("xnl", true, new string[] { "page" }, new Dictionary<string, string> { { "channel|content|site|system|page", "xnl:extexp" } }) });
-            RegxpEngineCommon<XNLContext>.updateXNLConfig();
             XNLContext context = new XNLContext();
-            context.parseMode=ParseMode.Dynamic;
+            //context.parseMode=ParseMode.Dynamic;
             //Response.Write(
-            ParserEngine<XNLContext>.parse("hgjg {$app.test} <xnl:if>{@test} {@if.test2} if测试<if> 这是if项</if> <else>这是else项  <xnl:if::i2>if2测试<if::i2> 这是if2项</if::i2> <else::i2>这是else2项</else::i2></xnl:if::i2> </else></xnl:if>  ;ljlkhlh <xnl:if>gogogo</xnl:if> jhk 222", context);
+            var str = ParserEngine<XNLContext>.parse("hgjg {$app.test} <xnl:for start=\"0\" end=\"5\" str=\"a,b,c\">{@i}-{@str}<br/><xnl:if>{@test} {@if.test2} if测试<if> 这是if项</if> <else>这是else项  <xnl:if::i2>if2测试<if::i2> 这是if2项</if::i2> <else::i2>这是else2项</else::i2></xnl:if::i2> </else></xnl:if></xnl:for>  ;ljlkhlh <xnl:if>gogogo</xnl:if> jhk 222", context);
             //);
-            object itemObj = XNLContext.getItem(context,"__codeBuffer");
-            if(itemObj!=null)
-            {
-                Response.Write(((StringBuilder)(itemObj)).ToString());
-            }
+            Response.Write(str);
+
+            Response.Write("\n");
+
+            context.response.buffer.Remove(0, context.response.buffer.Length);
+            str = ParserEngine<XNLContext>.parse("hgjg {$app.test} <xnl:for start=\"0\" end=\"5\" str=\"a,b,c\">{@i}-{@str}<br/><xnl:if>{@test} {@if.test2} if测试<if> 这是if项</if> <else>这是else项  <xnl:if::i2>if2测试<if::i2> 这是if2项</if::i2> <else::i2>这是else2项</else::i2></xnl:if::i2> </else></xnl:if></xnl:for>  ;ljlkhlh <xnl:if>gogogo</xnl:if> jhk 222", context, ParseMode.Dynamic);
+
+            Response.Write(str);
+            //object itemObj = XNLContext.getItem(context,"$__codeBuffer");
+            //if(itemObj!=null)
+            //{
+            //    Response.Write("\n");
+            //    Response.Write(((StringBuilder)(itemObj)).ToString());
+            //}
         }
     }
 }

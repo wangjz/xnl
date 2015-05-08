@@ -5,59 +5,182 @@ using System.Text.RegularExpressions;
 using System.Data;
 namespace COM.SingNo.XNLCore.Labels
 {
-  public  class For<T>:IXNLTag<T> where T:XNLContext
+    public class For<T> : IXNLTag<T> where T : XNLContext
     {
-      public T xnlContext
-      {
-          get;
-          private set;
-      }
+        public int start { get; set; }
 
-      public string instanceName { get; set; }
-      public string curTag { get; set; }
-      //标签开始,初始化参数等 抛异常初始化失败原因
-      public void onInit(T xnlContext, string instanceName)
+        public int end { get; set; }
+
+        public int i { get; set; }
+
+        public string split { get; set; }
+
+        public string str { get; set; }
+
+        private bool isChange = false;
+
+        private string[] strs;
+        public T xnlContext
         {
-        }
-        public void onStart()
-        {
+            get;
+            private set;
         }
 
-        public void onEnd()
+        public string instanceName { get; set; }
+        public string curTag { get; set; }
+
+        public void OnInit(T xnlContext, string instanceName)
+        {
+            start = 0;
+            end = 0;
+            split = ",";
+            strs = null;
+            this.xnlContext = xnlContext;
+            this.instanceName = instanceName;
+        }
+        public virtual void OnStart()
+        {
+            i = 0;
+            if(isChange)
+            {
+                isChange = false;
+                if(string.IsNullOrEmpty(str)==false)
+                {
+                    strs = str.Split(new string[] { split }, StringSplitOptions.RemoveEmptyEntries);
+                    if (end >= strs.Length) end = strs.Length-1;
+                }
+                else
+                {
+                    strs = null;
+                }
+            }
+        }
+
+        public void OnEnd()
         {
         }
 
         //子标签解析
-        public void onTag(string tagName, OnTagDelegate<T> tagDelegate, string body)
+        public void OnTag(OnTagDelegate tagDelegate = null)
         {
+            if (tagDelegate != null)
+            {
+                if (start > end) start = end;
+                for (i = start; i <= end;i++ )
+                {
+                    tagDelegate();
+                }   
+            }
         }
 
-        public void setAttributeValue(string paramName, object value, string subTagName=null)
+        public void SetAttribute(string paramName, object value, string subTagName = null)
         {
-
+            if (paramName == "start")
+            {
+                start = Convert.ToInt32(value);
+            }
+            else if (paramName == "end")
+            {
+                end = Convert.ToInt32(value);
+            }
+            else if (paramName == "str")
+            {
+                string v = Convert.ToString(value);
+                if (v != str)
+                {
+                    str = v;
+                    isChange = true;
+                }
+            }
+            else if (paramName == "split")
+            {
+                string v = Convert.ToString(value);
+                if (v != split)
+                {
+                    split = v;
+                    isChange = true;
+                }
+            }
         }
-        public object getAttributeValue(string paramName, string subTagName = null)
+
+        public object GetAttribute(string paramName, string tagName = null)
         {
-            return "";
+            object v ;
+            TryGetAttribute(out v, paramName, tagName);
+            return v;
+        }
+
+        public bool TryGetAttribute(out object outValue, string paramName, string tagName = null)
+        {
+            if (paramName == "i")
+            {
+                outValue = i;
+                return true;
+            }
+            else if (paramName == "pos")
+            {
+                outValue = (i - start + 1);
+                return true;
+            }
+            else if (paramName == "start")
+            {
+                outValue = start;
+                return true;
+            }
+            else if (paramName == "end")
+            {
+                outValue = end;
+                return true;
+            }
+            else if (paramName == "str")
+            {
+                if(strs!=null&&i<strs.Length)
+                {
+                    outValue = strs[i];
+                    return true;
+                }
+                outValue = "";
+                return true;
+            }
+            else if (paramName == "split")
+            {
+                outValue = split;
+                return true;
+            }
+            outValue = null;
+            return false;
         }
 
         //创建 
-        public IXNLTag<T> create()
+        public IXNLTag<T> Create()
         {
             return new For<T>();
         }
-        public bool existAttribute(string paramName, string tagName=null)
+        public bool ExistAttribute(string paramName, string tagName = null)
         {
+            if (paramName == "i"|| paramName=="str" || paramName == "str" || paramName == "start" || paramName == "end" || paramName == "split") return true;
             return false;
         }
 
         public string subTagNames
         {
-            get { return "foritem"; }
+            get { return null; }
         }
-        #region IXNLBase 成员
 
-      public string main(XNLTagStruct tagStruct, T XNLPage)
+        public ParseMode parseMode
+        {
+            get;
+            set;
+        }
+    }
+}
+
+
+/*
+
+  #region IXNLBase 成员
+
+        public string main(XNLTagStruct tagStruct, T XNLPage)
         {
             return "";
             //int forStart = 0;
@@ -106,7 +229,7 @@ namespace COM.SingNo.XNLCore.Labels
             //labelParams.Add("forvar", new XNLParam(0));
 
             //Match itemMatch = itemColls[0];
-           
+
             //string itemMatchStr = itemMatch.Groups[3].Value;
 
             //string forLabelReturnStr = forLabelContent.Replace(itemMatch.Groups[0].Value, "<forItemTmpReplaaceString></forItemTmpReplaaceString>");  //将匹配到的forItem替换为<forItemTmpReplaaceString></forItemTmpReplaaceString>
@@ -147,11 +270,4 @@ namespace COM.SingNo.XNLCore.Labels
         //    returnStr = XNLPage.xnlParser.replaceAttribleVariable(returnStr, forParams, XNLPage);
         //    return returnStr;
         //}
-
-      public ParseMode parseMode
-      {
-          get;
-          set;
-      }
-    }
-}
+*/

@@ -42,7 +42,7 @@ namespace COM.SingNo.XNLEngine
         internal const string RegexStr_XNLGlobalVariable = @"{!(\w+?)}";
         internal const string RegexStr_XNLNotes = "<\\!--\\#.*?\\#-->";  //匹配XNL标签注释
 
-        internal const string RegexStr_XNLInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)";
+        internal const string RegexStr_XNLInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
         internal const string RegexStr_XNLOutTagParams = @"<attrs>(?><attrs>(?<n>)|</attrs>(?<-n>)|(?! <attrs>|</attrs>)[.\\s\\S])*?(?(n)(?!))</attrs>";
         internal const string RegexStr_XNLOutTagParam = @"<attr\\s+([^><]*)>((?><attr\\s+[^><]*?>(?<n>)|</attr>(?<-n>)|(?! <attr\\s+([^><]*?)>|</attr>)[.\\s\\S])*?)(?(n)(?!))</attr>";
         internal const string RegexStr_XNLTagAttrName = "name=\"(.*?)\"";
@@ -427,9 +427,9 @@ namespace COM.SingNo.XNLEngine
 
                     string attrName = match.Groups[1].Value.ToLower();
 
-                    if (tagObj.existAttribute(attrName))
+                    if (tagObj.ExistAttribute(attrName))
                     {
-                        sb.Append(tagObj.getAttributeValue(attrName).ToString());
+                        sb.Append(tagObj.GetAttribute(attrName).ToString());
                     }
                     else if (string.Compare(match.Groups[2].Value, tagObj.instanceName,true) != 0)
                     {

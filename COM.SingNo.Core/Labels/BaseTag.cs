@@ -33,43 +33,47 @@ namespace COM.SingNo.XNLCore.Labels
             set;
         }
 
-        public virtual void onInit(T xnlContext, string instanceName)
+        public virtual void OnInit(T xnlContext, string instanceName)
         {
             this.xnlContext = xnlContext;
         }
 
-        public virtual void onStart()
+        public virtual void OnStart()
         {
             
         }
 
-        public virtual void onEnd()
+        public virtual void OnEnd()
         {
            
         }
 
-        public virtual void onTag(string tagName, OnTagDelegate<T> tagDelegate, string body)
+        public virtual void OnTag(OnTagDelegate tagDelegate=null)
         {
-            tagDelegate(this, body);
+            tagDelegate();
         }
 
-        public void setAttributeValue(string paramName, object value, string tagName=null)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        public object getAttributeValue(string paramName, string tagName=null)
+        public void SetAttribute(string paramName, object value, string tagName=null)
         {
             throw new NotImplementedException();
         }
 
-        public IXNLTag<T> create()
+        public object GetAttribute(string paramName, string tagName = null)
+        {
+            return null;
+        }
+        public bool TryGetAttribute(out object outValue, string paramName, string tagName = null)
+        {
+            outValue = null;
+            return false;
+        }
+
+        public IXNLTag<T> Create()
         {
             throw new NotImplementedException();
         }
 
-        public bool existAttribute(string paramName, string tagName=null)
+        public bool ExistAttribute(string paramName, string tagName=null)
         {
             return false;
         }

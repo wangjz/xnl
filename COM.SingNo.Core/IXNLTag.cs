@@ -4,7 +4,8 @@ using System.Text;
 using System.Data;
 namespace COM.SingNo.XNLCore
 {
-    public delegate void OnTagDelegate<T>(IXNLTag<T> tagObj ,string body) where T : XNLContext;
+    //public delegate void OnTagDelegate<T>(IXNLTag<T> tagObj) where T : XNLContext; // ,string body
+    public delegate void OnTagDelegate(); // ,string body
     public interface IXNLTag<T> where T:XNLContext //XNL标签接口
     {
         ParseMode parseMode { get; set; }
@@ -18,17 +19,20 @@ namespace COM.SingNo.XNLCore
 
         T xnlContext { get; }
       
-        void onInit(T xnlContext, string instanceName);
+        void OnInit(T xnlContext, string instanceName);
 
-        void onStart();
+        void OnStart(); //, string body
 
-        void onTag(string tagName, OnTagDelegate<T> tagDelegate, string body);//子标签
+        void OnTag(OnTagDelegate tagDelegate=null);//子标签 //, string body
 
-        void onEnd();
-        void setAttributeValue(string paramName, object value, string tagName=null);
-        object getAttributeValue(string paramName, string tagName=null);
+        void OnEnd();
+        void SetAttribute(string paramName, object value, string tagName=null);
 
-        bool existAttribute(string paramName, string tagName = null);
-        IXNLTag<T> create();
+        object GetAttribute(string paramName, string tagName = null);
+
+        bool TryGetAttribute(out object outValue,string paramName, string tagName=null);
+
+        bool ExistAttribute(string paramName, string tagName = null);
+        IXNLTag<T> Create();
     }
 }
