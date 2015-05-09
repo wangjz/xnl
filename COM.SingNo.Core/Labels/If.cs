@@ -10,17 +10,17 @@ namespace COM.SingNo.XNLCore.Labels
       public T xnlContext
       {
           get;
-          protected set;
+          set;
       }
 
-      public string instanceName { get; private set; }
+      public string instanceName { get; set; }
 
       public string curTag { get; set; }
 
-      public void OnInit(T xnlContext, string instanceName)
+      public void OnInit() //T xnlContext, string instanceName
       {
-          this.xnlContext = xnlContext;
-          this.instanceName = instanceName;
+          //this.xnlContext = xnlContext;
+          //this.instanceName = instanceName;
       }
 
       public virtual void OnStart()

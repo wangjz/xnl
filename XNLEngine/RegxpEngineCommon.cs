@@ -120,797 +120,7 @@ namespace COM.SingNo.XNLEngine
             return labelParams;
         }
         
-        /// <summary>
-        /// 替换XNL表达式
-        /// </summary>
-        /// <param name="labelStr"></param>
-        /// <returns>表达式计算结果</returns>
-        internal static string replaceXNLExpressionVariable(string labelStr, T XNLPage)
-        {
-            return "";
-            /*
-            MatchCollection expressMatchs = Regex.Matches(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Matches(labelStr);// getMatchCollsByRegex(labelStr, RegexStr_XNLExpressionVariable);
-            if (expressMatchs.Count>0)
-            {
-                List<string> list = new List<string>();
-                foreach (Match i in expressMatchs)
-                {
-                   
-                    if (list.Contains(i.Value))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        list.Add(i.Value);
-                    }
-                    string matchStr = i.Groups[1].Value;
-                    string[] extExpTag =XNLLib<T>.getExtExpTagInfo(matchStr);
-                    if (extExpTag != null)
-                    {
-                        XNLTagStruct tagStruct=new XNLTagStruct();
-                        tagStruct.bodyContent=matchStr;
-                        labelStr = labelStr.Replace(i.Value, XNLLib<T>.getTagInstance(extExpTag[0], extExpTag[1]).main(tagStruct, XNLPage));
-                    }
-                    else
-                    {
-                        string  expStr = EvalExpression(matchStr, XNLPage);
-                        //labelStr = labelStr.Replace(i.Groups[0].Value, XNLBaseCommon.decodeXNL(expStr));
-                        labelStr = labelStr.Replace(i.Groups[0].Value, expStr);
-                    }
-                }
-                Match expressMatch = Regex.Match(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Match(labelStr);
-                if (expressMatch.Success)
-                {
-                    labelStr = replaceXNLExpressionVariable(labelStr, XNLPage);
-                }
-                else
-                {
-                    return labelStr;
-                }
-            }
-            return labelStr;
-             */ 
-        }
-
-        /// <summary>
-        /// 替换内容中的上下文全局属性变量 !
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceGlobalAttribleVariable(string contentStr, T xnlContext)
-        {
-            //{!([^\s>]*[\s]*[^\s>]*)}  //匹配属性变量标签
-            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLGlobalVariable);//, XNL_RegexOptions // RegexObj_XNLGlobalVariable.Matches(contentStr);// Regex.Matches(contentStr, RegexStr_XNLGlobalVariable); 
-            if(matchColls.Count>0)
-            {
-                StringBuilder sb = new StringBuilder();
-                int curInx = 0;
-                foreach (Match match in matchColls)
-                {
-                    if (match.Index > curInx)
-                    {
-                        sb.Append(contentStr.Substring(curInx, match.Index));
-                    }
-                    else
-                    {
-                        if (xnlContext.globalAttriableColls != null)
-                        {
-                            string attribStr = match.Groups[1].Value.Trim().ToLower();
-                            string param = null;// XNLContext.getGlobalAttriable(xnlContext, attribStr);
-                            if (string.IsNullOrEmpty(param)==false)
-                            {
-                                sb.Append(param);
-                            }
-                        }
-                    }
-                    curInx = match.Index + match.Length;
-                }
-                if (curInx < contentStr.Length)
-                {
-                    sb.Append(contentStr.Substring(curInx,contentStr.Length));
-                }
-                return sb.ToString();
-            }
-            return contentStr;
-        }
        
-
-        //internal static string replaceAttribleVariable(XNLTagStruct tagStruct,bool isReplaceSub)
-        //{
-        //    return "";
-        //}
-
-        internal static string RequestFormVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestFormVariableEvaluator = new MatchEvaluator(RequestFormVariableEvaluator);
-        /// <summary>
-        /// 替换request.form变量 %
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceReqFormVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqFormVariable, RequestFormVariableEvaluator); //, XNL_RegexOptions
-        }
-
-
-        internal static string RequestQueryVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestQueryVariableEvaluator = new MatchEvaluator(RequestQueryVariableEvaluator);
-        /// <summary>
-        /// 替换request.queryString变量  &
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceReqQueryVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqQueryVariable, requestQueryVariableEvaluator, XNL_RegexOptions);
-        }
-
-
-        internal static string RequestVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestVariableEvaluator = new MatchEvaluator(RequestVariableEvaluator);
-        /// 替换request.queryString变量  &
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceRequestVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqVariable, requestVariableEvaluator); //, XNL_RegexOptions
-        }
-
-        internal static string SessionVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Session[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator sessionVariableEvaluator = new MatchEvaluator(SessionVariableEvaluator);
-        /// <summary>
-        /// 替换session变量  #
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceSessionVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLSessionVariable, sessionVariableEvaluator); //, XNL_RegexOptions
-        }
-
-        internal static string ApplicationVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Application[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator applicationVariableEvaluator = new MatchEvaluator(ApplicationVariableEvaluator);
-        /// <summary>
-        /// 替换application变量 ^
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceApplicationVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLApplicationVariable, applicationVariableEvaluator);  //, XNL_RegexOptions
-        }
-
-        internal static string AllPublicVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[2].Value;
-            string attribType = match.Groups[1].Value;
-            string reqStr = null;
-            switch (attribType)
-            {
-                case "#":
-                    reqStr = HttpContext.Current.Session[attribStr].ToString();
-                    break;
-                case "%":
-                    reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
-                    break;
-                case "?":
-                    reqStr = HttpContext.Current.Request[attribStr].ToString();
-                    break;
-                case "^":
-                    reqStr = HttpContext.Current.Application[attribStr].ToString();
-                    break;
-                case "&":
-                    reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
-                    break;
-            }
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator allPublicVariableEvaluator = new MatchEvaluator(AllPublicVariableEvaluator);
-
-        internal static string replaceAllPublicVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLAllPublicCariable, allPublicVariableEvaluator);  //, XNL_RegexOptions
-        }
-
-        /// 替换内容中的XNL标签属性变量 @
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceAttribleVariable(IXNLTag<T> tagObj, string contentStr)
-        {
-            MatchCollection matchColls;
-            if (string.IsNullOrEmpty(tagObj.instanceName)) //|| tagObj.instanceName.StartsWith("_instance#")
-            {
-                matchColls = Regex.Matches(contentStr, RegexStr_XNLAttriableVariable);
-            }
-            else
-            {
-                matchColls = Regex.Matches(contentStr, RegexTemplate_XNLAttriableVariable.Replace("NAME", tagObj.instanceName));
-            }
-            if (matchColls!=null&&matchColls.Count > 0)
-            {
-                int curIndex = 0;
-                StringBuilder sb = new StringBuilder();
-
-                foreach (Match match in matchColls)
-                {
-                    if (match.Index > curIndex)
-                    {
-                        sb.Append(contentStr.Substring(curIndex, match.Index - curIndex));
-                    }
-
-                    string attrName = match.Groups[1].Value.ToLower();
-
-                    if (tagObj.ExistAttribute(attrName))
-                    {
-                        sb.Append(tagObj.GetAttribute(attrName).ToString());
-                    }
-                    else if (string.Compare(match.Groups[2].Value, tagObj.instanceName,true) != 0)
-                    {
-                        sb.Append(match.Value);
-                    }
-                    curIndex = match.Index + match.Length;
-                }
-                if (curIndex < contentStr.Length)
-                {
-                    sb.Append(contentStr.Substring(curIndex,contentStr.Length));
-                }
-                return sb.ToString();
-            }
-            return contentStr;
-        }
-
-        /// <summary>
-        /// 替换数据库变量 $
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceDataBaseVariable(DataRow dataRow, string contentStr, T xnlContext, string tagInstanceName)
-        {
-            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLDataBaseVariable);
-            if (matchColls.Count>0)
-            {
-                Dictionary<int, List<string>> match1Colls = new Dictionary<int, List<string>>();
-                List<string> match2Colls = new List<string>(); //可以替换的
-                foreach (Match match in matchColls)
-                {
-                    string attribStr = match.Groups[1].Value;
-                    if (attribStr.Substring(0, 1) == "$")
-                    {
-                        string trueAttrStr = attribStr.Replace("$", "");
-                        List <string> attrList;
-                        int len = attribStr.Length-trueAttrStr.Length;
-                        if (match1Colls.TryGetValue(len, out attrList))
-                        {
-                            if(dataRow.Table.Columns.Contains(trueAttrStr)&&!attrList.Contains(attribStr))attrList.Add(attribStr);
-                        }
-                        else //添加
-                        {
-                            attrList=new List<string>();
-                            attrList.Add(attribStr);
-                            match1Colls.Add(len, attrList);
-                        }
-                    }
-                    else  //可以替换
-                    {
-                        try
-                        {
-                            if (!match2Colls.Contains(attribStr) && dataRow.Table.Columns.Contains(attribStr))
-                            {
-                                contentStr = contentStr.Replace(match.Groups[0].Value, dataRow[attribStr].ToString());
-                                match2Colls.Add(attribStr);
-                            }
-                        }
-                        catch //(Exception e)
-                        {
-
-                        }
-                    }
-                }
-                //替换其它层变量
-                for (int i = 1; i <=match1Colls.Count;i++ )
-                {
-                    foreach (string str in match1Colls[i])
-                    {
-                        contentStr = contentStr.Replace("{$" + str + "}", "{"+str+"}"); 
-                    }
-                }
-            }
-            return contentStr;
-        }
-        internal static string DataTableCompute(string ExpressionStr)
-        {
-            DataTable dt = new DataTable();
-            object returnObj;
-            //string regex = "\'(?>[\\(,]\\s*\'(?<n>)|\'\\s*[,\\)](?<-n>)|(?!\'\\s*[,\\)]).)*(?(n)(?!))\'";
-            //1.先判断字符串中是否有"字符
-            if (ExpressionStr.IndexOf("\"") >= 2)
-            {
-                MatchCollection matchColl2 = Regex.Matches(ExpressionStr, "(?<=[,\\(])\"(?>[\\(,]\\s*\"(?<n>)|\"\\s*[,\\)](?<-n>)|(?!\"\\s*[,\\)]).)*(?(n)(?!))\"(?=[,\\)])", XNL_RegexOptions);
-                //MatchCollection matchColl2 = Regex.Matches(ExpressionStr, "(?<=[,\\(])\"(?>[\\(,]\\s*\"(?<n>)|\"\\s*[,\\)](?<-n>)|(?!\"\\s*[,\\)]).)*(?(n)(?!))\"(?=[,\\)])", XNLCommon.MatchCompiledOptions);
-                if (matchColl2.Count > 0)  //有" " 的匹配
-                {
-                    //判断是否有'字符
-                    if (ExpressionStr.IndexOf("'") >= 2)
-                    {
-                        MatchCollection matchColl = Regex.Matches(ExpressionStr, "(?<=[,\\(])\'(?>[\\(,]\\s*\'(?<n>)|\'\\s*[,\\)](?<-n>)|(?!\'\\s*[,\\)]).)*(?(n)(?!))\'(?=[,\\)])", XNL_RegexOptions);
-                        if (matchColl.Count > 0)
-                        {
-                            Dictionary<string, string> backColls = new Dictionary<string, string>();
-                            for (int i = 0; i < matchColl.Count; i++)
-                            {
-                                Match match = matchColl[i];
-                                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
-                                string r = ra.Next().ToString();
-                                string reStr = "---tmp_express" + i.ToString() + r + "---";
-                                string attrStr = match.Groups[0].Value;
-                                backColls.Add(reStr, attrStr);
-                                //2.备份并替换''内的字符
-                                ExpressionStr = ExpressionStr.Replace(attrStr, reStr);
-                            }
-                            //3.替换""内的字符
-                            foreach (Match j in matchColl2)
-                            {
-                                string matchstr = j.Groups[0].Value;
-                                string rStr = "'" + (matchstr.Substring(1, matchstr.Length - 2).Replace("'", "''")) + "'";
-                                ExpressionStr = ExpressionStr.Replace(matchstr, rStr);
-                            }
-                            //4还原''内的字符
-                            foreach (KeyValuePair<string, string> k in backColls)
-                            {
-                                ExpressionStr = ExpressionStr.Replace(k.Key, k.Value);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        //3.替换""内的字符
-                        foreach (Match j in matchColl2)
-                        {
-                            string matchstr = j.Groups[0].Value;
-                            string rStr = "'" + (matchstr.Substring(1, matchstr.Length - 2).Replace("'", "''")) + "'";
-                            ExpressionStr = ExpressionStr.Replace(matchstr, rStr);
-                        }
-                    }
-                }
-            }
-            returnObj = dt.Compute(ExpressionStr, "");
-            return Convert.ToString(returnObj);
-
-        }
-        internal static string DataTableComputeUseMono(string ExpressionStr)
-        {
-            DataTable dt = new DataTable();
-            /*此内容用于mono*/
-            DataColumn column;
-            DataRow row;
-            // Create new DataColumn, set DataType, ColumnName and add to DataTable.    
-            column = new DataColumn();
-            column.DataType = System.Type.GetType("System.Int32");
-            column.ColumnName = "id";
-            dt.Columns.Add(column);
-            row = dt.NewRow();
-            row["id"] = 1;
-            dt.Rows.Add(row);
-            /*此内容用于mono*/
-            object returnObj;
-            returnObj = dt.Compute(ExpressionStr, "");
-            return Convert.ToString(returnObj);
-        }
-        internal static string EvalExpression(string ExpressionStr, T XNLPage)
-        {
-            //^([^\.]*)\((.*)?\)$
-            //^(.*)\.([^()]*)$|^(.*)\.(.*)\((.*)\)$
-            //string tmpExpressStr = ExpressionStr.Trim();
-            //tmpExpressStr = XNLCommon.decodeHTMLEscapecharacter(tmpExpressStr);
-            //tmpExpressStr = XNLCommon.decodeXNLEscapecharacter(tmpExpressStr);
-            //尝试其它表达式
-            try
-            {
-                #region 计算表达式
-                Match excMatch = Regex.Match(ExpressionStr, "^([^\\.]*)\\((.*)?\\)$", XNL_RegexOptions);
-                if (excMatch.Success) //自定义方法表达式
-                {
-                    string funcStr = excMatch.Groups[1].Value.Trim().ToLower();
-                    string valueStrs = excMatch.Groups[2].Value;
-                    string s = funcStr.Substring(0, 1);
-                    MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
-                    Dictionary<string, string> paramsDirectory = new Dictionary<string, string>();
-                    int matchCount = 0;
-                    foreach (Match match in valueMatchColl)
-                    {
-                        if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
-                        matchCount += 1;
-                        if (match.Groups[1].Value == "'")
-                        {
-                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[2].Value);
-                        }
-                        else if (match.Groups[3].Value == "\"")
-                        {
-                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[4].Value);
-                        }
-                        else
-                        {
-                            if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
-                            {
-                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[5].Value);
-                            }
-                            else
-                            {
-                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[6].Value);
-                            }
-                        }
-                    }
-                    switch (s)
-                    {
-                        // (')([^']*)?'|(")([^"]*)?"
-                        case "i":
-                            switch (funcStr)
-                            {
-                                case "isnumeric":
-                                    return Convert.ToString(UtilsCode.IsNumeric(paramsDirectory["1"]));
-                                case "isint":
-                                    return Convert.ToString(UtilsCode.IsInt(paramsDirectory["1"]));
-                                case "isunsign":
-                                    return Convert.ToString(UtilsCode.IsUnsign(paramsDirectory["1"]));
-                                case "isdate":
-                                    return Convert.ToString(UtilsCode.IsDate(paramsDirectory["1"]));
-                                case "isemail":
-                                    return Convert.ToString(UtilsCode.IsEMail(paramsDirectory["1"]));
-                                case "isflash":
-                                    return Convert.ToString(UtilsCode.IsFlash(paramsDirectory["1"]));
-                                case "isidcard":
-                                    return Convert.ToString(UtilsCode.IsIdCard(paramsDirectory["1"]));
-                                case "isimage":
-                                    return Convert.ToString(UtilsCode.IsImage(paramsDirectory["1"]));
-                                case "isfiletype":
-                                    return Convert.ToString(UtilsCode.IsFileType(paramsDirectory["1"], paramsDirectory["2"]));
-                                case "isurl":
-                                    return Convert.ToString(UtilsCode.IsUrl(paramsDirectory["1"]));
-                                case "iszipno":
-                                    return Convert.ToString(UtilsCode.IsZipNo(paramsDirectory["1"]));
-                                case "Isgreatethanzero":
-                                    return Convert.ToString(UtilsCode.IsGreateThanZero(paramsDirectory["1"]));
-                                case "ishanzi":
-                                    return Convert.ToString(UtilsCode.IsHanZi(paramsDirectory["1"]));
-                                case "istelno":
-                                    return Convert.ToString(UtilsCode.IsTelNo(paramsDirectory["1"]));
-                                case "iscellphotono":
-                                    return Convert.ToString(UtilsCode.IsCellPhotoNo(paramsDirectory["1"]));
-                                case "ismatch":
-                                    return Convert.ToString(UtilsCode.IsMatch(paramsDirectory["1"], paramsDirectory["2"]));
-                                case "insert":
-                                    return UtilsCode.Insert(paramsDirectory["1"], Convert.ToInt32(paramsDirectory["2"]), paramsDirectory["3"]);
-                                case "indexof":
-                                    return UtilsCode.IndexOf(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]), Convert.ToInt32(paramsDirectory["4"]));
-                                case "isnull":
-                                    return DataTableCompute(ExpressionStr);
-                                case "iif":
-                                    return DataTableCompute(ExpressionStr);
-                            }
-                            break;
-                        case "g":
-                            switch (funcStr)
-                            {
-                                case "getmatchgroup":
-                                    return UtilsCode.getMatchGroup(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
-                                case "getmatchcount":
-                                    return UtilsCode.getMatchCount(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
-                                case "getmatchs":
-                                    return UtilsCode.getMatchs(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
-                                case "getyear":
-                                    return UtilsCode.GetYear(paramsDirectory["1"]);
-                                case "getday":
-                                    return UtilsCode.GetDay(paramsDirectory["1"]);
-                                case "gettime":
-                                    return UtilsCode.GetTime(paramsDirectory["1"]);
-                                case "getweek":
-                                    return UtilsCode.GetWeek(paramsDirectory["1"]);
-                                case "getdate":
-                                    return UtilsCode.GetDate(paramsDirectory["1"]);
-                                case "getmonth":
-                                    return UtilsCode.GetMonth(paramsDirectory["1"]);
-                                case "gethour":
-                                    return UtilsCode.GetHour(paramsDirectory["1"]);
-                                case "getminute":
-                                    return UtilsCode.GetMinute(paramsDirectory["1"]);
-                                case "getsecond":
-                                    return UtilsCode.GetSecond(paramsDirectory["1"]);
-                                case "getmillisecond":
-                                    return UtilsCode.GetMillisecond(paramsDirectory["1"]);
-                            }
-                            break;
-                        case "d":
-                            switch (funcStr)
-                            {
-                                case "decodehtml":
-                                    return UtilsCode.decodeHtml(paramsDirectory["1"]);
-                                case "decodexnl":
-                                    return UtilsCode.decodeXNL(paramsDirectory["1"]);
-                                case "decodehtmlandxnl":
-                                    return UtilsCode.decodeHtmlAndXnl(paramsDirectory["1"]);
-                                case "date":
-                                    return UtilsCode.Date();
-                                case "day":
-                                    return UtilsCode.Day();
-                            }
-                            break;
-                        case "e":
-                            switch (funcStr)
-                            {
-                                case "encodehtml":
-                                    return UtilsCode.encodeHtml(paramsDirectory["1"]);
-                                case "encodexnl":
-                                    return UtilsCode.encodeXNL(paramsDirectory["1"]);
-                                case "encodehtmlandxnl":
-                                    return UtilsCode.encodeHtmlAndXnl(paramsDirectory["1"]);
-                            }
-                            break;
-                        case "r":
-                            switch (funcStr)
-                            {
-                                case "replace":
-                                    return UtilsCode.replace(paramsDirectory["1"], paramsDirectory["2"], paramsDirectory["3"]);
-                                case "remove":
-                                    return UtilsCode.Remove(paramsDirectory["1"], Convert.ToInt32(paramsDirectory["2"]), Convert.ToInt32(paramsDirectory["3"]));
-
-                            }
-                            break;
-                        case "t":
-                            switch (funcStr)
-                            {
-                                case "tolower":
-                                    return UtilsCode.ToLower(paramsDirectory["1"]);
-                                case "toupper":
-                                    return UtilsCode.ToUpper(paramsDirectory["1"]);
-                                case "trimstart":
-                                    return UtilsCode.TrimStart(paramsDirectory["1"]);
-                                case "trimend":
-                                    return UtilsCode.TrimEnd(paramsDirectory["1"]);
-                                case "trim":
-                                    return DataTableCompute(ExpressionStr);
-                                case "tolongdate":
-                                    return UtilsCode.ToLongDate(paramsDirectory["1"]);
-                                case "tolongtime":
-                                    return UtilsCode.ToLongTime(paramsDirectory["1"]);
-                                case "toshortdate":
-                                    return UtilsCode.ToShortDate(paramsDirectory["1"]);
-                                case "toshorttime":
-                                    return UtilsCode.ToShortTime(paramsDirectory["1"]);
-                                case "today":
-                                    return UtilsCode.Today();
-                                case "time":
-                                    return UtilsCode.Time();
-                            }
-                            break;
-                        case "f":
-                            switch (funcStr)
-                            {
-                                case "formatdate":
-                                    return UtilsCode.formatDate(paramsDirectory["1"], paramsDirectory["2"]);
-                                case "formattime":
-                                    return UtilsCode.formatTime(paramsDirectory["1"], paramsDirectory["2"]);
-                                case "formatnumber":
-                                    return UtilsCode.formatNumber(paramsDirectory["1"], paramsDirectory["2"]);
-                            }
-                            break;
-                        case "c":
-                            switch (funcStr)
-                            {
-                                case "convert":
-                                    return DataTableCompute(ExpressionStr);
-                                case "chs2pinyin":
-                                    return UtilsCode.CHS2PinYin(paramsDirectory["1"], paramsDirectory["2"], Convert.ToBoolean(paramsDirectory["3"]));
-                                case "chs2py":
-                                    return UtilsCode.CHS2PY(paramsDirectory["1"], paramsDirectory["2"], Convert.ToBoolean(paramsDirectory["3"]));
-                            }
-                            break;
-                        case "s":
-                            switch (funcStr)
-                            {
-                                case "substring":
-                                    return DataTableCompute(ExpressionStr);
-                                case "second":
-                                    return UtilsCode.Second();
-                            }
-                            break;
-                        case "l":
-                            switch (funcStr)
-                            {
-                                case "len":
-                                    return DataTableCompute(ExpressionStr);
-                            }
-                            break;
-                        case "n":
-                            switch (funcStr)
-                            {
-                                case "now":
-                                    return UtilsCode.now();
-                            }
-                            break;
-                        case "m":
-                            switch (funcStr)
-                            {
-                                case "month":
-                                    return UtilsCode.Month();
-                                case "minute":
-                                    return UtilsCode.Minute();
-                                case "millisecond":
-                                    return UtilsCode.Millisecond();
-                            }
-                            break;
-                        case "w":
-                            switch (funcStr)
-                            {
-                                case "week":
-                                    return UtilsCode.Week();
-                            }
-                            break;
-                        case "y":
-                            switch (funcStr)
-                            {
-                                case "year":
-                                    return UtilsCode.Year();
-                            }
-                            break;
-                        case "h":
-                            switch (funcStr)
-                            {
-                                case "hour":
-                                    return UtilsCode.Hour();
-                            }
-                            break;
-                        default:
-                            return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
-                    }
-                }
-                else  //扩展XNL标签表达式
-                {
-                    Match excXnlMatch = Regex.Match(ExpressionStr, "^(.*)\\.([^()]*)$|^(.*)\\.(.*)\\((.*)\\)$", XNL_RegexOptions);
-                    if (excXnlMatch.Success)
-                    {
-                        if (excXnlMatch.Groups[1].Value.Trim() != "") //xnl.label
-                        {
-                            string libNameStr = excXnlMatch.Groups[1].Value;
-                            string labelNameStr = excXnlMatch.Groups[2].Value;
-                            string returnStr = ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + "></" + libNameStr + ":" + labelNameStr + ">", XNLPage);
-                            return returnStr;
-                        }
-                        else  //xnl.labelname('hjgj','jh')
-                        {
-                            string libNameStr = excXnlMatch.Groups[3].Value;
-                            string labelNameStr = excXnlMatch.Groups[4].Value;
-                            string valueStrs = excXnlMatch.Groups[5].Value;
-                            MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
-                            int matchCount = 0;
-                            string paramStr = "<attrs>";
-                            foreach (Match match in valueMatchColl)
-                            {
-                                if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
-                                matchCount += 1;
-                                if (match.Groups[1].Value == "'")
-                                {
-                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[2].Value) + "</attr>";
-                                }
-                                else if (match.Groups[3].Value == "\"")
-                                {
-                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[4].Value) + "</attr>";
-                                }
-                                else
-                                {
-                                    if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
-                                    {
-                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[5].Value) + "</attr>";
-                                    }
-                                    else
-                                    {
-                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[6].Value) + "</attr>";
-                                    }
-                                }
-                            }
-                            paramStr += "</attrs>";
-                            string returnStr =ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + ">" + paramStr + "</" + libNameStr + ":" + labelNameStr + ">", XNLPage);
-                            return returnStr;
-                        }
-                    }
-                    else
-                    {
-                        return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
-                    }
-                }
-                return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
-                #endregion 计算表达式
-            }
-            catch
-            {
-                return ExpressionStr;
-            }
-        }
         /// <summary>
         /// 清除XNL注释标签
         /// </summary>
@@ -1225,177 +435,7 @@ namespace COM.SingNo.XNLEngine
             }
             return null;
         }
-        /*
-        private static string runTagWithErrorHandle(IXNLTag<T> xnlTagObj, XNLTagStruct tagStruct, T xnlContext, XNLOnErrorAction onErrorAction)
-        {
-            try
-            {
-                string s = "";
-                xnlTagObj.onInit(null, xnlContext);
-                if (xnlTagObj.isTagEnd==false)
-                {
-                    for (int i = 0; i < tagStruct.subTagStruct.Count; i++)
-                    {
-                        XNLTagStruct subTag=tagStruct.subTagStruct[i];
-                        if (string.IsNullOrEmpty(subTag.tagName))
-                        {
-                            s += subTag.allContent;
-                        }
-                        else
-                        {
-                        }
-                    }
-                }
-                //return xnlTagObj.main(tagStruct, xnlContext);
-            }
-            catch (System.Exception ex)
-            {
-                switch (onErrorAction)
-                {
-                    case XNLOnErrorAction.ThrowError:
-                        throw (ex);
-                    case XNLOnErrorAction.OutEmpty:
-                        return string.Empty;
-                    case XNLOnErrorAction.OutMsg:
-                        return tagStruct.nameSpace + ":" + tagStruct.tagName + " " + ex.Message;
-                }
-            }
-            return string.Empty;
-        }
-        /// <summary>
-        ///  解析模板内容
-        /// </summary>
-        /// <param name="templeteStr">模板内容</param>
-        /// <returns>页面html内容</returns>
-        internal static string parse(string templateStr, T xnlContext, bool isDecodeXNLEscape, bool isDebug) // IBasePage XNLPage
-        {
-            //标签是否闭合
-            //    //嵌套标签中是否有未命名同名标签
-            //    //标签调用是否出错
-            //    //是否声明标签实例
-            if (string.IsNullOrEmpty(templateStr)) return string.Empty;
-            string s = RegxpEngineCommon<T>.removeXNLNotes(templateStr);
-            s = RegxpEngineCommon<T>.replaceAllPublicVariable(s, xnlContext);
-
-            string namespaceName;// = MatchObj.match.Groups[1].Value.ToLower(); //标签命名空间名
-            string tagName;// = MatchObj.match.Groups[2].Value.ToLower();  //标签名
-            int index = 0;
-            int nextIndex = 0;
-            int delayTagInx = 0;
-            string tagGroup0Str;// = MatchObj.match.Groups[0].Value;  //所有标签内容
-            string tagGroup5Str;
-            string genStr;
-            XNLTagStruct tagStruct;
-            IXNLTag<T> tagObj = null;
-            int parseStep = 0; //解析步骤 ==2表示是解析延迟标签阶段
-            //IXNLTagObj<T> ifnew = new If<T>();
-            //return ifnew.ToString();
-            #region 调试解析
-          PARSELOOP:
-            for (var j = 0; j < 1000000; j++)
-            {
-                if (nextIndex > index) index = nextIndex;
-                Match tmpMatch = null;
-                if (isDebug)
-                {
-                    tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagPart1Group3.Match(s, index);
-                }
-                else
-                {
-                    tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
-                }
-                if (!tmpMatch.Success)
-                {
-                    if (parseStep == 0 && index == 0)
-                    {
-                        goto PARSEEND;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    namespaceName = tmpMatch.Groups[1].Value.ToLower();
-                    tagName = tmpMatch.Groups[2].Value.ToLower();
-                    string tagFullName = namespaceName + ":" + tagName;
-                    nextIndex = tmpMatch.Index;
-                    if (nextIndex > index) index = nextIndex;
-                    Match allGroupMatch;
-                    if (isDebug)
-                    {
-                        allGroupMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
-                        if (!allGroupMatch.Success)
-                        {
-                            throw (new Exception(tagFullName + "标签没有闭合"));
-                        }
-                    }
-                    else
-                    {
-                        allGroupMatch = tmpMatch;
-                    }
-                    
-                    tagGroup0Str = allGroupMatch.Groups[0].Value;
-                    tagGroup5Str = allGroupMatch.Groups[5].Value;
-                    if (tagFullName == "xnl.mytag")
-                    {
-                        string userTagStr;
-                        userTagStr = XNLContext.getCustomTag(xnlContext, tagName);
-                        if (userTagStr == null)
-                        {
-                            //加载此标签内容
-                            userTagStr = XNLBaseCommon.loadUserTagByName(tagName, xnlContext.workDirPath + XNLConfig.userTagSavePath + tagName + XNLConfig.userTagExtName);
-                            XNLContext.setCustomTag(xnlContext, tagName, userTagStr);
-                        }
-                        s = s.Replace(tagGroup0Str, userTagStr);
-                        continue;
-                    }
-                    else
-                    {
-                        if (parseStep == 0 && XNLLib<T>.checkTagIsDelayRun(tagFullName))
-                        {
-                            if (delayTagInx == 0) delayTagInx = index;
-                            nextIndex = index + tmpMatch.Length;
-                            continue;
-                        }
-                        else
-                        {
-                            try
-                            {
-                                tagObj = XNLLib<T>.getTagInstance(namespaceName, tagName);
-                            }
-                            catch //(ReflectionTypeLoadException e)
-                            {
-                                throw (new Exception("未找到标签" + tagFullName + "的实现"));
-                            }
-                            tagStruct = RegxpEngineCommon<T>.createTagStruct(allGroupMatch,tagObj,xnlContext);
-                                                 
-                            genStr = runTagWithErrorHandle(tagObj, tagStruct, xnlContext, XNLOnErrorAction.ThrowError);// tagObj.main(tagStruct.content, tagStruct.tagParams, xnlContext);
-                            s = s.Replace(tagGroup0Str, genStr);
-                        }
-                    }
-                }
-            }
-            #endregion
-            if (parseStep == 0)
-            {
-                index = delayTagInx;
-                nextIndex = delayTagInx;
-                parseStep += 1;
-                goto PARSELOOP;
-            }
-            else
-            {
-                goto PARSEEND;
-            }
-        PARSEEND:
-            s = RegxpEngineCommon<T>.replaceGlobalAttribleVariable(s, xnlContext);
-            s = RegxpEngineCommon<T>.replaceXNLExpressionVariable(s, xnlContext);
-            if (isDecodeXNLEscape) s = XNLBaseCommon.decodeXNL(s);
-            return s;
-        }
-        */
+       
         internal static XNLTagStruct getTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
@@ -1481,19 +521,20 @@ namespace COM.SingNo.XNLEngine
                     continue;
                 }
                 token = new XNLToken();
+                token.value = match.Value;
                 token.mode = mode;
                
                 switch(match.Groups[1].Value)
                 {
-                    case "@":
+                    case "@": //属性
                         token.Type = XNLTokenType.Attribute;
                         break;
-                    case "#":
+                    case "#": 
                         break;
-                    case "$":
+                    case "$": //变量
                         token.Type = XNLTokenType.Variable;
                         break;
-                    case "%":
+                    case "%": //表达式
                         token.Type = XNLTokenType.Express;
                         break;
                 }
@@ -1889,3 +930,972 @@ internal static XNLTagStruct getSubTagStruct(string contentStr, T xnlContext, st
             }
             return contentStr;
              */ 
+
+/*
+
+/// <summary>
+        /// 替换内容中的上下文全局属性变量 !
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceGlobalAttribleVariable(string contentStr, T xnlContext)
+        {
+            //{!([^\s>]*[\s]*[^\s>]*)}  //匹配属性变量标签
+            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLGlobalVariable);//, XNL_RegexOptions // RegexObj_XNLGlobalVariable.Matches(contentStr);// Regex.Matches(contentStr, RegexStr_XNLGlobalVariable); 
+            if(matchColls.Count>0)
+            {
+                StringBuilder sb = new StringBuilder();
+                int curInx = 0;
+                foreach (Match match in matchColls)
+                {
+                    if (match.Index > curInx)
+                    {
+                        sb.Append(contentStr.Substring(curInx, match.Index));
+                    }
+                    else
+                    {
+                        if (xnlContext.globalAttriableColls != null)
+                        {
+                            string attribStr = match.Groups[1].Value.Trim().ToLower();
+                            string param = null;// XNLContext.getGlobalAttriable(xnlContext, attribStr);
+                            if (string.IsNullOrEmpty(param)==false)
+                            {
+                                sb.Append(param);
+                            }
+                        }
+                    }
+                    curInx = match.Index + match.Length;
+                }
+                if (curInx < contentStr.Length)
+                {
+                    sb.Append(contentStr.Substring(curInx,contentStr.Length));
+                }
+                return sb.ToString();
+            }
+            return contentStr;
+        }
+*/
+
+/*
+       private static string runTagWithErrorHandle(IXNLTag<T> xnlTagObj, XNLTagStruct tagStruct, T xnlContext, XNLOnErrorAction onErrorAction)
+       {
+           try
+           {
+               string s = "";
+               xnlTagObj.onInit(null, xnlContext);
+               if (xnlTagObj.isTagEnd==false)
+               {
+                   for (int i = 0; i < tagStruct.subTagStruct.Count; i++)
+                   {
+                       XNLTagStruct subTag=tagStruct.subTagStruct[i];
+                       if (string.IsNullOrEmpty(subTag.tagName))
+                       {
+                           s += subTag.allContent;
+                       }
+                       else
+                       {
+                       }
+                   }
+               }
+               //return xnlTagObj.main(tagStruct, xnlContext);
+           }
+           catch (System.Exception ex)
+           {
+               switch (onErrorAction)
+               {
+                   case XNLOnErrorAction.ThrowError:
+                       throw (ex);
+                   case XNLOnErrorAction.OutEmpty:
+                       return string.Empty;
+                   case XNLOnErrorAction.OutMsg:
+                       return tagStruct.nameSpace + ":" + tagStruct.tagName + " " + ex.Message;
+               }
+           }
+           return string.Empty;
+       }
+       /// <summary>
+       ///  解析模板内容
+       /// </summary>
+       /// <param name="templeteStr">模板内容</param>
+       /// <returns>页面html内容</returns>
+       internal static string parse(string templateStr, T xnlContext, bool isDecodeXNLEscape, bool isDebug) // IBasePage XNLPage
+       {
+           //标签是否闭合
+           //    //嵌套标签中是否有未命名同名标签
+           //    //标签调用是否出错
+           //    //是否声明标签实例
+           if (string.IsNullOrEmpty(templateStr)) return string.Empty;
+           string s = RegxpEngineCommon<T>.removeXNLNotes(templateStr);
+           s = RegxpEngineCommon<T>.replaceAllPublicVariable(s, xnlContext);
+
+           string namespaceName;// = MatchObj.match.Groups[1].Value.ToLower(); //标签命名空间名
+           string tagName;// = MatchObj.match.Groups[2].Value.ToLower();  //标签名
+           int index = 0;
+           int nextIndex = 0;
+           int delayTagInx = 0;
+           string tagGroup0Str;// = MatchObj.match.Groups[0].Value;  //所有标签内容
+           string tagGroup5Str;
+           string genStr;
+           XNLTagStruct tagStruct;
+           IXNLTag<T> tagObj = null;
+           int parseStep = 0; //解析步骤 ==2表示是解析延迟标签阶段
+           //IXNLTagObj<T> ifnew = new If<T>();
+           //return ifnew.ToString();
+           #region 调试解析
+         PARSELOOP:
+           for (var j = 0; j < 1000000; j++)
+           {
+               if (nextIndex > index) index = nextIndex;
+               Match tmpMatch = null;
+               if (isDebug)
+               {
+                   tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagPart1Group3.Match(s, index);
+               }
+               else
+               {
+                   tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
+               }
+               if (!tmpMatch.Success)
+               {
+                   if (parseStep == 0 && index == 0)
+                   {
+                       goto PARSEEND;
+                   }
+                   else
+                   {
+                       break;
+                   }
+               }
+               else
+               {
+                   namespaceName = tmpMatch.Groups[1].Value.ToLower();
+                   tagName = tmpMatch.Groups[2].Value.ToLower();
+                   string tagFullName = namespaceName + ":" + tagName;
+                   nextIndex = tmpMatch.Index;
+                   if (nextIndex > index) index = nextIndex;
+                   Match allGroupMatch;
+                   if (isDebug)
+                   {
+                       allGroupMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
+                       if (!allGroupMatch.Success)
+                       {
+                           throw (new Exception(tagFullName + "标签没有闭合"));
+                       }
+                   }
+                   else
+                   {
+                       allGroupMatch = tmpMatch;
+                   }
+                    
+                   tagGroup0Str = allGroupMatch.Groups[0].Value;
+                   tagGroup5Str = allGroupMatch.Groups[5].Value;
+                   if (tagFullName == "xnl.mytag")
+                   {
+                       string userTagStr;
+                       userTagStr = XNLContext.getCustomTag(xnlContext, tagName);
+                       if (userTagStr == null)
+                       {
+                           //加载此标签内容
+                           userTagStr = XNLBaseCommon.loadUserTagByName(tagName, xnlContext.workDirPath + XNLConfig.userTagSavePath + tagName + XNLConfig.userTagExtName);
+                           XNLContext.setCustomTag(xnlContext, tagName, userTagStr);
+                       }
+                       s = s.Replace(tagGroup0Str, userTagStr);
+                       continue;
+                   }
+                   else
+                   {
+                       if (parseStep == 0 && XNLLib<T>.checkTagIsDelayRun(tagFullName))
+                       {
+                           if (delayTagInx == 0) delayTagInx = index;
+                           nextIndex = index + tmpMatch.Length;
+                           continue;
+                       }
+                       else
+                       {
+                           try
+                           {
+                               tagObj = XNLLib<T>.getTagInstance(namespaceName, tagName);
+                           }
+                           catch //(ReflectionTypeLoadException e)
+                           {
+                               throw (new Exception("未找到标签" + tagFullName + "的实现"));
+                           }
+                           tagStruct = RegxpEngineCommon<T>.createTagStruct(allGroupMatch,tagObj,xnlContext);
+                                                 
+                           genStr = runTagWithErrorHandle(tagObj, tagStruct, xnlContext, XNLOnErrorAction.ThrowError);// tagObj.main(tagStruct.content, tagStruct.tagParams, xnlContext);
+                           s = s.Replace(tagGroup0Str, genStr);
+                       }
+                   }
+               }
+           }
+           #endregion
+           if (parseStep == 0)
+           {
+               index = delayTagInx;
+               nextIndex = delayTagInx;
+               parseStep += 1;
+               goto PARSELOOP;
+           }
+           else
+           {
+               goto PARSEEND;
+           }
+       PARSEEND:
+           s = RegxpEngineCommon<T>.replaceGlobalAttribleVariable(s, xnlContext);
+           s = RegxpEngineCommon<T>.replaceXNLExpressionVariable(s, xnlContext);
+           if (isDecodeXNLEscape) s = XNLBaseCommon.decodeXNL(s);
+           return s;
+       }
+       */
+
+/*
+      /// <summary>
+      /// 替换XNL表达式
+      /// </summary>
+      /// <param name="labelStr"></param>
+      /// <returns>表达式计算结果</returns>
+      internal static string replaceXNLExpressionVariable(string labelStr, T XNLPage)
+      {
+          return "";
+          
+          MatchCollection expressMatchs = Regex.Matches(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Matches(labelStr);// getMatchCollsByRegex(labelStr, RegexStr_XNLExpressionVariable);
+          if (expressMatchs.Count>0)
+          {
+              List<string> list = new List<string>();
+              foreach (Match i in expressMatchs)
+              {
+                   
+                  if (list.Contains(i.Value))
+                  {
+                      continue;
+                  }
+                  else
+                  {
+                      list.Add(i.Value);
+                  }
+                  string matchStr = i.Groups[1].Value;
+                  string[] extExpTag =XNLLib<T>.getExtExpTagInfo(matchStr);
+                  if (extExpTag != null)
+                  {
+                      XNLTagStruct tagStruct=new XNLTagStruct();
+                      tagStruct.bodyContent=matchStr;
+                      labelStr = labelStr.Replace(i.Value, XNLLib<T>.getTagInstance(extExpTag[0], extExpTag[1]).main(tagStruct, XNLPage));
+                  }
+                  else
+                  {
+                      string  expStr = EvalExpression(matchStr, XNLPage);
+                      //labelStr = labelStr.Replace(i.Groups[0].Value, XNLBaseCommon.decodeXNL(expStr));
+                      labelStr = labelStr.Replace(i.Groups[0].Value, expStr);
+                  }
+              }
+              Match expressMatch = Regex.Match(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Match(labelStr);
+              if (expressMatch.Success)
+              {
+                  labelStr = replaceXNLExpressionVariable(labelStr, XNLPage);
+              }
+              else
+              {
+                  return labelStr;
+              }
+          }
+          return labelStr;
+            
+      }
+*/
+
+/*
+
+        internal static string RequestFormVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[1].Value;
+            string reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator requestFormVariableEvaluator = new MatchEvaluator(RequestFormVariableEvaluator);
+        /// <summary>
+        /// 替换request.form变量 %
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceReqFormVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLReqFormVariable, RequestFormVariableEvaluator); //, XNL_RegexOptions
+        }
+
+
+        internal static string RequestQueryVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[1].Value;
+            string reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator requestQueryVariableEvaluator = new MatchEvaluator(RequestQueryVariableEvaluator);
+        /// <summary>
+        /// 替换request.queryString变量  &
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceReqQueryVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLReqQueryVariable, requestQueryVariableEvaluator, XNL_RegexOptions);
+        }
+
+
+        internal static string RequestVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[1].Value;
+            string reqStr = HttpContext.Current.Request[attribStr].ToString();
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator requestVariableEvaluator = new MatchEvaluator(RequestVariableEvaluator);
+        /// 替换request.queryString变量  &
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceRequestVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLReqVariable, requestVariableEvaluator); //, XNL_RegexOptions
+        }
+
+        internal static string SessionVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[1].Value;
+            string reqStr = HttpContext.Current.Session[attribStr].ToString();
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator sessionVariableEvaluator = new MatchEvaluator(SessionVariableEvaluator);
+        /// <summary>
+        /// 替换session变量  #
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceSessionVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLSessionVariable, sessionVariableEvaluator); //, XNL_RegexOptions
+        }
+
+        internal static string ApplicationVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[1].Value;
+            string reqStr = HttpContext.Current.Application[attribStr].ToString();
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator applicationVariableEvaluator = new MatchEvaluator(ApplicationVariableEvaluator);
+        /// <summary>
+        /// 替换application变量 ^
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceApplicationVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLApplicationVariable, applicationVariableEvaluator);  //, XNL_RegexOptions
+        }
+
+        internal static string AllPublicVariableEvaluator(Match match)
+        {
+            if (HttpContext.Current == null)
+            {
+                return "";
+            }
+            string attribStr = match.Groups[2].Value;
+            string attribType = match.Groups[1].Value;
+            string reqStr = null;
+            switch (attribType)
+            {
+                case "#":
+                    reqStr = HttpContext.Current.Session[attribStr].ToString();
+                    break;
+                case "%":
+                    reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
+                    break;
+                case "?":
+                    reqStr = HttpContext.Current.Request[attribStr].ToString();
+                    break;
+                case "^":
+                    reqStr = HttpContext.Current.Application[attribStr].ToString();
+                    break;
+                case "&":
+                    reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
+                    break;
+            }
+            if (reqStr != null)
+            {
+                return UtilsCode.encodeHtmlAndXnl(reqStr);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        internal static MatchEvaluator allPublicVariableEvaluator = new MatchEvaluator(AllPublicVariableEvaluator);
+
+        internal static string replaceAllPublicVariable(string contentStr, T xnlContext)
+        {
+            return Regex.Replace(contentStr, RegexStr_XNLAllPublicCariable, allPublicVariableEvaluator);  //, XNL_RegexOptions
+        }
+
+        /// 替换内容中的XNL标签属性变量 @
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceAttribleVariable(IXNLTag<T> tagObj, string contentStr)
+        {
+            MatchCollection matchColls;
+            if (string.IsNullOrEmpty(tagObj.instanceName)) //|| tagObj.instanceName.StartsWith("_instance#")
+            {
+                matchColls = Regex.Matches(contentStr, RegexStr_XNLAttriableVariable);
+            }
+            else
+            {
+                matchColls = Regex.Matches(contentStr, RegexTemplate_XNLAttriableVariable.Replace("NAME", tagObj.instanceName));
+            }
+            if (matchColls!=null&&matchColls.Count > 0)
+            {
+                int curIndex = 0;
+                StringBuilder sb = new StringBuilder();
+
+                foreach (Match match in matchColls)
+                {
+                    if (match.Index > curIndex)
+                    {
+                        sb.Append(contentStr.Substring(curIndex, match.Index - curIndex));
+                    }
+
+                    string attrName = match.Groups[1].Value.ToLower();
+
+                    if (tagObj.ExistAttribute(attrName))
+                    {
+                        sb.Append(tagObj.GetAttribute(attrName).ToString());
+                    }
+                    else if (string.Compare(match.Groups[2].Value, tagObj.instanceName,true) != 0)
+                    {
+                        sb.Append(match.Value);
+                    }
+                    curIndex = match.Index + match.Length;
+                }
+                if (curIndex < contentStr.Length)
+                {
+                    sb.Append(contentStr.Substring(curIndex,contentStr.Length));
+                }
+                return sb.ToString();
+            }
+            return contentStr;
+        }
+
+        /// <summary>
+        /// 替换数据库变量 $
+        /// </summary>
+        /// <returns></returns>
+        internal static string replaceDataBaseVariable(DataRow dataRow, string contentStr, T xnlContext, string tagInstanceName)
+        {
+            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLDataBaseVariable);
+            if (matchColls.Count>0)
+            {
+                Dictionary<int, List<string>> match1Colls = new Dictionary<int, List<string>>();
+                List<string> match2Colls = new List<string>(); //可以替换的
+                foreach (Match match in matchColls)
+                {
+                    string attribStr = match.Groups[1].Value;
+                    if (attribStr.Substring(0, 1) == "$")
+                    {
+                        string trueAttrStr = attribStr.Replace("$", "");
+                        List <string> attrList;
+                        int len = attribStr.Length-trueAttrStr.Length;
+                        if (match1Colls.TryGetValue(len, out attrList))
+                        {
+                            if(dataRow.Table.Columns.Contains(trueAttrStr)&&!attrList.Contains(attribStr))attrList.Add(attribStr);
+                        }
+                        else //添加
+                        {
+                            attrList=new List<string>();
+                            attrList.Add(attribStr);
+                            match1Colls.Add(len, attrList);
+                        }
+                    }
+                    else  //可以替换
+                    {
+                        try
+                        {
+                            if (!match2Colls.Contains(attribStr) && dataRow.Table.Columns.Contains(attribStr))
+                            {
+                                contentStr = contentStr.Replace(match.Groups[0].Value, dataRow[attribStr].ToString());
+                                match2Colls.Add(attribStr);
+                            }
+                        }
+                        catch //(Exception e)
+                        {
+
+                        }
+                    }
+                }
+                //替换其它层变量
+                for (int i = 1; i <=match1Colls.Count;i++ )
+                {
+                    foreach (string str in match1Colls[i])
+                    {
+                        contentStr = contentStr.Replace("{$" + str + "}", "{"+str+"}"); 
+                    }
+                }
+            }
+            return contentStr;
+        }
+*/
+
+/*
+ internal static string DataTableCompute(string ExpressionStr)
+        {
+            DataTable dt = new DataTable();
+            object returnObj;
+            //string regex = "\'(?>[\\(,]\\s*\'(?<n>)|\'\\s*[,\\)](?<-n>)|(?!\'\\s*[,\\)]).)*(?(n)(?!))\'";
+            //1.先判断字符串中是否有"字符
+            if (ExpressionStr.IndexOf("\"") >= 2)
+            {
+                MatchCollection matchColl2 = Regex.Matches(ExpressionStr, "(?<=[,\\(])\"(?>[\\(,]\\s*\"(?<n>)|\"\\s*[,\\)](?<-n>)|(?!\"\\s*[,\\)]).)*(?(n)(?!))\"(?=[,\\)])", XNL_RegexOptions);
+                //MatchCollection matchColl2 = Regex.Matches(ExpressionStr, "(?<=[,\\(])\"(?>[\\(,]\\s*\"(?<n>)|\"\\s*[,\\)](?<-n>)|(?!\"\\s*[,\\)]).)*(?(n)(?!))\"(?=[,\\)])", XNLCommon.MatchCompiledOptions);
+                if (matchColl2.Count > 0)  //有" " 的匹配
+                {
+                    //判断是否有'字符
+                    if (ExpressionStr.IndexOf("'") >= 2)
+                    {
+                        MatchCollection matchColl = Regex.Matches(ExpressionStr, "(?<=[,\\(])\'(?>[\\(,]\\s*\'(?<n>)|\'\\s*[,\\)](?<-n>)|(?!\'\\s*[,\\)]).)*(?(n)(?!))\'(?=[,\\)])", XNL_RegexOptions);
+                        if (matchColl.Count > 0)
+                        {
+                            Dictionary<string, string> backColls = new Dictionary<string, string>();
+                            for (int i = 0; i < matchColl.Count; i++)
+                            {
+                                Match match = matchColl[i];
+                                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
+                                string r = ra.Next().ToString();
+                                string reStr = "---tmp_express" + i.ToString() + r + "---";
+                                string attrStr = match.Groups[0].Value;
+                                backColls.Add(reStr, attrStr);
+                                //2.备份并替换''内的字符
+                                ExpressionStr = ExpressionStr.Replace(attrStr, reStr);
+                            }
+                            //3.替换""内的字符
+                            foreach (Match j in matchColl2)
+                            {
+                                string matchstr = j.Groups[0].Value;
+                                string rStr = "'" + (matchstr.Substring(1, matchstr.Length - 2).Replace("'", "''")) + "'";
+                                ExpressionStr = ExpressionStr.Replace(matchstr, rStr);
+                            }
+                            //4还原''内的字符
+                            foreach (KeyValuePair<string, string> k in backColls)
+                            {
+                                ExpressionStr = ExpressionStr.Replace(k.Key, k.Value);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //3.替换""内的字符
+                        foreach (Match j in matchColl2)
+                        {
+                            string matchstr = j.Groups[0].Value;
+                            string rStr = "'" + (matchstr.Substring(1, matchstr.Length - 2).Replace("'", "''")) + "'";
+                            ExpressionStr = ExpressionStr.Replace(matchstr, rStr);
+                        }
+                    }
+                }
+            }
+            returnObj = dt.Compute(ExpressionStr, "");
+            return Convert.ToString(returnObj);
+
+        }
+        internal static string DataTableComputeUseMono(string ExpressionStr)
+        {
+            DataTable dt = new DataTable();
+            //此内容用于mono
+            DataColumn column;
+            DataRow row;
+            // Create new DataColumn, set DataType, ColumnName and add to DataTable.    
+            column = new DataColumn();
+            column.DataType = System.Type.GetType("System.Int32");
+            column.ColumnName = "id";
+            dt.Columns.Add(column);
+            row = dt.NewRow();
+            row["id"] = 1;
+            dt.Rows.Add(row);
+            //此内容用于mono
+            object returnObj;
+            returnObj = dt.Compute(ExpressionStr, "");
+            return Convert.ToString(returnObj);
+        }
+        internal static string EvalExpression(string ExpressionStr, T XNLPage)
+        {
+            //^([^\.]*)\((.*)?\)$
+            //^(.*)\.([^()]*)$|^(.*)\.(.*)\((.*)\)$
+            //string tmpExpressStr = ExpressionStr.Trim();
+            //tmpExpressStr = XNLCommon.decodeHTMLEscapecharacter(tmpExpressStr);
+            //tmpExpressStr = XNLCommon.decodeXNLEscapecharacter(tmpExpressStr);
+            //尝试其它表达式
+            try
+            {
+                #region 计算表达式
+                Match excMatch = Regex.Match(ExpressionStr, "^([^\\.]*)\\((.*)?\\)$", XNL_RegexOptions);
+                if (excMatch.Success) //自定义方法表达式
+                {
+                    string funcStr = excMatch.Groups[1].Value.Trim().ToLower();
+                    string valueStrs = excMatch.Groups[2].Value;
+                    string s = funcStr.Substring(0, 1);
+                    MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
+                    Dictionary<string, string> paramsDirectory = new Dictionary<string, string>();
+                    int matchCount = 0;
+                    foreach (Match match in valueMatchColl)
+                    {
+                        if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
+                        matchCount += 1;
+                        if (match.Groups[1].Value == "'")
+                        {
+                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[2].Value);
+                        }
+                        else if (match.Groups[3].Value == "\"")
+                        {
+                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[4].Value);
+                        }
+                        else
+                        {
+                            if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
+                            {
+                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[5].Value);
+                            }
+                            else
+                            {
+                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[6].Value);
+                            }
+                        }
+                    }
+                    switch (s)
+                    {
+                        // (')([^']*)?'|(")([^"]*)?"
+                        case "i":
+                            switch (funcStr)
+                            {
+                                case "isnumeric":
+                                    return Convert.ToString(UtilsCode.IsNumeric(paramsDirectory["1"]));
+                                case "isint":
+                                    return Convert.ToString(UtilsCode.IsInt(paramsDirectory["1"]));
+                                case "isunsign":
+                                    return Convert.ToString(UtilsCode.IsUnsign(paramsDirectory["1"]));
+                                case "isdate":
+                                    return Convert.ToString(UtilsCode.IsDate(paramsDirectory["1"]));
+                                case "isemail":
+                                    return Convert.ToString(UtilsCode.IsEMail(paramsDirectory["1"]));
+                                case "isflash":
+                                    return Convert.ToString(UtilsCode.IsFlash(paramsDirectory["1"]));
+                                case "isidcard":
+                                    return Convert.ToString(UtilsCode.IsIdCard(paramsDirectory["1"]));
+                                case "isimage":
+                                    return Convert.ToString(UtilsCode.IsImage(paramsDirectory["1"]));
+                                case "isfiletype":
+                                    return Convert.ToString(UtilsCode.IsFileType(paramsDirectory["1"], paramsDirectory["2"]));
+                                case "isurl":
+                                    return Convert.ToString(UtilsCode.IsUrl(paramsDirectory["1"]));
+                                case "iszipno":
+                                    return Convert.ToString(UtilsCode.IsZipNo(paramsDirectory["1"]));
+                                case "Isgreatethanzero":
+                                    return Convert.ToString(UtilsCode.IsGreateThanZero(paramsDirectory["1"]));
+                                case "ishanzi":
+                                    return Convert.ToString(UtilsCode.IsHanZi(paramsDirectory["1"]));
+                                case "istelno":
+                                    return Convert.ToString(UtilsCode.IsTelNo(paramsDirectory["1"]));
+                                case "iscellphotono":
+                                    return Convert.ToString(UtilsCode.IsCellPhotoNo(paramsDirectory["1"]));
+                                case "ismatch":
+                                    return Convert.ToString(UtilsCode.IsMatch(paramsDirectory["1"], paramsDirectory["2"]));
+                                case "insert":
+                                    return UtilsCode.Insert(paramsDirectory["1"], Convert.ToInt32(paramsDirectory["2"]), paramsDirectory["3"]);
+                                case "indexof":
+                                    return UtilsCode.IndexOf(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]), Convert.ToInt32(paramsDirectory["4"]));
+                                case "isnull":
+                                    return DataTableCompute(ExpressionStr);
+                                case "iif":
+                                    return DataTableCompute(ExpressionStr);
+                            }
+                            break;
+                        case "g":
+                            switch (funcStr)
+                            {
+                                case "getmatchgroup":
+                                    return UtilsCode.getMatchGroup(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
+                                case "getmatchcount":
+                                    return UtilsCode.getMatchCount(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
+                                case "getmatchs":
+                                    return UtilsCode.getMatchs(paramsDirectory["1"], paramsDirectory["2"], Convert.ToInt32(paramsDirectory["3"]));
+                                case "getyear":
+                                    return UtilsCode.GetYear(paramsDirectory["1"]);
+                                case "getday":
+                                    return UtilsCode.GetDay(paramsDirectory["1"]);
+                                case "gettime":
+                                    return UtilsCode.GetTime(paramsDirectory["1"]);
+                                case "getweek":
+                                    return UtilsCode.GetWeek(paramsDirectory["1"]);
+                                case "getdate":
+                                    return UtilsCode.GetDate(paramsDirectory["1"]);
+                                case "getmonth":
+                                    return UtilsCode.GetMonth(paramsDirectory["1"]);
+                                case "gethour":
+                                    return UtilsCode.GetHour(paramsDirectory["1"]);
+                                case "getminute":
+                                    return UtilsCode.GetMinute(paramsDirectory["1"]);
+                                case "getsecond":
+                                    return UtilsCode.GetSecond(paramsDirectory["1"]);
+                                case "getmillisecond":
+                                    return UtilsCode.GetMillisecond(paramsDirectory["1"]);
+                            }
+                            break;
+                        case "d":
+                            switch (funcStr)
+                            {
+                                case "decodehtml":
+                                    return UtilsCode.decodeHtml(paramsDirectory["1"]);
+                                case "decodexnl":
+                                    return UtilsCode.decodeXNL(paramsDirectory["1"]);
+                                case "decodehtmlandxnl":
+                                    return UtilsCode.decodeHtmlAndXnl(paramsDirectory["1"]);
+                                case "date":
+                                    return UtilsCode.Date();
+                                case "day":
+                                    return UtilsCode.Day();
+                            }
+                            break;
+                        case "e":
+                            switch (funcStr)
+                            {
+                                case "encodehtml":
+                                    return UtilsCode.encodeHtml(paramsDirectory["1"]);
+                                case "encodexnl":
+                                    return UtilsCode.encodeXNL(paramsDirectory["1"]);
+                                case "encodehtmlandxnl":
+                                    return UtilsCode.encodeHtmlAndXnl(paramsDirectory["1"]);
+                            }
+                            break;
+                        case "r":
+                            switch (funcStr)
+                            {
+                                case "replace":
+                                    return UtilsCode.replace(paramsDirectory["1"], paramsDirectory["2"], paramsDirectory["3"]);
+                                case "remove":
+                                    return UtilsCode.Remove(paramsDirectory["1"], Convert.ToInt32(paramsDirectory["2"]), Convert.ToInt32(paramsDirectory["3"]));
+
+                            }
+                            break;
+                        case "t":
+                            switch (funcStr)
+                            {
+                                case "tolower":
+                                    return UtilsCode.ToLower(paramsDirectory["1"]);
+                                case "toupper":
+                                    return UtilsCode.ToUpper(paramsDirectory["1"]);
+                                case "trimstart":
+                                    return UtilsCode.TrimStart(paramsDirectory["1"]);
+                                case "trimend":
+                                    return UtilsCode.TrimEnd(paramsDirectory["1"]);
+                                case "trim":
+                                    return DataTableCompute(ExpressionStr);
+                                case "tolongdate":
+                                    return UtilsCode.ToLongDate(paramsDirectory["1"]);
+                                case "tolongtime":
+                                    return UtilsCode.ToLongTime(paramsDirectory["1"]);
+                                case "toshortdate":
+                                    return UtilsCode.ToShortDate(paramsDirectory["1"]);
+                                case "toshorttime":
+                                    return UtilsCode.ToShortTime(paramsDirectory["1"]);
+                                case "today":
+                                    return UtilsCode.Today();
+                                case "time":
+                                    return UtilsCode.Time();
+                            }
+                            break;
+                        case "f":
+                            switch (funcStr)
+                            {
+                                case "formatdate":
+                                    return UtilsCode.formatDate(paramsDirectory["1"], paramsDirectory["2"]);
+                                case "formattime":
+                                    return UtilsCode.formatTime(paramsDirectory["1"], paramsDirectory["2"]);
+                                case "formatnumber":
+                                    return UtilsCode.formatNumber(paramsDirectory["1"], paramsDirectory["2"]);
+                            }
+                            break;
+                        case "c":
+                            switch (funcStr)
+                            {
+                                case "convert":
+                                    return DataTableCompute(ExpressionStr);
+                                case "chs2pinyin":
+                                    return UtilsCode.CHS2PinYin(paramsDirectory["1"], paramsDirectory["2"], Convert.ToBoolean(paramsDirectory["3"]));
+                                case "chs2py":
+                                    return UtilsCode.CHS2PY(paramsDirectory["1"], paramsDirectory["2"], Convert.ToBoolean(paramsDirectory["3"]));
+                            }
+                            break;
+                        case "s":
+                            switch (funcStr)
+                            {
+                                case "substring":
+                                    return DataTableCompute(ExpressionStr);
+                                case "second":
+                                    return UtilsCode.Second();
+                            }
+                            break;
+                        case "l":
+                            switch (funcStr)
+                            {
+                                case "len":
+                                    return DataTableCompute(ExpressionStr);
+                            }
+                            break;
+                        case "n":
+                            switch (funcStr)
+                            {
+                                case "now":
+                                    return UtilsCode.now();
+                            }
+                            break;
+                        case "m":
+                            switch (funcStr)
+                            {
+                                case "month":
+                                    return UtilsCode.Month();
+                                case "minute":
+                                    return UtilsCode.Minute();
+                                case "millisecond":
+                                    return UtilsCode.Millisecond();
+                            }
+                            break;
+                        case "w":
+                            switch (funcStr)
+                            {
+                                case "week":
+                                    return UtilsCode.Week();
+                            }
+                            break;
+                        case "y":
+                            switch (funcStr)
+                            {
+                                case "year":
+                                    return UtilsCode.Year();
+                            }
+                            break;
+                        case "h":
+                            switch (funcStr)
+                            {
+                                case "hour":
+                                    return UtilsCode.Hour();
+                            }
+                            break;
+                        default:
+                            return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
+                    }
+                }
+                else  //扩展XNL标签表达式
+                {
+                    Match excXnlMatch = Regex.Match(ExpressionStr, "^(.*)\\.([^()]*)$|^(.*)\\.(.*)\\((.*)\\)$", XNL_RegexOptions);
+                    if (excXnlMatch.Success)
+                    {
+                        if (excXnlMatch.Groups[1].Value.Trim() != "") //xnl.label
+                        {
+                            string libNameStr = excXnlMatch.Groups[1].Value;
+                            string labelNameStr = excXnlMatch.Groups[2].Value;
+                            string returnStr = ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + "></" + libNameStr + ":" + labelNameStr + ">", XNLPage);
+                            return returnStr;
+                        }
+                        else  //xnl.labelname('hjgj','jh')
+                        {
+                            string libNameStr = excXnlMatch.Groups[3].Value;
+                            string labelNameStr = excXnlMatch.Groups[4].Value;
+                            string valueStrs = excXnlMatch.Groups[5].Value;
+                            MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
+                            int matchCount = 0;
+                            string paramStr = "<attrs>";
+                            foreach (Match match in valueMatchColl)
+                            {
+                                if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
+                                matchCount += 1;
+                                if (match.Groups[1].Value == "'")
+                                {
+                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[2].Value) + "</attr>";
+                                }
+                                else if (match.Groups[3].Value == "\"")
+                                {
+                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[4].Value) + "</attr>";
+                                }
+                                else
+                                {
+                                    if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
+                                    {
+                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[5].Value) + "</attr>";
+                                    }
+                                    else
+                                    {
+                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[6].Value) + "</attr>";
+                                    }
+                                }
+                            }
+                            paramStr += "</attrs>";
+                            string returnStr =ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + ">" + paramStr + "</" + libNameStr + ":" + labelNameStr + ">", XNLPage);
+                            return returnStr;
+                        }
+                    }
+                    else
+                    {
+                        return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
+                    }
+                }
+                return RegxpEngineCommon<T>.DataTableCompute(ExpressionStr);
+                #endregion 计算表达式
+            }
+            catch
+            {
+                return ExpressionStr;
+            }
+        }
+*/

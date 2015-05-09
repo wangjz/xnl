@@ -24,5 +24,7 @@ namespace COM.SingNo.XNLCore
         public int Length { get; set; }
 
         public ParseMode mode { get; set; }
+
+        public string value { get; set; }
     }
 }

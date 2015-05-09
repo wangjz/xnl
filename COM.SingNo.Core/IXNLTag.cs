@@ -4,22 +4,21 @@ using System.Text;
 using System.Data;
 namespace COM.SingNo.XNLCore
 {
-    //public delegate void OnTagDelegate<T>(IXNLTag<T> tagObj) where T : XNLContext; // ,string body
-    public delegate void OnTagDelegate(); // ,string body
+    public delegate void OnTagDelegate();
     public interface IXNLTag<T> where T:XNLContext //XNL标签接口
     {
         ParseMode parseMode { get; set; }
         string subTagNames { get; }
         /// 标签实例名
         /// </summary>
-        string instanceName { get; }
+        string instanceName { get; set; }
 
         //别名
         string curTag { get; set; }
 
-        T xnlContext { get; }
-      
-        void OnInit(T xnlContext, string instanceName);
+        T xnlContext { get; set; }
+        //T xnlContext, string instanceName
+        void OnInit();
 
         void OnStart(); //, string body
 

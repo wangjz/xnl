@@ -4,14 +4,14 @@ using System.Text;
 using System.Data;
 namespace COM.SingNo.XNLCore.Labels
 {
-    public class XNLTag<T> : IXNLTag<T> where T : XNLContext
+    public class BaseTag<T> : IXNLTag<T> where T : XNLContext
     {
        // private T _xnlContext;
         #region IXNLTag<T> 成员
         public T xnlContext
         {
             get;
-            protected set;
+            set;
         }
         public string subTagNames
         {
@@ -24,7 +24,7 @@ namespace COM.SingNo.XNLCore.Labels
         public string instanceName
         {
             get;
-            private set; 
+            set; 
         }
 
         public string curTag
@@ -32,10 +32,11 @@ namespace COM.SingNo.XNLCore.Labels
             get;
             set;
         }
-
-        public virtual void OnInit(T xnlContext, string instanceName)
+        //T xnlContext, string instanceName
+        // this.xnlContext = xnlContext;
+        public virtual void OnInit()
         {
-            this.xnlContext = xnlContext;
+           
         }
 
         public virtual void OnStart()

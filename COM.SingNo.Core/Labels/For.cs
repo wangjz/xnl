@@ -20,23 +20,27 @@ namespace COM.SingNo.XNLCore.Labels
         private bool isChange = false;
 
         private string[] strs;
+
+        public int step = 1;
+
+        private int pos = 0;
         public T xnlContext
         {
             get;
-            private set;
+            set;
         }
 
         public string instanceName { get; set; }
         public string curTag { get; set; }
 
-        public void OnInit(T xnlContext, string instanceName)
+        public void OnInit()  //T xnlContext, string instanceName
         {
             start = 0;
             end = 0;
             split = ",";
             strs = null;
-            this.xnlContext = xnlContext;
-            this.instanceName = instanceName;
+            //this.xnlContext = xnlContext;
+            //this.instanceName = instanceName;
         }
         public virtual void OnStart()
         {
@@ -63,12 +67,23 @@ namespace COM.SingNo.XNLCore.Labels
         //子标签解析
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
+            if (step == 0) return;
             if (tagDelegate != null)
             {
-                if (start > end) start = end;
-                for (i = start; i <= end;i++ )
+                
+                if (start > end)
+                {
+                    if (step > 0) step = -step;
+                }
+                else
+                {
+                    if (step < 0) step = -step;
+                }
+                pos = 1;
+                for (i = start; i <= end; i += step)
                 {
                     tagDelegate();
+                    pos += 1;
                 }   
             }
         }
@@ -101,6 +116,10 @@ namespace COM.SingNo.XNLCore.Labels
                     isChange = true;
                 }
             }
+            else if(paramName == "step")
+            {
+                step = Convert.ToInt32(value);
+            }
         }
 
         public object GetAttribute(string paramName, string tagName = null)
@@ -119,7 +138,7 @@ namespace COM.SingNo.XNLCore.Labels
             }
             else if (paramName == "pos")
             {
-                outValue = (i - start + 1);
+                outValue = pos;
                 return true;
             }
             else if (paramName == "start")
@@ -147,6 +166,11 @@ namespace COM.SingNo.XNLCore.Labels
                 outValue = split;
                 return true;
             }
+            else if (paramName == "step")
+            {
+                outValue = step;
+                return true;
+            }
             outValue = null;
             return false;
         }
@@ -158,7 +182,7 @@ namespace COM.SingNo.XNLCore.Labels
         }
         public bool ExistAttribute(string paramName, string tagName = null)
         {
-            if (paramName == "i"|| paramName=="str" || paramName == "str" || paramName == "start" || paramName == "end" || paramName == "split") return true;
+            if (paramName == "i" || paramName == "str" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
             return false;
         }
 

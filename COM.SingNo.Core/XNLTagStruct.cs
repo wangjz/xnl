@@ -60,7 +60,9 @@ namespace COM.SingNo.XNLCore
         /// 父标签
         /// </summary>
         public XNLTagStruct parent { get; set; }
-
-        //public object tagObj { get; set; }
+        /// <summary>
+        /// 对应的标签实例
+        /// </summary>
+        public object tagObj { get; set; }
     }
 }

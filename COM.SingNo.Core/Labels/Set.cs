@@ -12,11 +12,13 @@ namespace COM.SingNo.XNLCore.Labels
             set;
         }
 
-        public string instanceName { get; private set; }
+        public string instanceName { get; set; }
         public string curTag { get; set; }
-        public void OnInit(T xnlContext, string instanceName)
+        //T xnlContext, string instanceName
+        //this.xnlContext = xnlContext;
+        public void OnInit()
         {
-            this.xnlContext = xnlContext;
+            
         }
 
         public void OnStart()
