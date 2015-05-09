@@ -7,6 +7,15 @@ namespace COM.SingNo.XNLCore.Labels
 {
   public  class If<T>:IXNLTag<T> where T:XNLContext
    {
+      public object v1;
+      public object v2;
+      public string test;
+      public bool value; //true if  false else
+
+      public object tagV1;
+      public object tagV2;
+      public string tagTest;
+      public bool tagValue;
       public T xnlContext
       {
           get;
@@ -17,15 +26,19 @@ namespace COM.SingNo.XNLCore.Labels
 
       public string curTag { get; set; }
 
-      public void OnInit() //T xnlContext, string instanceName
+      public void OnInit()
       {
-          //this.xnlContext = xnlContext;
-          //this.instanceName = instanceName;
+          test = "=";
+          value = true;
+
+          tagTest = "=";
+          tagValue = true;
+
       }
 
       public virtual void OnStart()
       {
-
+          //if(v1!=null)
       }
 
       public void OnEnd()
@@ -52,7 +65,9 @@ namespace COM.SingNo.XNLCore.Labels
       }
       public object GetAttribute(string paramName, string tagName = null)
       {
-          return null;
+          object v;
+          TryGetAttribute(out v, paramName, tagName);
+          return v;
       }
       public bool TryGetAttribute(out object outValue, string paramName, string tagName = null)
       {
@@ -68,6 +83,7 @@ namespace COM.SingNo.XNLCore.Labels
       }
       public bool ExistAttribute(string paramName, string tagName=null)
       {
+          if (paramName == "v1" || paramName == "v2" || paramName == "test") return true;
           return false;
       }
 
@@ -87,49 +103,6 @@ namespace COM.SingNo.XNLCore.Labels
 }
 
 /*
-       #region IXNLBase 成员
-     public string main(XNLTagStruct tagStruct, T XNLPage)
-     {
-           if (string.IsNullOrEmpty(tagStruct.bodyContent))
-           {
-               return "";
-           }
-           else if (tagStruct.subTagStruct != null)
-           {
-               StringBuilder sb = new StringBuilder();
-               string tagObjName = tagStruct.instanceName;
-               XNLParam resultparam=null;
-               XNLParam testParam=null;
-               string operatorString = "=";
-               if (tagStruct.tagParams != null)
-               {
-                   resultparam = tagStruct.tagParams["value"];
-                   testParam = tagStruct.tagParams["test"];
-                   XNLParam operaParam = tagStruct.tagParams["operator"];
-                   if (operaParam != null) operatorString = operaParam.value.ToString();
-               } 
-               bool resultVar = logicAction(operatorString, resultparam, testParam);
-               foreach (XNLTagStruct t in tagStruct.subTagStruct)
-               {
-                   if (string.IsNullOrEmpty(t.tagName))
-                   {
-                       sb.Append(t.allContent);
-                   }
-                   else if (string.Compare(t.tagName, "if", true) == 0 && resultVar)
-                   {
-                       sb.Append(ParserEngine<T>.xnlParser.replaceAttribleVariable(t.bodyContent, t.tagParams, XNLPage, tagStruct.instanceName));
-                   }
-                   else if (string.Compare(t.tagName, "else", true) == 0 && resultVar==false)
-                   {
-                       sb.Append(ParserEngine<T>.xnlParser.replaceAttribleVariable(t.bodyContent, t.tagParams, XNLPage, tagStruct.instanceName));
-                   }
-               }
-               return ParserEngine<T>.xnlParser.replaceAttribleVariable(sb.ToString(), tagStruct.tagParams, XNLPage, tagStruct.instanceName);
-           }
-           return "";
-       }
-
-       #endregion
 
        private bool logicAction(string operatorStr, XNLParam ifVar, XNLParam resultVar)
        {

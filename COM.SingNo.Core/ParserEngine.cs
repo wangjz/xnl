@@ -117,7 +117,7 @@ namespace COM.SingNo.XNLCore
                     if (isNoSubTag && isTagName == false)
                     {
                         index = strBuilder.Length;
-                        onNoTagAction(xnlContext, curStruct.bodyContent);
+                        if (string.IsNullOrEmpty(curStruct.bodyContent)==false) onNoTagAction(xnlContext, curStruct.bodyContent);
                     }
                     else if (isTagName)
                     {
@@ -257,21 +257,35 @@ namespace COM.SingNo.XNLCore
                                 tagObj.curTag = null;
                                 if (parseMode == ParseMode.Dynamic)
                                 {
-                                    strBuilder.AppendLine("OnTagDelegate " + instanceName + "_delegate=delegate (){");
-                                    XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
-                                    XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                    OnTagAction(tagObj);
-                                    strBuilder.AppendLine("};");
-                                    strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
-                                }
-                                else
-                                {
-                                    tagObj.OnTag(delegate()
+                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim())==false)
                                     {
+                                        strBuilder.AppendLine("OnTagDelegate " + instanceName + "_delegate=delegate (){");
                                         XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
                                         XNLContext.setItem(xnlContext, "$__tagid", tagId);
                                         OnTagAction(tagObj);
-                                    });
+                                        strBuilder.AppendLine("};");
+                                        strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
+                                    }
+                                    else
+                                    {
+                                        strBuilder.AppendLine(instanceName + ".OnTag(null);");
+                                    }
+                                }
+                                else
+                                {
+                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
+                                    {
+                                        tagObj.OnTag(delegate()
+                                        {
+                                            XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
+                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                            OnTagAction(tagObj);
+                                        });
+                                    }
+                                    else
+                                    {
+                                        tagObj.OnTag(null);
+                                    }
                                 }
                             }
                             else
@@ -285,10 +299,13 @@ namespace COM.SingNo.XNLCore
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
                                         tagObj.curTag = "";
-                                        //, tmpSubTag.bodyContent
-                                        XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
-                                        XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                        OnTagAction(tagObj);
+                                        if(string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
+                                        {
+                                            //, tmpSubTag.bodyContent
+                                            XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
+                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                            OnTagAction(tagObj);
+                                        }
                                     }
                                     else
                                     {
@@ -310,22 +327,36 @@ namespace COM.SingNo.XNLCore
                                         }
                                         if (parseMode == ParseMode.Dynamic)
                                         {
-                                            strBuilder.AppendLine("OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
-                                            XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
-                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                            OnTagAction(tagObj);
-                                            strBuilder.AppendLine("};");
-                                            strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_" + tagObj.curTag + "_delegate);");
-                                        }
-                                        else
-                                        {
-                                            //tmpSubTag  保存到context中
-                                            tagObj.OnTag(delegate()
+                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
                                             {
+                                                strBuilder.AppendLine("OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
                                                 XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
                                                 XNLContext.setItem(xnlContext, "$__tagid", tagId);
                                                 OnTagAction(tagObj);
-                                            });
+                                                strBuilder.AppendLine("};");
+                                                strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_" + tagObj.curTag + "_delegate);");
+                                            }
+                                            else
+                                            {
+                                                strBuilder.AppendLine(instanceName + ".OnTag(null);");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
+                                            {
+                                                //tmpSubTag  保存到context中
+                                                tagObj.OnTag(delegate()
+                                                {
+                                                    XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
+                                                    XNLContext.setItem(xnlContext, "$__tagid", tagId);
+                                                    OnTagAction(tagObj);
+                                                });
+                                            }
+                                            else
+                                            {
+                                                tagObj.OnTag(null);
+                                            }
                                         }
                                     }
                                 }
@@ -493,14 +524,14 @@ namespace COM.SingNo.XNLCore
                         else
                         {
 
-                            ParseAction(xnlContext, tagObj, t_subtag.bodyContent,curStruct);
+                            if (string.IsNullOrEmpty(t_subtag.bodyContent) == false) ParseAction(xnlContext, tagObj, t_subtag.bodyContent, curStruct);
                         }
                     }
                 }
             }
             else
             {
-                ParseAction(xnlContext, tagObj, body, curStruct);
+                if (string.IsNullOrEmpty(body)==false) ParseAction(xnlContext, tagObj, body, curStruct);
             }
         }
 

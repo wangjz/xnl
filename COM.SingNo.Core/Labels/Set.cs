@@ -14,8 +14,7 @@ namespace COM.SingNo.XNLCore.Labels
 
         public string instanceName { get; set; }
         public string curTag { get; set; }
-        //T xnlContext, string instanceName
-        //this.xnlContext = xnlContext;
+
         public void OnInit()
         {
             
