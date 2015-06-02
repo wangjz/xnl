@@ -203,12 +203,6 @@ namespace COM.SingNo.XNLCore
                                         strBuilder.AppendLine("\t" + instanceName + ".xnlContext = xnlContext;");
                                         strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
                                         strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
-                                        /*
-                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\tif(" + tagObj.instanceName + "==null){\n\t\t" + tagObj.instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();\n\t\t" + tagObj.instanceName + ".xnlContext = xnlContext;\n\t\t" + tagObj.instanceName + ".instanceName=\"" + tagObj.instanceName + "\";\n\t\t" + tagObj.instanceName + ".OnInit();\n\t}\n\t" + instanceName + " = " + tagObj.instanceName + ".Create();");
-                                        strBuilder.AppendLine("\t" + instanceName + ".xnlContext = xnlContext;");
-                                        strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
-                                        strBuilder.AppendLine("\t"+instanceName + ".OnInit();\n}");
-                                         */ 
                                     }
                                     tagObj = newTagObj;
                                 }
@@ -229,10 +223,16 @@ namespace COM.SingNo.XNLCore
                             {
                                 foreach (KeyValuePair<string, XNLParam> kv in curStruct.tagParams)
                                 {
+                                    //kv 是否含有标签  token类型  左值赋值  
+                                    List<XNLToken> tokens = xnlParser.GetTagTokens(kv.Key);
+
+                                    //List<XNLToken> tokens = xnlParser.GetTagTokens(kv.Key);
+
+
+
                                     //todo 处理特殊kv
                                     if (parseMode == ParseMode.Dynamic)
                                     {
-
                                         strBuilder.AppendLine(instanceName + ".SetAttribute(\"" + kv.Key + "\",@\"" + kv.Value.value + "\");");
                                     }
                                     else
@@ -257,6 +257,7 @@ namespace COM.SingNo.XNLCore
                                 tagObj.curTag = null;
                                 if (parseMode == ParseMode.Dynamic)
                                 {
+                                    strBuilder.AppendLine(instanceName + ".curTag = null;");
                                     if (string.IsNullOrEmpty(curStruct.bodyContent.Trim())==false)
                                     {
                                         strBuilder.AppendLine("OnTagDelegate " + instanceName + "_delegate=delegate (){");
@@ -327,6 +328,7 @@ namespace COM.SingNo.XNLCore
                                         }
                                         if (parseMode == ParseMode.Dynamic)
                                         {
+                                            strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
                                             if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
                                             {
                                                 strBuilder.AppendLine("OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");

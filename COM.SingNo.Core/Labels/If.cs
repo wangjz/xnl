@@ -10,12 +10,13 @@ namespace COM.SingNo.XNLCore.Labels
       public object v1;
       public object v2;
       public string test;
-      public bool value; //true if  false else
+      public bool value;
 
       public object tagV1;
       public object tagV2;
       public string tagTest;
       public bool tagValue;
+      bool isSetParam;
       public T xnlContext
       {
           get;
@@ -33,12 +34,15 @@ namespace COM.SingNo.XNLCore.Labels
 
           tagTest = "=";
           tagValue = true;
-
+          isSetParam = false;
       }
 
       public virtual void OnStart()
       {
-          //if(v1!=null)
+          tagV1 = v1;
+          tagV2 = v2;
+          tagTest = test;
+          value = LogicTest(v1, v2, test);
       }
 
       public void OnEnd()
@@ -51,18 +55,72 @@ namespace COM.SingNo.XNLCore.Labels
           if (tagDelegate == null) return;
           if ("if" == curTag)
           {
+              if (isSetParam)
+              {
+                  tagValue = LogicTest(tagV1, tagV2, tagTest);
+                  if (tagValue) tagDelegate();
+                  isSetParam = false;
+              }
+              else if (value) 
+              {
+                  tagDelegate();
+              }
           }
           else if ("else" == curTag)
           {
-
+              if(isSetParam)
+              {
+                  tagValue = LogicTest(tagV1, tagV2, tagTest);
+                  if (!tagValue) tagDelegate();
+                  isSetParam = false;
+              }
+              else if(!value)
+              {
+                  tagDelegate();
+              }
           }
-          tagDelegate();
+          else
+          {
+              if (value) tagDelegate();
+          }
+          tagValue = value;
       }
 
       public void SetAttribute(string paramName, object value, string tagName=null)
       {
-
+          if ("if" == tagName || "else" == tagName)
+          {
+              isSetParam = true;
+              if("v1"==paramName)
+              {
+                  tagV1 = value;
+              }
+              else if("v2"==paramName)
+              {
+                  tagV2 = value;
+              }
+              else if("test"==paramName)
+              {
+                  if (value != null) tagTest = value.ToString();
+              }
+          }
+          else
+          {
+              if ("v1" == paramName)
+              {
+                  v1 = value;
+              }
+              else if ("v2" == paramName)
+              {
+                  v2 = value;
+              }
+              else if ("test" == paramName)
+              {
+                  if (value != null) test = value.ToString();
+              }
+          }
       }
+
       public object GetAttribute(string paramName, string tagName = null)
       {
           object v;
@@ -71,6 +129,52 @@ namespace COM.SingNo.XNLCore.Labels
       }
       public bool TryGetAttribute(out object outValue, string paramName, string tagName = null)
       {
+          if ("if" == tagName || "else" == tagName)
+          {
+              if ("v1" == paramName)
+              {
+                  outValue = tagV1;
+                  return true;
+              }
+              else if ("v2" == paramName)
+              {
+                  outValue = tagV2;
+                  return true;
+              }
+              else if ("test" == paramName)
+              {
+                  outValue = tagTest;
+                  return true;
+              }
+              else if ("value" == paramName)
+              {
+                  outValue = tagValue;
+                  return true;
+              }
+          }
+          else
+          {
+              if ("v1" == paramName)
+              {
+                  outValue = v1;
+                  return true;
+              }
+              else if ("v2" == paramName)
+              {
+                  outValue = v2;
+                  return true;
+              }
+              else if ("test" == paramName)
+              {
+                  outValue = test;
+                  return true;
+              }
+              else if ("value" == paramName)
+              {
+                  outValue = value;
+                  return true;
+              }
+          }
           outValue = null;
           return false;
       }
@@ -81,6 +185,7 @@ namespace COM.SingNo.XNLCore.Labels
       {
           return new If<T>();
       }
+
       public bool ExistAttribute(string paramName, string tagName=null)
       {
           if (paramName == "v1" || paramName == "v2" || paramName == "test") return true;
@@ -99,761 +204,107 @@ namespace COM.SingNo.XNLCore.Labels
           get;
           set;
       }
+
+      public static bool LogicTest(object v1, object v2, string test)
+      {
+          if (v1 == null && v2 == null)
+          {
+              if (test == "=")
+              {
+                  return true;
+              }
+              else if (test == "!=")
+              {
+                  return false;
+              }
+          }
+          if (v1 == null) return false;
+          try
+          {
+              double v;
+              string s;
+              switch (test)
+              {
+                  case "=":
+                      if (v1.Equals(v2)) return true;
+                      break;
+                  case "!=":
+                      if (!v1.Equals(v2)) return true;
+                      break;
+                  case "&gt;":
+                      if (v2 == null) return true;
+                      s = v1.ToString();
+
+                      if (double.TryParse(s, out v)) //number
+                      {
+                          if (v > Convert.ToDouble(v2)) return true;
+                      }
+                      else
+                      {
+                          DateTime _v;
+                          if (DateTime.TryParse(s, out _v))
+                          {
+                              if (_v > Convert.ToDateTime(v2)) return true;
+                          }
+                      }
+                      break;
+                  case "&lt;":
+                      if (v2 == null) return false;
+                      s = v1.ToString();
+                      if (double.TryParse(s, out v)) //number
+                      {
+                          if (v < Convert.ToDouble(v2)) return true;
+                      }
+                      else
+                      {
+                          DateTime _v;
+                          if (DateTime.TryParse(s, out _v))
+                          {
+                              if (_v < Convert.ToDateTime(v2)) return true;
+                          }
+                      }
+                      break;
+                  case "&gt;=": //>=
+                      if (v2 == null) return true;
+                      s = v1.ToString();
+                      if (double.TryParse(s, out v)) //number
+                      {
+                          if (v >= Convert.ToDouble(v2)) return true;
+                      }
+                      else
+                      {
+                          DateTime _v;
+                          if (DateTime.TryParse(s, out _v))
+                          {
+                              if (_v >= Convert.ToDateTime(v2)) return true;
+                          }
+                      }
+                      break;
+                  case "&lt;=":  //<=
+                      if (v2 == null) return false;
+                      s = v1.ToString();
+                      if (double.TryParse(s, out v)) //number
+                      {
+                          if (v <= Convert.ToDouble(v2)) return true;
+                      }
+                      else
+                      {
+                          DateTime _v;
+                          if (DateTime.TryParse(s, out _v))
+                          {
+                              if (_v <= Convert.ToDateTime(v2)) return true;
+                          }
+                      }
+                      break;
+                  default:
+                      if (v1.Equals(v2)) return true;
+                      break;
+              }
+          }
+          catch (Exception)
+          {
+          }
+          return false;
+      }
    }
 }
-
-/*
-
-       private bool logicAction(string operatorStr, XNLParam ifVar, XNLParam resultVar)
-       {
-           if (ifVar == null || resultVar == null) return false;
-             bool boolResult=false;
-             object ifVarValue = ifVar.value;
-             object resultVarValue = resultVar.value;
-             switch (operatorStr)
-             {
-                 case "=":
-                    boolResult= testEquals(resultVar, ifVar);
-                     break;
-                 case "&gt;":  //>
-                     boolResult =testDaYu(resultVar, ifVar);
-                     break;
-                 case "&lt;":  //<
-                     boolResult = testXiaoYu(resultVar, ifVar);
-                     break;
-                 case "&gt;=": //>=
-                     boolResult = testDaYuOrEquals(resultVar, ifVar);
-                     break;
-                 case "&lt;=":  //<=
-                     boolResult = testXiaoYuOrEquals(resultVar, ifVar);
-                     break;
-                 case "!=":
-                     boolResult = testNoEquals(resultVar, ifVar);
-                     break;
-                 default:
-                     boolResult =testEquals(resultVar, ifVar);
-                     break;
-             }
-             return boolResult;
-       }
-
-       private Boolean testEquals( XNLParam resultVar,XNLParam testVar)
-       {
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string TypeFrist1 =XNLParam.getTypeName(resultVar.type).Substring(0, 1).ToUpper();
-           string TypeFrist2 = XNLParam.getTypeName(testVar.type).Substring(0, 1).ToUpper();
-           try
-           {
-               if (TypeFrist1 == "I" || TypeFrist2 == "I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (ifVarValue.Equals(resultVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else
-               {
-                   if (Convert.ToString(ifVarValue).Equals(Convert.ToString(resultVarValue))) boolResult = true;
-                   return boolResult;
-               }              
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-           }
-       }
-
-       private Boolean testDaYu(XNLParam resultVar, XNLParam testVar)
-       {
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string typeName1=XNLParam.getTypeName(resultVar.type);
-           string typeName2=XNLParam.getTypeName(testVar.type);
-           string TypeFrist1 =typeName1.Substring(0, 1).ToUpper();
-           string TypeFrist2 = typeName2.Substring(0, 1).ToUpper();
-           try
-           {
-               if(TypeFrist1=="I"||TypeFrist2=="I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.Int32 || testVar.type == XNLType.Int32)
-                       {
-                           if (Convert.ToInt32(resultVarValue) > Convert.ToInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int16 || testVar.type == XNLType.Int16)
-                       {
-                           if (Convert.ToInt16(resultVarValue) > Convert.ToInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int64 || testVar.type == XNLType.Int64)
-                       {
-                           if (Convert.ToInt64(resultVarValue) > Convert.ToInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "D" || TypeFrist2 == "D")
-               {
-                   if (typeName1.Trim().IndexOf("data") == 0 || typeName2.Trim().IndexOf("data") == 0)
-                       {
-                           DateTime resultDateTime;
-                           DateTime testDateTime;
-                           if (DateTime.TryParse(resultVarValue.ToString(), out resultDateTime) && DateTime.TryParse(ifVarValue.ToString(), out testDateTime))
-                           {
-                               if (DateTime.Compare(resultDateTime, testDateTime) > 0)
-                               {
-                                   boolResult = true;
-                               }
-                               return boolResult;
-                           }
-                           else
-                           {
-                               return boolResult;
-                           }
-                       }
-                       else if (resultVar.type == XNLType.Double|| testVar.type == XNLType.Double)
-                       {
-                           if (Convert.ToDouble(resultVarValue) > Convert.ToDouble(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Decimal || testVar.type == XNLType.Decimal)
-                       {
-                           if (Convert.ToDecimal(resultVarValue) > Convert.ToDecimal(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                        
-                                           
-               }
-               else if (TypeFrist1 == "U" || TypeFrist2 == "U")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.UInt32 || testVar.type == XNLType.UInt32)
-                       {
-                           if (Convert.ToUInt32(resultVarValue) > Convert.ToUInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt16 || testVar.type == XNLType.UInt16)
-                       {
-                           if (Convert.ToUInt16(resultVarValue) > Convert.ToUInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt64 || testVar.type == XNLType.UInt64)
-                       {
-                           if (Convert.ToUInt64(resultVarValue) > Convert.ToUInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-                    
-               }
-               else if (TypeFrist1 == "C" || TypeFrist2 == "C")
-               {
-                   if (resultVar.type == XNLType.Currency|| testVar.type == XNLType.Currency)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) > Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "T" || TypeFrist2 == "T")
-               {
-                   if (resultVar.type == XNLType.Time || testVar.type == XNLType.Time)
-                   {
-                       if (Convert.ToDateTime(resultVarValue) > Convert.ToDateTime(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "S" || TypeFrist2 == "S")
-               {
-                   if (resultVar.type == XNLType.SByte || testVar.type == XNLType.SByte)
-                   {
-                       if (Convert.ToSByte(resultVarValue) > Convert.ToSByte(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if(resultVar.type == XNLType.Single|| testVar.type == XNLType.Single)
-                   {
-                       if (Convert.ToSingle(resultVarValue) > Convert.ToSingle(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.String || testVar.type == XNLType.String)
-                   {
-                       if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                       {
-                           if (Convert.ToDouble(resultVarValue) > Convert.ToDouble(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-               }
-               else if (TypeFrist1 == "B" || TypeFrist2 == "B")
-               {
-                   if (Convert.ToByte(resultVarValue) > Convert.ToByte(ifVarValue)) boolResult = true;
-                   return boolResult;
-               }
-               else
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                        if (Convert.ToDouble(resultVarValue) > Convert.ToDouble(ifVarValue)) boolResult = true;
-                        return boolResult;                    
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-
-           }
-           return boolResult;
-       }
-
-       private Boolean testXiaoYu(XNLParam resultVar, XNLParam testVar)
-       {
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string typeName1 = XNLParam.getTypeName(resultVar.type);
-           string typeName2 = XNLParam.getTypeName(testVar.type);
-           string TypeFrist1 = typeName1.Substring(0, 1).ToUpper();
-           string TypeFrist2 = typeName2.Substring(0, 1).ToUpper();
-           try
-           {
-               if (TypeFrist1 == "I" || TypeFrist2 == "I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.Int32 || testVar.type == XNLType.Int32)
-                       {
-                           if (Convert.ToInt32(resultVarValue) < Convert.ToInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int16 || testVar.type == XNLType.Int16)
-                       {
-                           if (Convert.ToInt16(resultVarValue) < Convert.ToInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int64 || testVar.type == XNLType.Int64)
-                       {
-                           if (Convert.ToInt64(resultVarValue) < Convert.ToInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "D" || TypeFrist2 == "D")
-               {
-
-                   if (typeName1.Trim().IndexOf("data") == 0 || typeName2.Trim().IndexOf("data") == 0)
-                   {
-                       DateTime resultDateTime;
-                       DateTime testDateTime;
-                       if (DateTime.TryParse(resultVarValue.ToString(), out resultDateTime) && DateTime.TryParse(ifVarValue.ToString(), out testDateTime))
-                       {
-                           if (DateTime.Compare(resultDateTime, testDateTime) < 0)
-                           {
-                               boolResult = true;
-                           }
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-                   else if (resultVar.type == XNLType.Double || testVar.type == XNLType.Double)
-                   {
-                       if (Convert.ToDouble(resultVarValue) < Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Decimal || testVar.type == XNLType.Decimal)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) < Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   
-
-               }
-               else if (TypeFrist1 == "U" || TypeFrist2 == "U")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.UInt32 || testVar.type == XNLType.UInt32)
-                       {
-                           if (Convert.ToUInt32(resultVarValue) < Convert.ToUInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt16 || testVar.type == XNLType.UInt16)
-                       {
-                           if (Convert.ToUInt16(resultVarValue) < Convert.ToUInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt64 || testVar.type == XNLType.UInt64)
-                       {
-                           if (Convert.ToUInt64(resultVarValue) < Convert.ToUInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-
-               }
-               else if (TypeFrist1 == "C" || TypeFrist2 == "C")
-               {
-                   if (resultVar.type == XNLType.Currency || testVar.type == XNLType.Currency)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) < Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "T" || TypeFrist2 == "T")
-               {
-                   if (resultVar.type == XNLType.Time || testVar.type == XNLType.Time)
-                   {
-                       if (Convert.ToDateTime(resultVarValue) < Convert.ToDateTime(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "S" || TypeFrist2 == "S")
-               {
-                   if (resultVar.type == XNLType.SByte || testVar.type == XNLType.SByte)
-                   {
-                       if (Convert.ToSByte(resultVarValue) < Convert.ToSByte(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Single || testVar.type == XNLType.Single)
-                   {
-                       if (Convert.ToSingle(resultVarValue) < Convert.ToSingle(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.String || testVar.type == XNLType.String)
-                   {
-                       if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                       {
-                           if (Convert.ToDouble(resultVarValue) < Convert.ToDouble(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-               }
-               else if (TypeFrist1 == "B" || TypeFrist2 == "B")
-               {
-                   if (Convert.ToByte(resultVarValue) < Convert.ToByte(ifVarValue)) boolResult = true;
-                   return boolResult;
-               }
-               else
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (Convert.ToDouble(resultVarValue) < Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-
-           }
-           return boolResult;
-       }
-
-       private Boolean testDaYuOrEquals(XNLParam resultVar, XNLParam testVar)
-       {
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string typeName1 = XNLParam.getTypeName(resultVar.type);
-           string typeName2 = XNLParam.getTypeName(testVar.type);
-           string TypeFrist1 = typeName1.Substring(0, 1).ToUpper();
-           string TypeFrist2 = typeName2.Substring(0, 1).ToUpper();
-           try
-           {
-               if (TypeFrist1 == "I" || TypeFrist2 == "I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.Int32 || testVar.type == XNLType.Int32)
-                       {
-                           if (Convert.ToInt32(resultVarValue) >= Convert.ToInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int16 || testVar.type == XNLType.Int16)
-                       {
-                           if (Convert.ToInt16(resultVarValue) >= Convert.ToInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int64 || testVar.type == XNLType.Int64)
-                       {
-                           if (Convert.ToInt64(resultVarValue) >= Convert.ToInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "D" || TypeFrist2 == "D")
-               {
-                   if (typeName1.Trim().IndexOf("data") == 0 || typeName2.Trim().IndexOf("data") == 0)
-                   {
-                       DateTime resultDateTime;
-                       DateTime testDateTime;
-                       if (DateTime.TryParse(resultVarValue.ToString(), out resultDateTime) && DateTime.TryParse(ifVarValue.ToString(), out testDateTime))
-                       {
-                           if (DateTime.Compare(resultDateTime, testDateTime) > 0 || DateTime.Compare(resultDateTime, testDateTime) == 0)
-                           {
-                               boolResult = true;
-                           }
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-                   else if (resultVar.type == XNLType.Double || testVar.type == XNLType.Double)
-                   {
-                       if (Convert.ToDouble(resultVarValue) >= Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Decimal || testVar.type == XNLType.Decimal)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) >= Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                    
-
-               }
-               else if (TypeFrist1 == "U" || TypeFrist2 == "U")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.UInt32 || testVar.type == XNLType.UInt32)
-                       {
-                           if (Convert.ToUInt32(resultVarValue) >= Convert.ToUInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt16 || testVar.type == XNLType.UInt16)
-                       {
-                           if (Convert.ToUInt16(resultVarValue) >= Convert.ToUInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt64 || testVar.type == XNLType.UInt64)
-                       {
-                           if (Convert.ToUInt64(resultVarValue) >= Convert.ToUInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-
-               }
-               else if (TypeFrist1 == "C" || TypeFrist2 == "C")
-               {
-                   if (resultVar.type == XNLType.Currency || testVar.type == XNLType.Currency)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) >= Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "T" || TypeFrist2 == "T")
-               {
-                   if (resultVar.type == XNLType.Time || testVar.type == XNLType.Time)
-                   {
-                       if (Convert.ToDateTime(resultVarValue) >= Convert.ToDateTime(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "S" || TypeFrist2 == "S")
-               {
-                   if (resultVar.type == XNLType.SByte || testVar.type == XNLType.SByte)
-                   {
-                       if (Convert.ToSByte(resultVarValue) >= Convert.ToSByte(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Single || testVar.type == XNLType.Single)
-                   {
-                       if (Convert.ToSingle(resultVarValue) >= Convert.ToSingle(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.String || testVar.type == XNLType.String)
-                   {
-                       if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                       {
-                           if (Convert.ToDouble(resultVarValue) >= Convert.ToDouble(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-               }
-               else if (TypeFrist1 == "B" || TypeFrist2 == "B")
-               {
-                   if (Convert.ToByte(resultVarValue) >= Convert.ToByte(ifVarValue)) boolResult = true;
-                   return boolResult;
-               }
-               else
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (Convert.ToDouble(resultVarValue) >= Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-
-           }
-           return boolResult;
-       }
-
-       private Boolean testXiaoYuOrEquals(XNLParam resultVar, XNLParam testVar)
-       {
-
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string typeName1 = XNLParam.getTypeName(resultVar.type);
-           string typeName2 = XNLParam.getTypeName(testVar.type);
-           string TypeFrist1 = typeName1.Substring(0, 1).ToUpper();
-           string TypeFrist2 = typeName2.Substring(0, 1).ToUpper();
-           try
-           {
-               if (TypeFrist1 == "I" || TypeFrist2 == "I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.Int32 || testVar.type == XNLType.Int32)
-                       {
-                           if (Convert.ToInt32(resultVarValue) <= Convert.ToInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int16 || testVar.type == XNLType.Int16)
-                       {
-                           if (Convert.ToInt16(resultVarValue) <= Convert.ToInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.Int64 || testVar.type == XNLType.Int64)
-                       {
-                           if (Convert.ToInt64(resultVarValue) <= Convert.ToInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "D" || TypeFrist2 == "D")
-               {
-
-                   if (typeName1.Trim().IndexOf("data") == 0 || typeName2.Trim().IndexOf("data") == 0)
-                   {
-                       DateTime resultDateTime;
-                       DateTime testDateTime;
-                       if (DateTime.TryParse(resultVarValue.ToString(), out resultDateTime) && DateTime.TryParse(ifVarValue.ToString(), out testDateTime))
-                       {
-                           if (DateTime.Compare(resultDateTime, testDateTime) < 0 || DateTime.Compare(resultDateTime, testDateTime) == 0)
-                           {
-                               boolResult = true;
-                           }
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-                   else if (resultVar.type == XNLType.Double || testVar.type == XNLType.Double)
-                   {
-                       if (Convert.ToDouble(resultVarValue) <= Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Decimal || testVar.type == XNLType.Decimal)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) <= Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "U" || TypeFrist2 == "U")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (resultVar.type == XNLType.UInt32 || testVar.type == XNLType.UInt32)
-                       {
-                           if (Convert.ToUInt32(resultVarValue) <= Convert.ToUInt32(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt16 || testVar.type == XNLType.UInt16)
-                       {
-                           if (Convert.ToUInt16(resultVarValue) <= Convert.ToUInt16(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else if (resultVar.type == XNLType.UInt64 || testVar.type == XNLType.UInt64)
-                       {
-                           if (Convert.ToUInt64(resultVarValue) <= Convert.ToUInt64(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-
-               }
-               else if (TypeFrist1 == "C" || TypeFrist2 == "C")
-               {
-                   if (resultVar.type == XNLType.Currency || testVar.type == XNLType.Currency)
-                   {
-                       if (Convert.ToDecimal(resultVarValue) <= Convert.ToDecimal(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "T" || TypeFrist2 == "T")
-               {
-                   if (resultVar.type == XNLType.Time || testVar.type == XNLType.Time)
-                   {
-                       if (Convert.ToDateTime(resultVarValue) <= Convert.ToDateTime(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-               }
-               else if (TypeFrist1 == "S" || TypeFrist2 == "S")
-               {
-                   if (resultVar.type == XNLType.SByte || testVar.type == XNLType.SByte)
-                   {
-                       if (Convert.ToSByte(resultVarValue) <= Convert.ToSByte(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.Single || testVar.type == XNLType.Single)
-                   {
-                       if (Convert.ToSingle(resultVarValue) <= Convert.ToSingle(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else if (resultVar.type == XNLType.String || testVar.type == XNLType.String)
-                   {
-                       if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                       {
-                           if (Convert.ToDouble(resultVarValue) <= Convert.ToDouble(ifVarValue)) boolResult = true;
-                           return boolResult;
-                       }
-                       else
-                       {
-                           return boolResult;
-                       }
-                   }
-               }
-               else if (TypeFrist1 == "B" || TypeFrist2 == "B")
-               {
-                   if (Convert.ToByte(resultVarValue) <= Convert.ToByte(ifVarValue)) boolResult = true;
-                   return boolResult;
-               }
-               else
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (Convert.ToDouble(resultVarValue) <= Convert.ToDouble(ifVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-
-           }
-           return boolResult;
-       }
-
-       private Boolean testNoEquals(XNLParam resultVar, XNLParam testVar)
-       {
-
-           bool boolResult = false;
-           object ifVarValue = testVar.value;
-           object resultVarValue = resultVar.value;
-           string typeName1 = XNLParam.getTypeName(resultVar.type);
-           string typeName2 = XNLParam.getTypeName(testVar.type);
-           string TypeFrist1 = typeName1.Substring(0, 1).ToUpper();
-           string TypeFrist2 = typeName2.Substring(0, 1).ToUpper();
-           try
-           {
-               if (TypeFrist1 == "I" || TypeFrist2 == "I")
-               {
-                   if (UtilsCode.IsNumeric(Convert.ToString(resultVarValue)) && UtilsCode.IsNumeric(Convert.ToString(ifVarValue)))
-                   {
-                       if (!ifVarValue.Equals(resultVarValue)) boolResult = true;
-                       return boolResult;
-                   }
-                   else
-                   {
-                       return boolResult;
-                   }
-               }
-               else
-               {
-                   if (!Convert.ToString(ifVarValue).Equals(Convert.ToString(resultVarValue))) boolResult = true;
-                   return boolResult;
-               }
-           }
-           catch
-           {
-               boolResult = false;
-               return boolResult;
-           }
-       }
-      */

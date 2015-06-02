@@ -11,12 +11,14 @@ using System.Security.Permissions;
 using System.Reflection;
 namespace COM.SingNo.XNLEngine
 {
+    /*
     [StrongNameIdentityPermissionAttribute(SecurityAction.LinkDemand, PublicKey =
 "002400000480000094000000060200000024000052534131000400000100010015ce07c41d2a58" +
 "1d81df04d0515fb1e3d5eeff895ef834010f59762599faf8c6866cf5f293002c2e30c43a84dba9" +
 "44171fb1c049a275d53eff78cf79290f3112e8b37de7429a3ed1a8d9af3f678cd70cc51e704f43" +
 "554aaf255d67a56847a3ace7cd5be1f622c50f74128df700319a5a8a6f8663ec625ea319fb78b4" +
 "3eaeb8ba")]
+     */ 
     public class RegxpEngineCommon<T> where T:XNLContext
     {
         internal static string XNLTagRegNames;
@@ -245,6 +247,14 @@ namespace COM.SingNo.XNLEngine
             string regStr = getTagRegStr(nameSpace, tagName, tagObjName);
             return Regex.Matches(contentStr, regStr, XNL_RegexOptions);
         }
+
+
+        internal static Match matchSubTagGroupAllByName(string contentStr, string tagName, string tagObjName)
+        {
+            string regStr = getSubTagRegStr(tagName, tagObjName);
+            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
+        }
+
         internal static string getTagRegStr(string nameSpace, string tagName, string tagObjName)
         {
             string regStr;
@@ -275,11 +285,6 @@ namespace COM.SingNo.XNLEngine
             return regStr;
         }
 
-        internal static Match matchSubTagGroupAllByName(string contentStr, string tagName, string tagObjName)
-        {
-            string regStr = getSubTagRegStr(tagName, tagObjName);
-            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
-        }
 
         internal static MatchCollection matchSubTagsGroupAllByName(string contentStr,  string tagName, string tagObjName)
         {
@@ -458,13 +463,6 @@ namespace COM.SingNo.XNLEngine
                 if (counts == 1 && tmpMatch.Index == 0 && tmpMatch.Length == contentStr.Length)
                 {
                     tagStruct=createTagStruct(tmpMatch);
-                    //tagStruct.allContent = contentStr;
-                    //tagStruct.bodyContent = tmpMatch.Groups[5].Value;
-                    //tagStruct.instanceName = tmpMatch.Groups[3].Value;
-                    //tagStruct.nameSpace = tmpMatch.Groups[1].Value;
-                    //tagStruct.tagName = tmpMatch.Groups[2].Value;
-                    //tagStruct.tagParams = getTagAllParams(tmpMatch.Groups[4].Value, tmpMatch.Groups[5].Value);
-                    //tagStruct.subTagStruct = getSubTagStructs(tmpMatch.Groups[5].Value,)
                 }
                 else
                 {
@@ -523,22 +521,8 @@ namespace COM.SingNo.XNLEngine
                 token = new XNLToken();
                 token.value = match.Value;
                 token.mode = mode;
-               
-                switch(match.Groups[1].Value)
-                {
-                    case "@": //属性
-                        token.Type = XNLTokenType.Attribute;
-                        break;
-                    case "#": 
-                        break;
-                    case "$": //变量
-                        token.Type = XNLTokenType.Variable;
-                        break;
-                    case "%": //表达式
-                        token.Type = XNLTokenType.Express;
-                        break;
-                }
-                if (dotInx==-1)
+
+                if (dotInx == -1)
                 {
                     token.Name = tokenValue;
                     token.Scope = string.Empty;
@@ -546,13 +530,131 @@ namespace COM.SingNo.XNLEngine
                 else
                 {
                     token.Scope = tokenValue.Substring(0, dotInx);
-                    token.Name = tokenValue.Substring(dotInx+1);
+                    token.Name = tokenValue.Substring(dotInx + 1);
                 }
+
+                switch(match.Groups[1].Value)
+                {
+                    case "@": //属性
+                        token.Type = XNLTokenType.Attribute;
+                        break;
+                    case "$": // //表达式  统一概念 无参数 变量表达式  有参数  方法表达式  {$site.url}  {$isemail({$siteurl})}
+
+                        //token.Type = XNLTokenType.Variable;
+                        //token.Type = XNLTokenType.Express;
+
+                        break;
+                }
+                
                 token.Index = match.Index;
                 token.Length = match.Length;
                 tokens.Add(token);
             }
             return tokens;
+        }
+
+
+        //获取表达式描述,  将表达式 转为 标签 形式
+        internal static Dictionary<string, string> GetExpressionArgs(string ExpressionStr)
+        {
+            return null;
+            /*
+            //^([^\.]*)\((.*)?\)$
+            //^(.*)\.([^()]*)$|^(.*)\.(.*)\((.*)\)$
+            //string tmpExpressStr = ExpressionStr.Trim();
+            //tmpExpressStr = XNLCommon.decodeHTMLEscapecharacter(tmpExpressStr);
+            //tmpExpressStr = XNLCommon.decodeXNLEscapecharacter(tmpExpressStr);
+            //尝试其它表达式
+            try
+            {
+                #region 计算表达式
+                Match excMatch = Regex.Match(ExpressionStr, "^([^\\.]*)\\((.*)?\\)$", XNL_RegexOptions);
+                if (excMatch.Success) //内置方法表达式
+                {
+                    string funcStr = excMatch.Groups[1].Value.Trim().ToLower();
+                    string valueStrs = excMatch.Groups[2].Value;
+                    string s = funcStr.Substring(0, 1);
+                    MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
+                    Dictionary<string, string> paramsDirectory = new Dictionary<string, string>();
+                    int matchCount = 0;
+                    foreach (Match match in valueMatchColl)
+                    {
+                        if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
+                        matchCount += 1;
+                        if (match.Groups[1].Value == "'")
+                        {
+                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[2].Value);
+                        }
+                        else if (match.Groups[3].Value == "\"")
+                        {
+                            paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[4].Value);
+                        }
+                        else
+                        {
+                            if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
+                            {
+                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[5].Value);
+                            }
+                            else
+                            {
+                                paramsDirectory.Add(Convert.ToString(matchCount), match.Groups[6].Value);
+                            }
+                        }
+                    }
+                } 
+
+                Match excXnlMatch = Regex.Match(ExpressionStr, "^(.*)\\.([^()]*)$|^(.*)\\.(.*)\\((.*)\\)$", XNL_RegexOptions);
+                    if (excXnlMatch.Success)
+                    {
+                        if (excXnlMatch.Groups[1].Value.Trim() != "") //xnl.label
+                        {
+                            string libNameStr = excXnlMatch.Groups[1].Value;
+                            string labelNameStr = excXnlMatch.Groups[2].Value;
+                            string returnStr = ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + "></" + libNameStr + ":" + labelNameStr + ">", XNLPage);
+                            return returnStr;
+                        }
+                        else  //xnl.labelname('hjgj','jh')
+                        {
+                            string libNameStr = excXnlMatch.Groups[3].Value;
+                            string labelNameStr = excXnlMatch.Groups[4].Value;
+                            string valueStrs = excXnlMatch.Groups[5].Value;
+                            MatchCollection valueMatchColl = Regex.Matches(valueStrs, "(\')([^\']*)?\'|(\")([^\"]*)?\"|(true|false)|([+-]?\\d*[.]?\\d*)", XNL_RegexOptions);
+                            int matchCount = 0;
+                            string paramStr = "<attrs>";
+                            foreach (Match match in valueMatchColl)
+                            {
+                                if (match.Groups[0].Value.Trim().Equals(string.Empty)) continue;
+                                matchCount += 1;
+                                if (match.Groups[1].Value == "'")
+                                {
+                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[2].Value) + "</attr>";
+                                }
+                                else if (match.Groups[3].Value == "\"")
+                                {
+                                    paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[4].Value) + "</attr>";
+                                }
+                                else
+                                {
+                                    if (match.Groups[5].Value.Trim().ToLower() == "true" || match.Groups[5].Value.Trim().ToLower() == "false")
+                                    {
+                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[5].Value) + "</attr>";
+                                    }
+                                    else
+                                    {
+                                        paramStr += "<attr name=\"param" + Convert.ToString(matchCount) + "\" >" + UtilsCode.encodeHtmlAndXnl(match.Groups[6].Value) + "</attr>";
+                                    }
+                                }
+                            }
+                            paramStr += "</attrs>";
+                            string returnStr = ParserEngine<T>.parse("<" + libNameStr + ":" + labelNameStr + ">" + paramStr + "</" + libNameStr + ":" + labelNameStr + ">", XNLPage);
+                            return returnStr;
+                        }
+            }
+            catch
+            {
+                
+            }
+             */ 
         }
     }
 }
@@ -579,915 +681,8 @@ namespace COM.SingNo.XNLEngine
 //    }
 //    return null;
 //}
-/*
-internal static XNLTagStruct getSubTagStruct(string contentStr, T xnlContext, string tagName, string tagObjName)
-{
-    return createSubTagStruct(matchSubTagGroupAllByName(contentStr,  tagName, tagObjName), xnlContext);
-}
-*/
-
-/*
-/// <summary>
-        /// 根据属性名替换内容相应属性值
-        /// </summary>
-        /// <param name="contentStr"></param>
-        /// <param name="attribNameStr"></param>
-        /// <param name="varValueStr"></param>
-        /// <returns></returns>
-        internal static string replaceAttribleVariableByName(string contentStr, string attribNameStr, string varValueStr, string tagInstanceName)
-        {
-            Regex regex = new Regex("{@(@*)" + attribNameStr + "}", XNL_RegexOptions);
-            MatchCollection matchColls = regex.Matches(contentStr);
-            if(matchColls.Count>0)
-            {
-                Dictionary<int, List<string>> match1Colls = new Dictionary<int, List<string>>();
-                List<string> match2Colls = new List<string>(); //可以替换的
-                foreach (Match match in matchColls)
-                {
-                    string allMatch = match.Groups[0].Value;
-                    string attribStr = match.Groups[1].Value;
-                    if (attribStr.Length > 0 && attribStr.Substring(0, 1) == "@")
-                    {
-                        int len = attribStr.Length;
-                        List<string> attrList;
-                        if (match1Colls.TryGetValue(len, out attrList))
-                        {
-                            if (!attrList.Contains(allMatch)) attrList.Add(allMatch);
-                        }
-                        else //添加
-                        {
-                            attrList = new List<string>();
-                            attrList.Add(allMatch);
-                            match1Colls.Add(len, attrList);
-                        }
-                        //contentStr = contentStr.Replace(match.Groups[0].Value, "{" + attribStr + attribNameStr + "}");
-                    }
-                    else  //可以替换
-                    {
-                        if (!match2Colls.Contains(allMatch))
-                        {
-                            contentStr = contentStr.Replace(allMatch, varValueStr);
-                            match2Colls.Add(allMatch);
-                        }
-                    }
-                }
-                //替换其它层变量
-                for (int i = 1; i <= match1Colls.Count; i++)
-                {
-                    foreach (string str in match1Colls[i])
-                    {
-                        contentStr = contentStr.Replace(str, "{" + str.Substring(2));
-                    }
-                }
-            }
-            return contentStr;
-        }
- * 
- * 
- * 
- *  /// <summary>
-        /// 替换内容中的XNL标签属性变量 @
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceAttribleVariable(XNLParams attParams, string contentStr,string tagInstanceName)
-        {
-            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLAttriableVariable);
-            if (matchColls.Count > 0)
-            {
-                Dictionary<int, List<string>> match1Colls = new Dictionary<int, List<string>>();
-                List<string> match2Colls = new List<string>(); //可以替换的
-                foreach (Match match in matchColls)
-                {
-                    string trueAttr=match.Groups[1].Value;
-                    string attribStr = trueAttr.ToLower();
-                    if (attribStr.Substring(0, 1) == "@")
-                    {
-                        string trueAttrStr = trueAttr.Replace("@", "");
-                        string lowTrueAttr = trueAttrStr.ToLower();
-                        int len = attribStr.Length - trueAttrStr.Length;
-                        List<string> attrList;
-                        string _attrStr = trueAttr.Substring(1);
-                        if (match1Colls.TryGetValue(len, out attrList))
-                        {
-                            if (attParams.ContainsKey(lowTrueAttr) && !attrList.Contains(_attrStr)) attrList.Add(_attrStr);
-                        }
-                        else //添加
-                        {
-                            attrList = new List<string>();
-                            attrList.Add(_attrStr);
-                            match1Colls.Add(len, attrList);
-                        }
-                        //if (attParams.ContainsKey(attribStr.Replace("@", ""))) contentStr = contentStr.Replace(match.Groups[0].Value, "{" + attribStr + "}");
-                    }
-                    else  //可以替换
-                    {
-                        XNLParam param;
-                        if (!match2Colls.Contains(trueAttr) && attParams.TryGetValue(attribStr, out param))
-                        {
-                            contentStr = contentStr.Replace(match.Groups[0].Value, Convert.ToString(param.value));
-                            match2Colls.Add(trueAttr);
-                        }
-                    }
-
-                }
-                //替换其它层变量
-                for (int i = 1; i <= match1Colls.Count; i++)
-                {
-                    foreach (string str in match1Colls[i])
-                    {
-                        contentStr = contentStr.Replace("{@" + str + "}", "{" + str + "}");
-                    }
-                }
-            }
-            return contentStr;
-        }
- * 
- * 
- * //MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLReqFormVariable);
-            //if (matchColls.Count>0)
-            //{
-            //    List<string> list = new List<string>();
-            //    foreach (Match match in matchColls)
-            //    {
-            //        string attribStr = match.Groups[1].Value;
-            //        if (list.Contains(attribStr))
-            //        {
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            list.Add(attribStr);
-            //        }
-            //        if (HttpContext.Current == null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //            return contentStr;
-            //        }
-            //        string reqStr = HttpContext.Current.Request.Form[attribStr];
-            //        if (reqStr != null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, UtilsCode.encodeHtmlAndXnl(reqStr));
-            //        }
-            //        else
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //        }
-            //    }
-            //}
-            
-            //return contentStr;
- * 
- * 
- *  //MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLReqQueryVariable);
-            //if (matchColls.Count>0)
-            //{
-            //    List<string> list = new List<string>();
-            //    foreach (Match match in matchColls)
-            //    {
-            //        string attribStr = match.Groups[1].Value;
-            //        if (list.Contains(attribStr))
-            //        {
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            list.Add(attribStr);
-            //        }
-            //        if (HttpContext.Current == null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //            return contentStr;
-            //        }
-            //        string reqStr = HttpContext.Current.Request.QueryString[attribStr];
-            //        if (reqStr != null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, UtilsCode.encodeHtmlAndXnl(reqStr));
-            //        }
-            //        else
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //        }
-            //    }
-            //}
-            //return contentStr;
- * 
- * 
- *    //MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLReqVariable);
-            //if (matchColls.Count > 0)
-            //{
-            //    List<string> list = new List<string>();
-            //    foreach (Match match in matchColls)
-            //    {
-            //        string attribStr = match.Groups[1].Value;
-            //        if (list.Contains(attribStr))
-            //        {
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            list.Add(attribStr);
-            //        }
-            //        if (HttpContext.Current == null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //            return contentStr;
-            //        }
-            //        string reqStr = HttpContext.Current.Request[attribStr];
-            //        if (reqStr != null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, UtilsCode.encodeHtmlAndXnl(reqStr));
-            //        }
-            //        else
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //        }
-            //    }
-            //}
-            //return contentStr;
- * 
- * 
- * //MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLSessionVariable);
-            //if (matchColls.Count > 0)
-            //{
-            //    List<string> list = new List<string>();
-            //    foreach (Match match in matchColls)
-            //    {
-            //        string attribStr = match.Groups[1].Value;
-            //        if (list.Contains(attribStr))
-            //        {
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            list.Add(attribStr);
-            //        }
-            //        if (HttpContext.Current == null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //            return contentStr;
-            //        }
-            //        string reqStr = HttpContext.Current.Session[attribStr].ToString();
-            //        if (reqStr != null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, reqStr);
-            //        }
-            //        else
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //        }
-            //    }
-            //}
-            //return contentStr;
- * 
- * 
- * 
- * //MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLApplicationVariable);
-            //if (matchColls.Count>0)
-            //{
-            //    List<string> list = new List<string>();
-            //    foreach (Match match in matchColls)
-            //    {
-            //        string attribStr = match.Groups[1].Value;
-            //        if (list.Contains(attribStr))
-            //        {
-            //            continue;
-            //        }
-            //        else
-            //        {
-            //            list.Add(attribStr);
-            //        }
-            //        if (HttpContext.Current == null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //            return contentStr;
-            //        }
-            //        string reqStr = HttpContext.Current.Application[attribStr].ToString();
-            //        if (reqStr != null)
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, reqStr);
-            //        }
-            //        else
-            //        {
-            //            contentStr = contentStr.Replace(match.Groups[0].Value, "");
-            //        }
-            //    }
-            //}
-            //return contentStr;
- * 
- * 
- * //return RegexObj_XNLAllPublicCariable.Replace(contentStr, allPublicVariableEvaluator);
-            /*
-            MatchCollection matchColls = RegexObj_XNLAllPublicCariable.Matches(contentStr);
-            if (matchColls.Count > 0)
-            {
-                List<string> list = new List<string>();
-                foreach (Match match in matchColls)
-                {
-                    if (list.Contains(match.Value))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        list.Add(match.Value);
-                    }
-                    if (HttpContext.Current == null)
-                    {
-                        contentStr = contentStr.Replace(match.Groups[0].Value, "");
-                        continue;
-                        //return contentStr;
-                    }
-                    string attribStr = match.Groups[2].Value;
-                    string attribType = match.Groups[1].Value;
-                    string reqStr=null;
-                    switch (attribType)
-                    {
-                        case "#":
-                            reqStr = HttpContext.Current.Session[attribStr].ToString();
-                            break;
-                        case "%":
-                            reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
-                            break;
-                        case "?":
-                            reqStr = HttpContext.Current.Request[attribStr].ToString();
-                            break;
-                        case "^":
-                            reqStr = HttpContext.Current.Application[attribStr].ToString();
-                            break;
-                        case "&":
-                            reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
-                            break;
-                    }
-                    if (reqStr != null)
-                    {
-                        contentStr = contentStr.Replace(match.Groups[0].Value, reqStr);
-                    }
-                    else
-                    {
-                        contentStr = contentStr.Replace(match.Groups[0].Value, "");
-                    }
-                }
-            }
-            return contentStr;
-             */ 
-
-/*
-
-/// <summary>
-        /// 替换内容中的上下文全局属性变量 !
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceGlobalAttribleVariable(string contentStr, T xnlContext)
-        {
-            //{!([^\s>]*[\s]*[^\s>]*)}  //匹配属性变量标签
-            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLGlobalVariable);//, XNL_RegexOptions // RegexObj_XNLGlobalVariable.Matches(contentStr);// Regex.Matches(contentStr, RegexStr_XNLGlobalVariable); 
-            if(matchColls.Count>0)
-            {
-                StringBuilder sb = new StringBuilder();
-                int curInx = 0;
-                foreach (Match match in matchColls)
-                {
-                    if (match.Index > curInx)
-                    {
-                        sb.Append(contentStr.Substring(curInx, match.Index));
-                    }
-                    else
-                    {
-                        if (xnlContext.globalAttriableColls != null)
-                        {
-                            string attribStr = match.Groups[1].Value.Trim().ToLower();
-                            string param = null;// XNLContext.getGlobalAttriable(xnlContext, attribStr);
-                            if (string.IsNullOrEmpty(param)==false)
-                            {
-                                sb.Append(param);
-                            }
-                        }
-                    }
-                    curInx = match.Index + match.Length;
-                }
-                if (curInx < contentStr.Length)
-                {
-                    sb.Append(contentStr.Substring(curInx,contentStr.Length));
-                }
-                return sb.ToString();
-            }
-            return contentStr;
-        }
-*/
-
-/*
-       private static string runTagWithErrorHandle(IXNLTag<T> xnlTagObj, XNLTagStruct tagStruct, T xnlContext, XNLOnErrorAction onErrorAction)
-       {
-           try
-           {
-               string s = "";
-               xnlTagObj.onInit(null, xnlContext);
-               if (xnlTagObj.isTagEnd==false)
-               {
-                   for (int i = 0; i < tagStruct.subTagStruct.Count; i++)
-                   {
-                       XNLTagStruct subTag=tagStruct.subTagStruct[i];
-                       if (string.IsNullOrEmpty(subTag.tagName))
-                       {
-                           s += subTag.allContent;
-                       }
-                       else
-                       {
-                       }
-                   }
-               }
-               //return xnlTagObj.main(tagStruct, xnlContext);
-           }
-           catch (System.Exception ex)
-           {
-               switch (onErrorAction)
-               {
-                   case XNLOnErrorAction.ThrowError:
-                       throw (ex);
-                   case XNLOnErrorAction.OutEmpty:
-                       return string.Empty;
-                   case XNLOnErrorAction.OutMsg:
-                       return tagStruct.nameSpace + ":" + tagStruct.tagName + " " + ex.Message;
-               }
-           }
-           return string.Empty;
-       }
-       /// <summary>
-       ///  解析模板内容
-       /// </summary>
-       /// <param name="templeteStr">模板内容</param>
-       /// <returns>页面html内容</returns>
-       internal static string parse(string templateStr, T xnlContext, bool isDecodeXNLEscape, bool isDebug) // IBasePage XNLPage
-       {
-           //标签是否闭合
-           //    //嵌套标签中是否有未命名同名标签
-           //    //标签调用是否出错
-           //    //是否声明标签实例
-           if (string.IsNullOrEmpty(templateStr)) return string.Empty;
-           string s = RegxpEngineCommon<T>.removeXNLNotes(templateStr);
-           s = RegxpEngineCommon<T>.replaceAllPublicVariable(s, xnlContext);
-
-           string namespaceName;// = MatchObj.match.Groups[1].Value.ToLower(); //标签命名空间名
-           string tagName;// = MatchObj.match.Groups[2].Value.ToLower();  //标签名
-           int index = 0;
-           int nextIndex = 0;
-           int delayTagInx = 0;
-           string tagGroup0Str;// = MatchObj.match.Groups[0].Value;  //所有标签内容
-           string tagGroup5Str;
-           string genStr;
-           XNLTagStruct tagStruct;
-           IXNLTag<T> tagObj = null;
-           int parseStep = 0; //解析步骤 ==2表示是解析延迟标签阶段
-           //IXNLTagObj<T> ifnew = new If<T>();
-           //return ifnew.ToString();
-           #region 调试解析
-         PARSELOOP:
-           for (var j = 0; j < 1000000; j++)
-           {
-               if (nextIndex > index) index = nextIndex;
-               Match tmpMatch = null;
-               if (isDebug)
-               {
-                   tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagPart1Group3.Match(s, index);
-               }
-               else
-               {
-                   tmpMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
-               }
-               if (!tmpMatch.Success)
-               {
-                   if (parseStep == 0 && index == 0)
-                   {
-                       goto PARSEEND;
-                   }
-                   else
-                   {
-                       break;
-                   }
-               }
-               else
-               {
-                   namespaceName = tmpMatch.Groups[1].Value.ToLower();
-                   tagName = tmpMatch.Groups[2].Value.ToLower();
-                   string tagFullName = namespaceName + ":" + tagName;
-                   nextIndex = tmpMatch.Index;
-                   if (nextIndex > index) index = nextIndex;
-                   Match allGroupMatch;
-                   if (isDebug)
-                   {
-                       allGroupMatch = RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll.Match(s, index);
-                       if (!allGroupMatch.Success)
-                       {
-                           throw (new Exception(tagFullName + "标签没有闭合"));
-                       }
-                   }
-                   else
-                   {
-                       allGroupMatch = tmpMatch;
-                   }
-                    
-                   tagGroup0Str = allGroupMatch.Groups[0].Value;
-                   tagGroup5Str = allGroupMatch.Groups[5].Value;
-                   if (tagFullName == "xnl.mytag")
-                   {
-                       string userTagStr;
-                       userTagStr = XNLContext.getCustomTag(xnlContext, tagName);
-                       if (userTagStr == null)
-                       {
-                           //加载此标签内容
-                           userTagStr = XNLBaseCommon.loadUserTagByName(tagName, xnlContext.workDirPath + XNLConfig.userTagSavePath + tagName + XNLConfig.userTagExtName);
-                           XNLContext.setCustomTag(xnlContext, tagName, userTagStr);
-                       }
-                       s = s.Replace(tagGroup0Str, userTagStr);
-                       continue;
-                   }
-                   else
-                   {
-                       if (parseStep == 0 && XNLLib<T>.checkTagIsDelayRun(tagFullName))
-                       {
-                           if (delayTagInx == 0) delayTagInx = index;
-                           nextIndex = index + tmpMatch.Length;
-                           continue;
-                       }
-                       else
-                       {
-                           try
-                           {
-                               tagObj = XNLLib<T>.getTagInstance(namespaceName, tagName);
-                           }
-                           catch //(ReflectionTypeLoadException e)
-                           {
-                               throw (new Exception("未找到标签" + tagFullName + "的实现"));
-                           }
-                           tagStruct = RegxpEngineCommon<T>.createTagStruct(allGroupMatch,tagObj,xnlContext);
-                                                 
-                           genStr = runTagWithErrorHandle(tagObj, tagStruct, xnlContext, XNLOnErrorAction.ThrowError);// tagObj.main(tagStruct.content, tagStruct.tagParams, xnlContext);
-                           s = s.Replace(tagGroup0Str, genStr);
-                       }
-                   }
-               }
-           }
-           #endregion
-           if (parseStep == 0)
-           {
-               index = delayTagInx;
-               nextIndex = delayTagInx;
-               parseStep += 1;
-               goto PARSELOOP;
-           }
-           else
-           {
-               goto PARSEEND;
-           }
-       PARSEEND:
-           s = RegxpEngineCommon<T>.replaceGlobalAttribleVariable(s, xnlContext);
-           s = RegxpEngineCommon<T>.replaceXNLExpressionVariable(s, xnlContext);
-           if (isDecodeXNLEscape) s = XNLBaseCommon.decodeXNL(s);
-           return s;
-       }
-       */
-
-/*
-      /// <summary>
-      /// 替换XNL表达式
-      /// </summary>
-      /// <param name="labelStr"></param>
-      /// <returns>表达式计算结果</returns>
-      internal static string replaceXNLExpressionVariable(string labelStr, T XNLPage)
-      {
-          return "";
-          
-          MatchCollection expressMatchs = Regex.Matches(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Matches(labelStr);// getMatchCollsByRegex(labelStr, RegexStr_XNLExpressionVariable);
-          if (expressMatchs.Count>0)
-          {
-              List<string> list = new List<string>();
-              foreach (Match i in expressMatchs)
-              {
-                   
-                  if (list.Contains(i.Value))
-                  {
-                      continue;
-                  }
-                  else
-                  {
-                      list.Add(i.Value);
-                  }
-                  string matchStr = i.Groups[1].Value;
-                  string[] extExpTag =XNLLib<T>.getExtExpTagInfo(matchStr);
-                  if (extExpTag != null)
-                  {
-                      XNLTagStruct tagStruct=new XNLTagStruct();
-                      tagStruct.bodyContent=matchStr;
-                      labelStr = labelStr.Replace(i.Value, XNLLib<T>.getTagInstance(extExpTag[0], extExpTag[1]).main(tagStruct, XNLPage));
-                  }
-                  else
-                  {
-                      string  expStr = EvalExpression(matchStr, XNLPage);
-                      //labelStr = labelStr.Replace(i.Groups[0].Value, XNLBaseCommon.decodeXNL(expStr));
-                      labelStr = labelStr.Replace(i.Groups[0].Value, expStr);
-                  }
-              }
-              Match expressMatch = Regex.Match(labelStr, RegexStr_XNLExpressionVariable, XNL_RegexOptions);// RegexObj_XNLExpressionVariable.Match(labelStr);
-              if (expressMatch.Success)
-              {
-                  labelStr = replaceXNLExpressionVariable(labelStr, XNLPage);
-              }
-              else
-              {
-                  return labelStr;
-              }
-          }
-          return labelStr;
-            
-      }
-*/
-
-/*
-
-        internal static string RequestFormVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestFormVariableEvaluator = new MatchEvaluator(RequestFormVariableEvaluator);
-        /// <summary>
-        /// 替换request.form变量 %
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceReqFormVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqFormVariable, RequestFormVariableEvaluator); //, XNL_RegexOptions
-        }
 
 
-        internal static string RequestQueryVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestQueryVariableEvaluator = new MatchEvaluator(RequestQueryVariableEvaluator);
-        /// <summary>
-        /// 替换request.queryString变量  &
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceReqQueryVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqQueryVariable, requestQueryVariableEvaluator, XNL_RegexOptions);
-        }
-
-
-        internal static string RequestVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Request[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator requestVariableEvaluator = new MatchEvaluator(RequestVariableEvaluator);
-        /// 替换request.queryString变量  &
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceRequestVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLReqVariable, requestVariableEvaluator); //, XNL_RegexOptions
-        }
-
-        internal static string SessionVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Session[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator sessionVariableEvaluator = new MatchEvaluator(SessionVariableEvaluator);
-        /// <summary>
-        /// 替换session变量  #
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceSessionVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLSessionVariable, sessionVariableEvaluator); //, XNL_RegexOptions
-        }
-
-        internal static string ApplicationVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[1].Value;
-            string reqStr = HttpContext.Current.Application[attribStr].ToString();
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator applicationVariableEvaluator = new MatchEvaluator(ApplicationVariableEvaluator);
-        /// <summary>
-        /// 替换application变量 ^
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceApplicationVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLApplicationVariable, applicationVariableEvaluator);  //, XNL_RegexOptions
-        }
-
-        internal static string AllPublicVariableEvaluator(Match match)
-        {
-            if (HttpContext.Current == null)
-            {
-                return "";
-            }
-            string attribStr = match.Groups[2].Value;
-            string attribType = match.Groups[1].Value;
-            string reqStr = null;
-            switch (attribType)
-            {
-                case "#":
-                    reqStr = HttpContext.Current.Session[attribStr].ToString();
-                    break;
-                case "%":
-                    reqStr = HttpContext.Current.Request.Form[attribStr].ToString();
-                    break;
-                case "?":
-                    reqStr = HttpContext.Current.Request[attribStr].ToString();
-                    break;
-                case "^":
-                    reqStr = HttpContext.Current.Application[attribStr].ToString();
-                    break;
-                case "&":
-                    reqStr = HttpContext.Current.Request.QueryString[attribStr].ToString();
-                    break;
-            }
-            if (reqStr != null)
-            {
-                return UtilsCode.encodeHtmlAndXnl(reqStr);
-            }
-            else
-            {
-                return "";
-            }
-        }
-        internal static MatchEvaluator allPublicVariableEvaluator = new MatchEvaluator(AllPublicVariableEvaluator);
-
-        internal static string replaceAllPublicVariable(string contentStr, T xnlContext)
-        {
-            return Regex.Replace(contentStr, RegexStr_XNLAllPublicCariable, allPublicVariableEvaluator);  //, XNL_RegexOptions
-        }
-
-        /// 替换内容中的XNL标签属性变量 @
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceAttribleVariable(IXNLTag<T> tagObj, string contentStr)
-        {
-            MatchCollection matchColls;
-            if (string.IsNullOrEmpty(tagObj.instanceName)) //|| tagObj.instanceName.StartsWith("_instance#")
-            {
-                matchColls = Regex.Matches(contentStr, RegexStr_XNLAttriableVariable);
-            }
-            else
-            {
-                matchColls = Regex.Matches(contentStr, RegexTemplate_XNLAttriableVariable.Replace("NAME", tagObj.instanceName));
-            }
-            if (matchColls!=null&&matchColls.Count > 0)
-            {
-                int curIndex = 0;
-                StringBuilder sb = new StringBuilder();
-
-                foreach (Match match in matchColls)
-                {
-                    if (match.Index > curIndex)
-                    {
-                        sb.Append(contentStr.Substring(curIndex, match.Index - curIndex));
-                    }
-
-                    string attrName = match.Groups[1].Value.ToLower();
-
-                    if (tagObj.ExistAttribute(attrName))
-                    {
-                        sb.Append(tagObj.GetAttribute(attrName).ToString());
-                    }
-                    else if (string.Compare(match.Groups[2].Value, tagObj.instanceName,true) != 0)
-                    {
-                        sb.Append(match.Value);
-                    }
-                    curIndex = match.Index + match.Length;
-                }
-                if (curIndex < contentStr.Length)
-                {
-                    sb.Append(contentStr.Substring(curIndex,contentStr.Length));
-                }
-                return sb.ToString();
-            }
-            return contentStr;
-        }
-
-        /// <summary>
-        /// 替换数据库变量 $
-        /// </summary>
-        /// <returns></returns>
-        internal static string replaceDataBaseVariable(DataRow dataRow, string contentStr, T xnlContext, string tagInstanceName)
-        {
-            MatchCollection matchColls = Regex.Matches(contentStr, RegexStr_XNLDataBaseVariable);
-            if (matchColls.Count>0)
-            {
-                Dictionary<int, List<string>> match1Colls = new Dictionary<int, List<string>>();
-                List<string> match2Colls = new List<string>(); //可以替换的
-                foreach (Match match in matchColls)
-                {
-                    string attribStr = match.Groups[1].Value;
-                    if (attribStr.Substring(0, 1) == "$")
-                    {
-                        string trueAttrStr = attribStr.Replace("$", "");
-                        List <string> attrList;
-                        int len = attribStr.Length-trueAttrStr.Length;
-                        if (match1Colls.TryGetValue(len, out attrList))
-                        {
-                            if(dataRow.Table.Columns.Contains(trueAttrStr)&&!attrList.Contains(attribStr))attrList.Add(attribStr);
-                        }
-                        else //添加
-                        {
-                            attrList=new List<string>();
-                            attrList.Add(attribStr);
-                            match1Colls.Add(len, attrList);
-                        }
-                    }
-                    else  //可以替换
-                    {
-                        try
-                        {
-                            if (!match2Colls.Contains(attribStr) && dataRow.Table.Columns.Contains(attribStr))
-                            {
-                                contentStr = contentStr.Replace(match.Groups[0].Value, dataRow[attribStr].ToString());
-                                match2Colls.Add(attribStr);
-                            }
-                        }
-                        catch //(Exception e)
-                        {
-
-                        }
-                    }
-                }
-                //替换其它层变量
-                for (int i = 1; i <=match1Colls.Count;i++ )
-                {
-                    foreach (string str in match1Colls[i])
-                    {
-                        contentStr = contentStr.Replace("{$" + str + "}", "{"+str+"}"); 
-                    }
-                }
-            }
-            return contentStr;
-        }
-*/
 
 /*
  internal static string DataTableCompute(string ExpressionStr)

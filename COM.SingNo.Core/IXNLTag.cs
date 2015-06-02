@@ -7,7 +7,7 @@ namespace COM.SingNo.XNLCore
     public delegate void OnTagDelegate();
     public interface IXNLTag<T> where T:XNLContext //XNL标签接口
     {
-        ParseMode parseMode { get; set; }
+        //ParseMode parseMode { get; set; }
         string subTagNames { get; }
         /// 标签实例名
         /// </summary>
@@ -17,7 +17,6 @@ namespace COM.SingNo.XNLCore
         string curTag { get; set; }
 
         T xnlContext { get; set; }
-        //T xnlContext, string instanceName
         void OnInit();
 
         void OnStart(); //, string body

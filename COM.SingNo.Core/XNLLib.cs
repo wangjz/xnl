@@ -11,14 +11,15 @@ namespace COM.SingNo.XNLCore
         private static Assembly libAssembly;
         public string nameSpace { get; private set; }
         public bool isCache { get; private set; }
-        public string[] delayRunTags { get; private set; }
+        //public string[] delayRunTags { get; private set; }
         public Dictionary<string, string> extExpTags { get; private set; }
         private XNLCache<T> tagCache;
-        public XNLLib(string _nameSpace, bool _isCache, string[] _delayRunTags, Dictionary<string, string> _extExpTags)
+        //public XNLLib(string _nameSpace, bool _isCache, string[] _delayRunTags, Dictionary<string, string> _extExpTags)
+        public XNLLib(string _nameSpace, bool _isCache, Dictionary<string, string> _extExpTags)
         {
             nameSpace = _nameSpace;
             isCache = _isCache;
-            delayRunTags = _delayRunTags;
+            //delayRunTags = _delayRunTags;
             extExpTags = _extExpTags;
             if (_isCache)
             {
@@ -64,10 +65,11 @@ namespace COM.SingNo.XNLCore
             return obj;
         }
        
-        private static List<string> delayRunTagList = new List<string>();
+        //private static List<string> delayRunTagList = new List<string>();
         private static string tagNameSpacesStr = "";
         private static Dictionary<string, XNLLib<T>> tagLibColls = new Dictionary<string, XNLLib<T>>();
         private static Dictionary<string, string[]> extExpColls = new Dictionary<string, string[]>();  //
+        /*
         private static void addDelayRunTag(string tagFullName)
         {
             tagFullName = tagFullName.Trim().ToLower();
@@ -83,6 +85,7 @@ namespace COM.SingNo.XNLCore
         {
             return delayRunTagList.Contains(tagFullName);
         }
+         */ 
         private static void updateTagNameSpacesStr()
         {
             string str = "";
@@ -116,13 +119,13 @@ namespace COM.SingNo.XNLCore
             {
                 tagLibColls.Add(tagNameSpace, tagLib);
             }
-            if (tagLib.delayRunTags != null && tagLib.delayRunTags.Length > 0)
-            {
-                for(int i=0;i<tagLib.delayRunTags.Length;i++)
-                {
-                    addDelayRunTag(tagLib.nameSpace + ":" + tagLib.delayRunTags[i]);
-                } 
-            }
+            //if (tagLib.delayRunTags != null && tagLib.delayRunTags.Length > 0)
+            //{
+            //    for(int i=0;i<tagLib.delayRunTags.Length;i++)
+            //    {
+            //        addDelayRunTag(tagLib.nameSpace + ":" + tagLib.delayRunTags[i]);
+            //    } 
+            //}
             if (tagLib.extExpTags != null)
             {
                 foreach (KeyValuePair<string, string> kv in tagLib.extExpTags)
@@ -142,13 +145,13 @@ namespace COM.SingNo.XNLCore
             if (tagLibColls.ContainsKey(tagNameSpace))
             {
                 XNLLib<T> tagLib = tagLibColls[tagNameSpace];
-                if (tagLib.delayRunTags != null && tagLib.delayRunTags.Length > 0)
-                {
-                    for (int i = 0; i < tagLib.delayRunTags.Length; i++)
-                    {
-                        removeDelayRunTag(tagLib.nameSpace + ":" + tagLib.delayRunTags[i]);
-                    }
-                }
+                //if (tagLib.delayRunTags != null && tagLib.delayRunTags.Length > 0)
+                //{
+                //    for (int i = 0; i < tagLib.delayRunTags.Length; i++)
+                //    {
+                //        removeDelayRunTag(tagLib.nameSpace + ":" + tagLib.delayRunTags[i]);
+                //    }
+                //}
                 if (tagLib.extExpTags != null)
                 {
                     foreach (KeyValuePair<string, string> kv in tagLib.extExpTags)
@@ -241,5 +244,8 @@ namespace COM.SingNo.XNLCore
             }
             return null;
         }
+
+        //重载标签  原标签全名  子类标签全名
+        //SetOverride
     }
 }

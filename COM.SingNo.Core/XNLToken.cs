@@ -9,6 +9,7 @@ namespace COM.SingNo.XNLCore
         Attribute = 0, //属性 @
         Variable, //= 1变量 $
         Express //= 2,  //表达式
+        //tag
     }
     public class XNLToken
     {
@@ -16,7 +17,7 @@ namespace COM.SingNo.XNLCore
         //名称
         public string Name { get; set; }
 
-        //域名称
+        //域名称  标签所在实例名称  或 标签名称
         public string Scope { get; set; }
         //在内容中的位置
         public int Index { get; set; }
