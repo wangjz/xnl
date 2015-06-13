@@ -11,18 +11,18 @@ namespace COM.SingNo.XNLEngine
         {
             internal static RegexParser<T> instance = new RegexParser<T>();
         }
-        public static RegexParser<T> getInstance()
+        public static RegexParser<T> GetInstance()
         {
             return Nested.instance;
         }
 
         public XNLTagStruct GetTagStruct(string contentStr)
         {
-            return RegxpEngineCommon<T>.getTagStruct(contentStr);
+            return RegxpEngineCommon<T>.GetTagStruct(contentStr);
         }
         public string RemoveXNLNotes(string contentStr)
         {
-            return RegxpEngineCommon<T>.removeXNLNotes(contentStr);
+            return RegxpEngineCommon<T>.RemoveXNLNotes(contentStr);
         }
 
         public List<XNLToken> GetTagTokens(string contentStr)

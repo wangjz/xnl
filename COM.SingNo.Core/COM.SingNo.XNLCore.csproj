@@ -12,7 +12,7 @@
     <AssemblyName>COM.SingNo.XNLCore</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>singno.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -48,10 +48,11 @@
     <Compile Include="Exceptions\ResponseEndException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IXNLParser.cs" />
-    <Compile Include="Labels\BaseTag.cs" />
-    <Compile Include="Labels\For.cs" />
-    <Compile Include="Labels\If.cs" />
-    <Compile Include="Labels\Set.cs" />
+    <Compile Include="Tags\BaseTag.cs" />
+    <Compile Include="Tags\Expression.cs" />
+    <Compile Include="Tags\For.cs" />
+    <Compile Include="Tags\If.cs" />
+    <Compile Include="Tags\Set.cs" />
     <Compile Include="ParserEngine.cs" />
     <Compile Include="XNLAttribute.cs" />
     <Compile Include="XNLCache.cs" />

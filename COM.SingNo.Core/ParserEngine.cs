@@ -4,13 +4,14 @@ using System.Text;
 using System.Data;
 using System.Web;
 using COM.SingNo.XNLCore.Exceptions;
+using System.Collections;
 namespace COM.SingNo.XNLCore
 {
     public class ParserEngine<T> where T:XNLContext
     {
         public static IXNLParser<T> xnlParser { get; set; }
 
-        public static string parse(string templateStr, T xnlContext,ParseMode parseMode = ParseMode.Static)
+        public static string Parse(string templateStr, T xnlContext,ParseMode parseMode = ParseMode.Static)
         {
             if (xnlParser == null)
             {
@@ -23,12 +24,12 @@ namespace COM.SingNo.XNLCore
 
             if (templateStr == null)
             {
-                object nestedTag = XNLContext.getItem(xnlContext, "$__nestedTag");
+                object nestedTag = XNLContext.GetItem(xnlContext, "$__nestedTag");
                 if (nestedTag != null)
                 {
                     isNested = true;
                     tagStruct = (XNLTagStruct)nestedTag;
-                    XNLContext.setItem(xnlContext, "$__nestedTag",null); //清除
+                    XNLContext.SetItem(xnlContext, "$__nestedTag",null); //清除
                 }
                 else
                 {
@@ -65,23 +66,23 @@ namespace COM.SingNo.XNLCore
                 int index = 0;
                 if (isNested)
                 {
-                    parseMode = (ParseMode)XNLContext.getItem(xnlContext, "$__parseMode");
-                    tagsObj = (Dictionary<string, IXNLTag<T>>)XNLContext.getItem(xnlContext, "$__tags");
-                    nameTags = (Dictionary<string, IXNLTag<T>>)XNLContext.getItem(xnlContext, "$__nameTags");
-                    tagId = (int)XNLContext.getItem(xnlContext, "$__tagid");
+                    //parseMode = (ParseMode)XNLContext.GetItem(xnlContext, "$__parseMode");
+                    tagsObj = (Dictionary<string, IXNLTag<T>>)XNLContext.GetItem(xnlContext, "$__tags");
+                    nameTags = (Dictionary<string, IXNLTag<T>>)XNLContext.GetItem(xnlContext, "$__nameTags");
+                    tagId = (int)XNLContext.GetItem(xnlContext, "$__tagid");
                     index = strBuilder.Length;
                 }
                 else
                 {
-                    XNLContext.setItem(xnlContext, "$__parseMode", parseMode);
+                    //XNLContext.SetItem(xnlContext, "$__parseMode", parseMode);
 
                     tagsObj = new Dictionary<string, IXNLTag<T>>();
 
                     nameTags = new Dictionary<string, IXNLTag<T>>();
 
-                    XNLContext.setItem(xnlContext, "$__tags", tagsObj);
+                    XNLContext.SetItem(xnlContext, "$__tags", tagsObj);
 
-                    XNLContext.setItem(xnlContext, "$__nameTags", nameTags);
+                    XNLContext.SetItem(xnlContext, "$__nameTags", nameTags);
 
                     if (parseMode == ParseMode.Dynamic)
                     {
@@ -117,22 +118,24 @@ namespace COM.SingNo.XNLCore
                     if (isNoSubTag && isTagName == false)
                     {
                         index = strBuilder.Length;
-                        if (string.IsNullOrEmpty(curStruct.bodyContent)==false) onNoTagAction(xnlContext, curStruct.bodyContent);
+                        if (string.IsNullOrEmpty(curStruct.bodyContent)==false) OnNoTagAction(xnlContext, curStruct.bodyContent,tagsObj,parseMode);
                     }
                     else if (isTagName)
                     {
                         isTagNew = false;
                         isEnd = false;
                         index = strBuilder.Length;
+
                         //try
                         //{
+                            
                             fullTagName = curStruct.nameSpace + ":" + curStruct.tagName;
                             if (tagsObj.TryGetValue(fullTagName, out tagObj) == false)
                             {
                                 isTagNew = true;
                                 try
                                 {
-                                    tagObj = XNLLib<T>.getTagInstance(curStruct.nameSpace, curStruct.tagName).Create();
+                                    tagObj = XNLLib<T>.GetTagInstance(curStruct.nameSpace, curStruct.tagName).Create();
                                 }
                                 catch
                                 {
@@ -140,7 +143,7 @@ namespace COM.SingNo.XNLCore
                                 }
                                 tagsObj[fullTagName] = tagObj;
                             }
-                            
+                            //isTagNew = GetTagInstance(curStruct.nameSpace, curStruct.tagName, tagsObj, out tagObj);
                             instanceName = curStruct.instanceName;
                            
                             if (isTagNew)
@@ -156,7 +159,7 @@ namespace COM.SingNo.XNLCore
                                 if(parseMode==ParseMode.Dynamic)
                                 {
                                     strBuilder.Insert(0, "IXNLTag<T> " + instanceName + "= null;\n");
-                                    strBuilder.AppendLine("\n" + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
+                                    strBuilder.AppendLine("\n" + instanceName + " = XNLLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
                                     strBuilder.AppendLine(instanceName + ".xnlContext = xnlContext;");
                                     strBuilder.AppendLine(instanceName + ".instanceName = \"" + instanceName + "\";");
                                     strBuilder.AppendLine(instanceName + ".OnInit();");
@@ -199,7 +202,7 @@ namespace COM.SingNo.XNLCore
                                 {
                                     if (parseMode == ParseMode.Dynamic)
                                     {
-                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
+                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = XNLLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
                                         strBuilder.AppendLine("\t" + instanceName + ".xnlContext = xnlContext;");
                                         strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
                                         strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
@@ -212,7 +215,7 @@ namespace COM.SingNo.XNLCore
                                 instanceName = tagObj.instanceName;
                                 if (parseMode == ParseMode.Dynamic)
                                 {
-                                    strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = XNLLib<T>.getTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
+                                    strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = XNLLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
                                     strBuilder.AppendLine("\t" + instanceName + ".xnlContext = xnlContext;");
                                     strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
                                     strBuilder.AppendLine("\t"+instanceName + ".OnInit();\n}");
@@ -224,7 +227,7 @@ namespace COM.SingNo.XNLCore
                                 foreach (KeyValuePair<string, XNLParam> kv in curStruct.tagParams)
                                 {
                                     //kv 是否含有标签  token类型  左值赋值  
-                                    List<XNLToken> tokens = xnlParser.GetTagTokens(kv.Key);
+                                    //List<XNLToken> tokens = xnlParser.GetTagTokens(kv.Key);
 
                                     //List<XNLToken> tokens = xnlParser.GetTagTokens(kv.Key);
 
@@ -261,9 +264,9 @@ namespace COM.SingNo.XNLCore
                                     if (string.IsNullOrEmpty(curStruct.bodyContent.Trim())==false)
                                     {
                                         strBuilder.AppendLine("OnTagDelegate " + instanceName + "_delegate=delegate (){");
-                                        XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
-                                        XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                        OnTagAction(tagObj);
+                                        //XNLContext.SetItem(xnlContext, "$__curStruct", curStruct);
+                                        XNLContext.SetItem(xnlContext, "$__tagid", tagId);
+                                        OnTagAction(tagObj, curStruct,tagsObj, parseMode);
                                         strBuilder.AppendLine("};");
                                         strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
                                     }
@@ -278,9 +281,9 @@ namespace COM.SingNo.XNLCore
                                     {
                                         tagObj.OnTag(delegate()
                                         {
-                                            XNLContext.setItem(xnlContext, "$__curStruct", curStruct);
-                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                            OnTagAction(tagObj);
+                                            //XNLContext.SetItem(xnlContext, "$__curStruct", curStruct);
+                                            XNLContext.SetItem(xnlContext, "$__tagid", tagId);
+                                            OnTagAction(tagObj, curStruct,tagsObj, parseMode);
                                         });
                                     }
                                     else
@@ -303,9 +306,9 @@ namespace COM.SingNo.XNLCore
                                         if(string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
                                         {
                                             //, tmpSubTag.bodyContent
-                                            XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
-                                            XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                            OnTagAction(tagObj);
+                                            //XNLContext.SetItem(xnlContext, "$__curStruct", tmpSubTag);
+                                            XNLContext.SetItem(xnlContext, "$__tagid", tagId);
+                                            OnTagAction(tagObj, tmpSubTag,tagsObj, parseMode);
                                         }
                                     }
                                     else
@@ -332,9 +335,9 @@ namespace COM.SingNo.XNLCore
                                             if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
                                             {
                                                 strBuilder.AppendLine("OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
-                                                XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
-                                                XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                                OnTagAction(tagObj);
+                                                //XNLContext.SetItem(xnlContext, "$__curStruct", tmpSubTag);
+                                                XNLContext.SetItem(xnlContext, "$__tagid", tagId);
+                                                OnTagAction(tagObj, tmpSubTag,tagsObj, parseMode);
                                                 strBuilder.AppendLine("};");
                                                 strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_" + tagObj.curTag + "_delegate);");
                                             }
@@ -350,9 +353,9 @@ namespace COM.SingNo.XNLCore
                                                 //tmpSubTag  保存到context中
                                                 tagObj.OnTag(delegate()
                                                 {
-                                                    XNLContext.setItem(xnlContext, "$__curStruct", tmpSubTag);
-                                                    XNLContext.setItem(xnlContext, "$__tagid", tagId);
-                                                    OnTagAction(tagObj);
+                                                    //XNLContext.SetItem(xnlContext, "$__curStruct", tmpSubTag);
+                                                    XNLContext.SetItem(xnlContext, "$__tagid", tagId);
+                                                    OnTagAction(tagObj, tmpSubTag,tagsObj, parseMode);
                                                 });
                                             }
                                             else
@@ -409,7 +412,7 @@ namespace COM.SingNo.XNLCore
                     {
                         break;
                     }
-                    #region
+                    #region  remove code
                     /*
                     bool isTagEnd = (tagStruct == null);
                     if (isTagEnd) break;
@@ -470,7 +473,7 @@ namespace COM.SingNo.XNLCore
             return strBuilder.ToString();
         }
 
-        static bool testNestedTag(string content,out XNLTagStruct outStruct)
+        static bool TestNestedTag(string content,out XNLTagStruct outStruct)
         {
 
             if (string.IsNullOrEmpty(content))
@@ -486,26 +489,26 @@ namespace COM.SingNo.XNLCore
             }
             return false;
         }
-     
-        
-        public static void OnTagAction(IXNLTag<T> tagObj)
+
+
+        static void OnTagAction(IXNLTag<T> tagObj,XNLTagStruct curStruct, Dictionary<string, IXNLTag<T>> tagsObj, ParseMode parseMode)
         {
-            XNLContext xnlContext = tagObj.xnlContext;
-            XNLTagStruct curStruct = (XNLTagStruct)XNLContext.getItem(xnlContext, "$__curStruct");
-            XNLContext.setItem(xnlContext, "$__curStruct", null);
+            T xnlContext = tagObj.xnlContext;
+            //XNLTagStruct curStruct = (XNLTagStruct)XNLContext.GetItem(xnlContext, "$__curStruct");
+            //XNLContext.SetItem(xnlContext, "$__curStruct", null);
             string body = curStruct.bodyContent;
             //检测是否有其它tag
             //如果有其它tag，递归解析
             XNLTagStruct t_newTag;
-            bool isHasNested = testNestedTag(body, out t_newTag);
+            bool isHasNested = TestNestedTag(body, out t_newTag);
             if (isHasNested) //处理嵌套情况
             {
                 t_newTag.parent = curStruct;
                 if (t_newTag.tagName != null) //完全嵌套
                 {
-                    XNLContext.setItem(xnlContext, "$__nestedTag", t_newTag);
+                    XNLContext.SetItem(xnlContext, "$__nestedTag", t_newTag);
 
-                    ParserEngine<XNLContext>.parse(null, xnlContext);
+                    ParserEngine<XNLContext>.Parse(null, xnlContext, parseMode);
 
                 }
                 else
@@ -520,49 +523,51 @@ namespace COM.SingNo.XNLCore
                         if (t_subtag.tagName != null) //完全嵌套
                         {
                             
-                            XNLContext.setItem(xnlContext, "$__nestedTag", t_subtag);
-                            ParserEngine<XNLContext>.parse(null, xnlContext);
+                            XNLContext.SetItem(xnlContext, "$__nestedTag", t_subtag);
+                            ParserEngine<XNLContext>.Parse(null, xnlContext, parseMode);
                         }
                         else
                         {
 
-                            if (string.IsNullOrEmpty(t_subtag.bodyContent) == false) ParseAction(xnlContext, tagObj, t_subtag.bodyContent, curStruct);
+                            if (string.IsNullOrEmpty(t_subtag.bodyContent) == false) ParseAction(xnlContext, tagObj, t_subtag.bodyContent, curStruct, tagsObj, parseMode);
                         }
                     }
                 }
             }
             else
             {
-                if (string.IsNullOrEmpty(body)==false) ParseAction(xnlContext, tagObj, body, curStruct);
+                if (string.IsNullOrEmpty(body)==false) ParseAction(xnlContext, tagObj, body, curStruct,tagsObj,parseMode);
             }
         }
 
 
-        public static void ParseAction(XNLContext xnlContext,IXNLTag<T> tagObj,string body,XNLTagStruct tagStruct)
+        static void ParseAction(T xnlContext, IXNLTag<T> tagObj, string body, XNLTagStruct tagStruct,Dictionary<string, IXNLTag<T>> tagsObj, ParseMode parseMode)
         {
             if (string.IsNullOrEmpty(body)) return;
-            ParseMode parseMode =(ParseMode) XNLContext.getItem(xnlContext, "$__parseMode");
+            //ParseMode parseMode =(ParseMode) XNLContext.GetItem(xnlContext, "$__parseMode");
             bool isDynamic = (parseMode == ParseMode.Dynamic);
             StringBuilder strBuilder = xnlContext.response.buffer;
             List<XNLToken> tokens = xnlParser.GetTagTokens(body);
-            string nameScape = tagStruct.nameSpace;
-            string tagName = tagStruct.tagName;
-            XNLTagStruct parentTag = tagStruct;
-            while(true)
-            {
-                if (string.IsNullOrEmpty(tagName) == false || parentTag == null) break;
-                nameScape = parentTag.nameSpace;
-                tagName = parentTag.tagName;
-                parentTag = parentTag.parent;
-            }
+            
             if (tokens != null)
             {
+                string nameScape = tagStruct.nameSpace;
+                string tagName = tagStruct.tagName;
+                XNLTagStruct parentTag = tagStruct;
+                while (true)
+                {
+                    if (string.IsNullOrEmpty(tagName) == false || parentTag == null) break;
+                    nameScape = parentTag.nameSpace;
+                    tagName = parentTag.tagName;
+                    parentTag = parentTag.parent;
+                }
+
                 int index = 0;
-                //object obj = null;
                 IXNLTag<T> parentObj=null;
                 foreach (XNLToken token in tokens)
                 {
-                    var len = token.Index - index;
+                    //表达式之间的 字符串
+                    var len = token.index - index;
                     if (len > 0)
                     {
                         var str = body.Substring(index, len);
@@ -577,21 +582,35 @@ namespace COM.SingNo.XNLCore
                             strBuilder.Append(str);
                         }
                     }
-                    index = token.Index + token.Length;
-                    if (string.IsNullOrEmpty(token.Scope) || token.Name == tagObj.instanceName)
+                    index = token.index + token.length;
+                    if (token.type == XNLTokenType.Express)
                     {
-                        bool isHas = tagObj.ExistAttribute(token.Name, tagObj.curTag);
+                        //表达式
+                        ParseExpression((XNLExpression)token, strBuilder, tagsObj, xnlContext, isDynamic, tagStruct, tagObj);
+                    }
+                    else
+                    {
+                        bool isHas = false;
+                        if (string.IsNullOrEmpty(token.scope))
+                        {
+                            isHas = tagObj.ExistAttribute(token.name, tagObj.curTag);
+                        }
+                        else if (token.scope == tagName || token.scope == tagObj.instanceName)
+                        {
+                            isHas = true;
+                        }
+                        
                         if (isHas)
                         {
-                             if (isDynamic)
-                             {
-                                  strBuilder.Append("\nbuffer.Append(");
-                                  strBuilder.Append(tagObj.instanceName + ".GetAttribute(\"" + token.Name + "\",\"" + tagObj.curTag + "\"));");
-                             }
-                             else
-                             {
-                                 strBuilder.Append(tagObj.GetAttribute(token.Name, tagObj.curTag));
-                             }
+                            if (isDynamic)
+                            {
+                                strBuilder.Append("\nbuffer.Append(");
+                                strBuilder.Append(tagObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + tagObj.curTag + "\"));");
+                            }
+                            else
+                            {
+                                strBuilder.Append(tagObj.GetAttribute(token.name, tagObj.curTag));
+                            }
                         }
                         else
                         {
@@ -604,7 +623,14 @@ namespace COM.SingNo.XNLCore
                                 if (string.IsNullOrEmpty(parentTag.tagName) == false && (parentTag.nameSpace != nameScape || parentTag.tagName != tagName) && parentTag.tagObj != null)
                                 {
                                     parentObj = (IXNLTag<T>)parentTag.tagObj;
-                                    isHas = parentObj.ExistAttribute(token.Name, parentObj.curTag);
+                                    if (string.IsNullOrEmpty(token.scope))
+                                    {
+                                        isHas = parentObj.ExistAttribute(token.name, parentObj.curTag);
+                                    }
+                                    else if (token.scope == parentTag.tagName || token.scope == parentObj.instanceName)
+                                    {
+                                        isHas = true;
+                                    }
                                     if (isHas) break;
                                 }
                                 parentTag = parentTag.parent;
@@ -614,13 +640,13 @@ namespace COM.SingNo.XNLCore
                                 if (isDynamic)
                                 {
                                     strBuilder.Append("\nbuffer.Append(");
-                                    strBuilder.Append(parentObj.instanceName + ".GetAttribute(\"" + token.Name + "\",\"" + parentObj.curTag + "\"));");
+                                    strBuilder.Append(parentObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + parentObj.curTag + "\"));");
                                 }
                                 else
                                 {
-                                    strBuilder.Append(parentObj.GetAttribute(token.Name, parentObj.curTag));
+                                    strBuilder.Append(parentObj.GetAttribute(token.name, parentObj.curTag));
                                 }
-                                
+
                             }
                             else
                             {
@@ -638,6 +664,7 @@ namespace COM.SingNo.XNLCore
                         }
                     }
                 }
+
                 if(index<body.Length)
                 {
                     if (isDynamic)
@@ -667,9 +694,9 @@ namespace COM.SingNo.XNLCore
             }
         }
 
-        public static void onNoTagAction(T xnlContext, string body)
+        static void OnNoTagAction(T xnlContext, string body, Dictionary<string, IXNLTag<T>> tagsObj, ParseMode parseMode)
         {
-            ParseMode parseMode = (ParseMode)XNLContext.getItem(xnlContext, "$__parseMode");
+            //ParseMode parseMode = (ParseMode)XNLContext.GetItem(xnlContext, "$__parseMode");
             bool isDynamic = (parseMode == ParseMode.Dynamic);
             StringBuilder strBuilder = xnlContext.response.buffer;
             List<XNLToken> tokens = xnlParser.GetTagTokens(body);
@@ -692,7 +719,7 @@ namespace COM.SingNo.XNLCore
                 int inx = 0;
                 foreach (XNLToken token in tokens)
                 {
-                    var len = token.Index - inx;
+                    var len = token.index - inx;
                     if (len > 0)
                     {
                         if (isDynamic)
@@ -703,87 +730,27 @@ namespace COM.SingNo.XNLCore
                         }
                         else
                         {
-                            strBuilder.Append(body.Substring(inx, token.Index));
+                            strBuilder.Append(body.Substring(inx, len));
                         }
                     }
-                    inx = token.Index + token.Length;
+                    inx = token.index + token.length;
                     if (isDynamic==false) token.mode = ParseMode.Static;
-                    switch(token.Type)
+                    switch(token.type)
                     {
-                        case XNLTokenType.Variable:
-                            switch(token.Scope.ToLower())
-                            {
-                                case "app":
-                                    if (isDynamic)
-                                    {
-                                        if (token.mode == ParseMode.Static)
-                                        {
-                                            strBuilder.Append(HttpContext.Current.Application[token.Name]);
-                                        }
-                                        else
-                                        {
-                                            strBuilder.Append("\nbuffer.Append(HttpContext.Current.Application[\"" + token.Name + "\"]);\n");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        strBuilder.Append(HttpContext.Current.Application[token.Name]);
-                                    }
-                                    break;
-                                case "session":
-                                    if (isDynamic)
-                                    {
-                                        if (token.mode == ParseMode.Static)
-                                        {
-                                            strBuilder.Append(HttpContext.Current.Session[token.Name]);
-                                        }
-                                        else
-                                        {
-                                            strBuilder.Append("\nbuffer.Append(HttpContext.Current.Session[\"" + token.Name + "\"]);\n");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        strBuilder.Append(HttpContext.Current.Session[token.Name]);
-                                    }
-                                    break;
-                                case "post":
-                                    if (token.mode == ParseMode.Static)
-                                    {
-
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                    break;
-                                case "get":
-                                    if (token.mode == ParseMode.Static)
-                                    {
-
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                    break;
-                                case "request":
-                                    if (token.mode == ParseMode.Static)
-                                    {
-
-                                    }
-                                    else
-                                    {
-
-                                    }
-                                    break;
-                            }
-                            break;
                         case XNLTokenType.Express:
-
+                            ParseExpression((XNLExpression)token, strBuilder,tagsObj, xnlContext, isDynamic);
                             break;
                         case XNLTokenType.Attribute:
-
+                            if (isDynamic)
+                            {
+                                strBuilder.Append("\nbuffer.Append(@\"");
+                                strBuilder.Append(token.value);
+                                strBuilder.AppendLine("\");");
+                            }
+                            else
+                            {
+                                strBuilder.Append(token.value);
+                            }
                             break;
                     }
                 }
@@ -801,6 +768,299 @@ namespace COM.SingNo.XNLCore
                     }
                 }
             } 
+        }
+
+        static void ParseExpression(XNLExpression express, StringBuilder strBuilder, Dictionary<string, IXNLTag<T>> tagsObj, T xnlContext, bool isDynamic, XNLTagStruct tagStruct = null ,IXNLTag<T> parentTagObj= null)
+        {
+            var ns = express.scope ?? "xnl";
+            
+            var tagName = express.tagName ?? "expression";
+
+            IXNLTag<T> tagObj;
+
+            IXNLTag<T> t_tagObj;
+
+            InitExpressTagObj(ns, tagName, strBuilder, tagsObj, xnlContext, isDynamic, out tagObj);
+
+            if (express.args != null)
+            {
+                Stack<IEnumerator<XNLToken>> tokens = new Stack<IEnumerator<XNLToken>>();
+                IEnumerator<XNLToken> curTokens = express.args.GetEnumerator();
+                XNLExpression curExpress = null;
+                XNLExpression prevExpress = null;
+                XNLToken curToken = null;
+                Stack args = new Stack();
+                while(true)
+                {
+                    bool isHas = curTokens.MoveNext();
+                    if(isHas)
+                    {
+                        curToken = curTokens.Current;
+                        XNLTokenType tokenType = curToken.type;
+
+                        if (tokenType == XNLTokenType.Common)
+                        {
+                            if(isDynamic)
+                            {
+                                args.Push("\"" + curToken.value.Replace("\"","\\\"") + "\"");
+                            }
+                            else
+                            {
+                                args.Push(curToken.value);
+                            }
+                        }
+                        else if (tokenType == XNLTokenType.Express)
+                        {
+                            curExpress = (XNLExpression)curToken;
+                            if (curExpress.args==null)
+                            {
+                                ns = curExpress.scope ?? "xnl";
+
+                                tagName = curExpress.tagName ?? "expression";
+
+                                InitExpressTagObj(ns, tagName, strBuilder, tagsObj, xnlContext, isDynamic, out t_tagObj);
+
+                                if (isDynamic)
+                                {
+                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + curExpress.name + "\")");
+                                }
+                                else
+                                {
+                                    args.Push(t_tagObj.GetAttribute(curExpress.name));
+                                }
+                            }
+                            else
+                            {
+                                prevExpress = curExpress;
+                                tokens.Push(curTokens);
+                                curTokens = curExpress.args.GetEnumerator();
+                                continue;
+                            }
+                        }
+                        else if (tokenType == XNLTokenType.Attribute)
+                        {
+                            //遍历查找
+                            if(tagStruct!=null)
+                            {
+                                args.Push(ParseAttribule(curToken,parentTagObj,tagStruct,isDynamic));
+                            }
+                            else
+                            {
+                                args.Push("");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (prevExpress!=null)
+                        {
+                            //出栈
+                            if (prevExpress.args!=null)
+                            {
+                                var count = prevExpress.args.Count;
+                                ArrayList t_args = new ArrayList(count);
+                                for (var i = 0; i < count; i++)
+                                {
+                                    t_args.Insert(0, args.Pop());
+                                }
+
+                                //执行
+                                ns = prevExpress.scope ?? "xnl";
+
+                                tagName = prevExpress.tagName ?? "expression";
+
+                                InitExpressTagObj(ns, tagName, strBuilder, tagsObj, xnlContext, isDynamic, out t_tagObj);
+
+                                if (isDynamic)
+                                {
+                                    //设置参数
+                                    string args_str = "new ArrayList() { ";
+                                    for (var i = 0; i < count; i++)
+                                    {
+                                        string str = t_args[i].ToString();
+                                        args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
+                                    }
+                                    args_str += "}";
+
+                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + prevExpress.name + "\",null," + args_str + ")");
+                                }
+                                else
+                                {
+                                    args.Push(t_tagObj.GetAttribute(prevExpress.name, null, t_args));
+                                }
+                            }
+                            prevExpress = null;
+                        }
+                        if(tokens.Count>0)
+                        {
+                            curTokens = tokens.Pop();
+                            continue;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                int _count = args.Count;
+                ArrayList _args = new ArrayList(_count);
+                for (var i = 0; i < _count; i++)
+                {
+                    _args.Insert(0, args.Pop());
+                }
+
+                if (isDynamic)
+                {
+                    //设置参数
+                    string args_str = "new ArrayList() { ";
+                    for (var i = 0; i < _count; i++)
+                    {
+                        string str = _args[i].ToString();
+                        args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
+                    }
+                    args_str += "}";
+
+                    strBuilder.Append("\nbuffer.Append(" + tagObj.instanceName + ".GetAttribute(\"" + express.name + "\",null," + args_str + "));");
+                }
+                else
+                {
+                    strBuilder.Append(tagObj.GetAttribute(express.name, null, _args));
+                }
+            }
+            else
+            {
+                if (isDynamic)
+                {
+                    strBuilder.Append("\nbuffer.Append(" + tagObj.instanceName + ".GetAttribute(\"" + express.name + "\"));");    
+                }
+                else
+                {
+                    strBuilder.Append(tagObj.GetAttribute(express.name));
+                }
+            }
+        }
+
+        static bool GetTagInstance(string nameSpace, string tagName, Dictionary<string, IXNLTag<T>> tagsObj, out IXNLTag<T> tagObj)
+        {
+            bool isTagNew = false;
+            string fullTagName = nameSpace + ":" + tagName;
+            if (tagsObj.TryGetValue(fullTagName, out tagObj) == false)
+            {
+                isTagNew = true;
+                try
+                {
+                    tagObj = XNLLib<T>.GetTagInstance(nameSpace, tagName).Create();
+                }
+                catch
+                {
+                    throw (new Exception("未找到标签" + fullTagName + "的实现"));
+                }
+                tagsObj[fullTagName] = tagObj;
+            }
+            return isTagNew;
+        }
+
+        static bool InitExpressTagObj(string nameSpace, string tagName, StringBuilder strBuilder, Dictionary<string, IXNLTag<T>> tagsObj, T xnlContext, bool isDynamic, out IXNLTag<T> tagObj)
+        {
+            bool isNew = GetTagInstance(nameSpace, tagName, tagsObj, out tagObj);
+
+            if (isNew)
+            {
+                tagObj.xnlContext = xnlContext;
+                tagObj.instanceName = "exp_" + nameSpace + "_" + tagName;
+                if (isDynamic)
+                {
+                    strBuilder.Insert(0, "IXNLTag<T> " + tagObj.instanceName + "= null;\n");
+                    strBuilder.AppendLine("\n" + tagObj.instanceName + " = XNLLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\").Create();");
+                    strBuilder.AppendLine(tagObj.instanceName + ".xnlContext = xnlContext;");
+                    strBuilder.AppendLine(tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";");
+                    strBuilder.AppendLine(tagObj.instanceName + ".OnInit();");
+                }
+                else
+                {
+                    tagObj.OnInit();
+                }
+            }
+            return isNew;
+        }
+
+        static object ParseAttribule(XNLToken token, IXNLTag<T> tagObj,XNLTagStruct tagStruct,bool isDynamic)
+        {
+            string nameScape = tagStruct.nameSpace;
+            string tagName = tagStruct.tagName;
+            XNLTagStruct parentTag = tagStruct;
+            while (true)
+            {
+                if (string.IsNullOrEmpty(tagName) == false || parentTag == null) break;
+                nameScape = parentTag.nameSpace;
+                tagName = parentTag.tagName;
+                parentTag = parentTag.parent;
+            }
+            IXNLTag<T> parentObj = null;
+
+            bool isHas = false;
+
+            if (string.IsNullOrEmpty(token.scope))
+            {
+                isHas = tagObj.ExistAttribute(token.name, tagObj.curTag);
+            }
+            else if (token.scope == tagName || token.scope == tagObj.instanceName)
+            {
+                isHas = true;
+            }
+
+            if (isHas)
+            {
+                if (isDynamic)
+                {
+                    return tagObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + tagObj.curTag + "\")";
+                }
+                else
+                {
+                    return tagObj.GetAttribute(token.name, tagObj.curTag);
+                }
+            }
+            else
+            {
+                //遍历父级
+                parentTag = tagStruct.parent;
+
+                while (true)
+                {
+                    if (parentTag == null) break;
+                    if (string.IsNullOrEmpty(parentTag.tagName) == false && (parentTag.nameSpace != nameScape || parentTag.tagName != tagName) && parentTag.tagObj != null)
+                    {
+                        parentObj = (IXNLTag<T>)parentTag.tagObj;
+                        if (string.IsNullOrEmpty(token.scope))
+                        {
+                            isHas = parentObj.ExistAttribute(token.name, parentObj.curTag);
+                        }
+                        else if (token.scope == parentTag.tagName || token.scope == parentObj.instanceName)
+                        {
+                            isHas = true;
+                        }
+                        
+                        if (isHas) break;
+                    }
+                    parentTag = parentTag.parent;
+                }
+                if (isHas)
+                {
+                    if (isDynamic)
+                    {
+                        return parentObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + parentObj.curTag + "\")";
+                    }
+                    else
+                    {
+                        return parentObj.GetAttribute(token.name, parentObj.curTag);
+                    }
+                }
+                else
+                {
+                    return "";// token.value;
+                }
+            }
         }
     }
 }

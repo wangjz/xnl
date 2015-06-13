@@ -59,12 +59,12 @@ namespace COM.SingNo.XNLCore
             return tagStr;
         }
         */
-        public static void setItem(XNLContext xnlContext, string itemName, object itemValue)
+        public static void SetItem(XNLContext xnlContext, string itemName, object itemValue)
         {
             if (xnlContext.items == null) xnlContext.items = new Dictionary<string, object>();
             xnlContext.items[itemName] = itemValue;
         }
-        public static bool removeItem(XNLContext xnlContext, string itemName)
+        public static bool RemoveItem(XNLContext xnlContext, string itemName)
         {
             if (xnlContext.items == null) return true;
             try
@@ -75,7 +75,7 @@ namespace COM.SingNo.XNLCore
             catch { }
             return false;
         }
-        public static object getItem(XNLContext xnlContext, string itemName)
+        public static object GetItem(XNLContext xnlContext, string itemName)
         {
             if (xnlContext.items == null) return null;
             object obj;

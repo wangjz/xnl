@@ -15,7 +15,7 @@ namespace COM.SingNo.XNLCore
         /// <param name="pathStr">路径</param>
         /// <param name="encoder">编码</param>
         /// <returns></returns>
-        public static string loadTemplete(string pathStr, string charset)
+        public static string LoadTemplete(string pathStr, string charset)
         {
             Encoding encoder = Encoding.GetEncoding(charset);
             StreamReader TxtReader = new StreamReader(pathStr, encoder);
@@ -31,7 +31,7 @@ namespace COM.SingNo.XNLCore
         /// <param name="tagName">用户标签名称</param>
         /// <param name="siteRootPath">用户标签所属站点根目录</param>
         /// <returns></returns>
-        public static string loadUserTagByName(string tagName, string siteRootPath)
+        public static string LoadUserTagByName(string tagName, string siteRootPath)
         {
 
             //string pathStr = (SystemConfig.systemDir + (siteRootPath.Replace("/", "\\"))).Replace("\\\\", "\\") + "Template\\UserTag\\UT_" + tagName + ".ascx";
@@ -58,7 +58,7 @@ namespace COM.SingNo.XNLCore
         /// <param name="template"></param>
         /// <param name="sitePath"></param>
         /// <returns></returns>
-        public static Dictionary<string, string> getTemplateUserTag(string template, string sitePath)
+        public static Dictionary<string, string> GetTemplateUserTag(string template, string sitePath)
         {
             MatchCollection matchColl = Regex.Matches(template, "<xnl\\.mytag:(\\w+)>", XNLBaseCommon.XNL_RegexOptions);
             if (matchColl.Count > 0)
@@ -69,30 +69,30 @@ namespace COM.SingNo.XNLCore
                     string tagName = m.Groups[1].Value.ToLower();
                     if (!myTagColls.ContainsKey(tagName))
                     {
-                        myTagColls.Add(tagName, loadUserTagByName(tagName, sitePath));
+                        myTagColls.Add(tagName, LoadUserTagByName(tagName, sitePath));
                     }
                 }
                 return myTagColls;
             }
             return null;
         }
-        public static string encodeXNL(string scrStr)
+        public static string EncodeXNL(string scrStr)
         {
             scrStr = scrStr.Replace("{", "&xnlal;");
             scrStr = scrStr.Replace("}", "&xnlar;");
             return scrStr;
         }
-        public static string decodeXNL(string scrStr)
+        public static string DecodeXNL(string scrStr)
         {
             scrStr = scrStr.Replace("&xnlal;", "{");
             scrStr = scrStr.Replace("&xnlar;", "}");
             return scrStr;
         }
-        public static string encodeHTML(string scrStr)
+        public static string EncodeHTML(string scrStr)
         {
             return UtilsCode.encodeHtml(scrStr);
         }
-        public static string decodeHTML(string scrStr)
+        public static string DecodeHTML(string scrStr)
         {
             scrStr = scrStr.Replace("&gt;", ">");
             scrStr = scrStr.Replace("&lt;", "<");

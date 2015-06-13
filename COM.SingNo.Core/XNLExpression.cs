@@ -6,9 +6,21 @@ namespace COM.SingNo.XNLCore
 {
     public class XNLExpression : XNLToken
     {
-        //xnl 表达式
-        //表达式参数
+        /// <summary>
+        /// 标签名称
+        /// </summary>
 
-        //内置 or  扩展 表达式
+        public string tagName { get; set; }
+
+       
+        /// <summary>
+        /// 参数列表
+        /// </summary>
+        public IList<XNLToken> args { get; set; }
+
+        public XNLExpression()
+        {
+            type = XNLTokenType.Express;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace COM.SingNo.XNLCore
    public class XNLVariable : XNLToken
     {
         //类型
-        //全局变量 包括  post  get  Request  Session  Application
+        //全局变量 包括  post  get  Request  Session  Application head
 
 
         //本地变量

@@ -16,7 +16,7 @@ namespace COM.SingNo.XNLCore
         {
             internal static XNLTagCache instance = new XNLTagCache();
         }
-        public static XNLTagCache getInstance()
+        public static XNLTagCache GetInstance()
         {
             return Nested.instance;
         }

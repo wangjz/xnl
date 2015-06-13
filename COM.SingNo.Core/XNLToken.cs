@@ -6,23 +6,24 @@ namespace COM.SingNo.XNLCore
 {
     public enum XNLTokenType
     {
-        Attribute = 0, //属性 @
-        Variable, //= 1变量 $
-        Express //= 2,  //表达式
+        Common,
+        Attribute, //属性 @
+        Express //= 2,  //表达式 $
+        //Variable, //= 1变量 $
         //tag
     }
     public class XNLToken
     {
-        public XNLTokenType Type { get; set; }
+        public XNLTokenType type { get; set; }
         //名称
-        public string Name { get; set; }
+        public string name { get; set; }
 
         //域名称  标签所在实例名称  或 标签名称
-        public string Scope { get; set; }
+        public string scope { get; set; }
         //在内容中的位置
-        public int Index { get; set; }
+        public int index { get; set; }
         //在内容中的长度
-        public int Length { get; set; }
+        public int length { get; set; }
 
         public ParseMode mode { get; set; }
 

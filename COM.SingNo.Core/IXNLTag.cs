@@ -7,7 +7,6 @@ namespace COM.SingNo.XNLCore
     public delegate void OnTagDelegate();
     public interface IXNLTag<T> where T:XNLContext //XNL标签接口
     {
-        //ParseMode parseMode { get; set; }
         string subTagNames { get; }
         /// 标签实例名
         /// </summary>
@@ -19,16 +18,16 @@ namespace COM.SingNo.XNLCore
         T xnlContext { get; set; }
         void OnInit();
 
-        void OnStart(); //, string body
+        void OnStart();
 
-        void OnTag(OnTagDelegate tagDelegate=null);//子标签 //, string body
+        void OnTag(OnTagDelegate tagDelegate=null);
 
         void OnEnd();
         void SetAttribute(string paramName, object value, string tagName=null);
 
-        object GetAttribute(string paramName, string tagName = null);
+        object GetAttribute(string paramName, string tagName = null, object userData = null);
 
-        bool TryGetAttribute(out object outValue,string paramName, string tagName=null);
+        bool TryGetAttribute(out object outValue, string paramName, string tagName = null, object userData = null);
 
         bool ExistAttribute(string paramName, string tagName = null);
         IXNLTag<T> Create();

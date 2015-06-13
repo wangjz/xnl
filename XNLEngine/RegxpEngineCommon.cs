@@ -11,37 +11,11 @@ using System.Security.Permissions;
 using System.Reflection;
 namespace COM.SingNo.XNLEngine
 {
-    /*
-    [StrongNameIdentityPermissionAttribute(SecurityAction.LinkDemand, PublicKey =
-"002400000480000094000000060200000024000052534131000400000100010015ce07c41d2a58" +
-"1d81df04d0515fb1e3d5eeff895ef834010f59762599faf8c6866cf5f293002c2e30c43a84dba9" +
-"44171fb1c049a275d53eff78cf79290f3112e8b37de7429a3ed1a8d9af3f678cd70cc51e704f43" +
-"554aaf255d67a56847a3ace7cd5be1f622c50f74128df700319a5a8a6f8663ec625ea319fb78b4" +
-"3eaeb8ba")]
-     */ 
     public class RegxpEngineCommon<T> where T:XNLContext
     {
         internal static string XNLTagRegNames;
         internal const RegexOptions XNL_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);//|RegexOptions.Compiled
-        //internal const RegexOptions XNL_RegexOptionsNoCompiled = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
-        //@"<@XNL+:\w+[\s]*([^>]*)>([.\s\S]*)</\1:\2>"  //<(xnl|cms\.manage):([_a-zA-Z0-9]+)(::[_a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>  //捕捉所有
-        //<xnl|cms\.manage:[_a-zA-Z0-9]+(?:::[_a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)> //不分组捕捉前半部分
-        //<(xnl|cms\.manage):([_a-zA-Z0-9]+)(::[_a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)> 分组捕捉前半部分  1标签命名空间 2标签名 3标签实例名 4 标签参数
-
-        internal const string RegexStr_XNLAttriableVariable = @"{@([^\s{}><:]+?)}";
-        internal const string RegexStr_XNLDataBaseVariable = "{\\$([^\\s{><}:]+?)}";
-        internal const string RegexTemplate_XNLAttriableVariable = @"{@([^\s{}><:]+?)(::NAME|)}";
-        internal const string RegexTemplate_XNLDataBaseVariable = "{\\$([^\\s{><}:]+?)(::NAME|)}";
-
-        internal const string RegexStr_XNLReqFormVariable = @"{%(\w+?)}";
-        internal const string RegexStr_XNLReqQueryVariable = @"{&(\w+?)}";
-        internal const string RegexStr_XNLReqVariable = @"{\\?(\w+?)}";
-        internal const string RegexStr_XNLSessionVariable = @"{#(\w+?)}";
-        internal const string RegexStr_XNLApplicationVariable = @"{^(\w+?)}";
-        internal const string RegexStr_XNLAllPublicCariable = @"{([%&\\?#^])(\w+?)}";
-
-        internal const string RegexStr_XNLExpressionVariable = @"{\[([^{}]+)\]}";//"{\\[((?>[^{][^\\[])+?(?>[^\\]][^}])*?)\\]}"; // //{\[([^{}]+|{\[(?<o>)|\]}(?<-o>)?)(?(o)(?!))\]}
-        internal const string RegexStr_XNLGlobalVariable = @"{!(\w+?)}";
+        
         internal const string RegexStr_XNLNotes = "<\\!--\\#.*?\\#-->";  //匹配XNL标签注释
 
         internal const string RegexStr_XNLInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
@@ -54,34 +28,21 @@ namespace COM.SingNo.XNLEngine
         internal static string RegexStr_XNLTagPart1Group0;// = @"<@XNL:[_a-zA-Z0-9]+(?:::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
         internal static string RegexStr_XNLTagPart1Group3;// = @"<(@XNL):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
         internal static string RegexStr_XNLTagPart1Group4;// = @"<(@XNL):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
-        //internal static string RegexStr_XNLTagWithName3GroupAll;// = @"<(@XNL):(@TAG)(@NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
-        //internal static string RegexStr_XNLSubTagName2GroupAll;// = @"<(@XNL)(@NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
+        
 
         internal const string RegexTemplate_XNLTagGroupAll = @"<(XNL):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
         internal const string RegexTemplate_XNLTagPart1Group0 = @"<XNL:[_a-zA-Z0-9]+(?:::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
         internal const string RegexTemplate_XNLTagPart1Group3 = @"<(XNL):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
         internal const string RegexTemplate_XNLTagPart1Group4 = @"<(XNL):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
 
-        internal static string RegexStr_XNLTagWithName3GroupAll;
+       
         internal static string RegexStr_XNLSubTagName2GroupAll;
-        internal const string RegexTemplate_XNLTagWithName3GroupAll = @"<(XNL):(TAG)(::NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
         internal const string RegexTemplate_XNLSubTagName2GroupAll = @"<(XNL)(::NAME|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
 
-        
+        //internal static string RegexStr_XNLTagWithName3GroupAll;
+        //internal const string RegexTemplate_XNLTagWithName3GroupAll = @"<(XNL):(TAG)(::NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
 
-        //internal static Regex RegexObj_XNLAttriableVariable = new Regex(RegexStr_XNLAttriableVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLDataBaseVariable = new Regex(RegexStr_XNLDataBaseVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLReqFormVariable = new Regex(RegexStr_XNLReqFormVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLReqQueryVariable = new Regex(RegexStr_XNLReqQueryVariable, XNL_RegexOptions);
-
-        //internal static Regex RegexObj_XNLReqVariable = new Regex(RegexStr_XNLReqVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLSessionVariable = new Regex(RegexStr_XNLSessionVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLApplicationVariable = new Regex(RegexStr_XNLApplicationVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLAllPublicCariable = new Regex(RegexStr_XNLAllPublicCariable, XNL_RegexOptions);
-
-        //internal static Regex RegexObj_XNLExpressionVariable = new Regex(RegexStr_XNLExpressionVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLGlobalVariable = new Regex(RegexStr_XNLGlobalVariable, XNL_RegexOptions);
-        //internal static Regex RegexObj_XNLNotes = new Regex(RegexStr_XNLNotes, XNL_RegexOptions);
+       
         internal static Regex RegexObj_XNLTagGroupAll;
         //internal static Regex RegexObj_XNLTagPart1Group0;
         internal static Regex RegexObj_XNLTagPart1Group3;
@@ -94,30 +55,23 @@ namespace COM.SingNo.XNLEngine
         //internal static Regex RegexObj_XNLTagAttrName = new Regex(RegexStr_XNLTagAttrName, XNL_RegexOptions);// "name=\"(.*?)\"";
         //internal static Regex RegexObj_XNLTagAttrType = new Regex(RegexStr_XNLTagAttrType, XNL_RegexOptions);// "type=\"(.*?)\"";
 
-        internal static Regex RegexObj_XNLTagToken = new Regex(@"{([@#$%])([_a-zA-Z0-9\\.:]+)}");
+        //internal static Regex RegexObj_XNLTagToken = new Regex(@"{([@$])([_a-zA-Z0-9\\.:]+)}");  //@#$%
+
+        internal static Regex RegexObj_XNLTagToken = new Regex(@"{([@$])([_a-zA-Z0-9\.:]+.*?)}");  //{([@$])((?>{(?<n>)|}(?<-n>)|(?!{|}).)*?)(?(n)(?!))}
         /// <summary>
         /// 根据item项的内容，得到标签item项的所有属性
         /// </summary>
         /// <param name="attribStr"></param>
         /// <param name="itemContentStr"></param>
         /// <returns></returns>
-        internal static XNLParams getTagAllParams(string attribStr, string itemContentStr)
+        internal static XNLParams GetTagAllParams(string attribStr, string itemContentStr)
         {
-            XNLParams labelParams = getXNLParams(attribStr);
-            XNLParams labelParams2 = getXNLParams(itemContentStr);
-            //string key=null;
+            XNLParams labelParams = GetXNLParams(attribStr);
+            XNLParams labelParams2 = GetXNLParams(itemContentStr);
+            
             foreach (KeyValuePair<string, XNLParam> tmpParam in labelParams2)
             {
                 labelParams[tmpParam.Key] = tmpParam.Value;
-                //key = tmpParam.Key;
-                //if (!labelParams.ContainsKey(key))
-                //{
-                //    labelParams.Add(key, tmpParam.Value);
-                //}
-                //else
-                //{
-                //    labelParams[key] = tmpParam.Value;
-                //}
             }
             return labelParams;
         }
@@ -128,17 +82,15 @@ namespace COM.SingNo.XNLEngine
         /// </summary>
         /// <param name="contentStr"></param>
         /// <returns></returns>
-        internal static string removeXNLNotes(string contentStr)
+        internal static string RemoveXNLNotes(string contentStr)
         {
             return Regex.Replace(contentStr, RegexStr_XNLNotes, "", XNL_RegexOptions);
         }
 
 
-        internal static XNLParams getXNLParams(string str) //, T xnlContext
+        internal static XNLParams GetXNLParams(string str) //, T xnlContext
         {
             if (string.IsNullOrEmpty(str)) return null;
-           // str = RegxpEngineCommon<T>.replaceXNLExpressionVariable(str, xnlContext); //解析表达式
-            //str = RegxpEngineCommon<T>.replaceGlobalAttribleVariable(str, xnlContext);
             XNLParams xnlParams=null;
             XNLParam tmpxnlparam;
             string t_paramName=null;
@@ -149,14 +101,14 @@ namespace COM.SingNo.XNLEngine
             {
                 if (trimStr.EndsWith("</attrs>")==false)
                 {
-                    Match match = matchXNLAttrsTag(str);
+                    Match match = MatchXNLAttrsTag(str);
                     if (match.Success)
                     {
                         trimStr = match.Value;
                     }
                 }
                 xnlParams = new XNLParams();
-                MatchCollection subColls = matchXNLAttrTags(trimStr);
+                MatchCollection subColls = MatchXNLAttrTags(trimStr);
                 foreach (Match subMatch in subColls)
                 {
                     Match nameMatch = Regex.Match(subMatch.Groups[1].Value, RegexStr_XNLTagAttrName, XNL_RegexOptions);// RegexObj_XNLTagAttrName.Match(subMatch.Groups[1].Value);
@@ -193,32 +145,28 @@ namespace COM.SingNo.XNLEngine
             }
             return xnlParams;
         }
-        internal static MatchCollection matcgXNLTagInnerAttrs(string str)
-        {
-            MatchCollection paramColle = Regex.Matches(str, RegexStr_XNLInnerTagParams, XNL_RegexOptions);// RegxpEngineCommon<T>.RegexObj_XNLInnerTagParams.Matches(str);
-            return paramColle;
-        }
-        internal static Match matchXNLAttrsTag(string str)
+       
+        internal static Match MatchXNLAttrsTag(string str)
         {
             Match match = Regex.Match(str, RegexStr_XNLOutTagParams, XNL_RegexOptions);// RegexObj_XNLOutTagParams.Match(str);
             return match;
         }
-        internal static MatchCollection matchXNLAttrTags(string str)
+        internal static MatchCollection MatchXNLAttrTags(string str)
         {
             MatchCollection colls = Regex.Matches(str, RegexStr_XNLOutTagParam, XNL_RegexOptions);// RegxpEngineCommon<T>.RegexObj_XNLOutTagParam.Matches(str);
             return colls;
         }
 
-        public static void updateXNLConfig()
+        public static void UpdateXNLConfig()
         {
             Regex.CacheSize = 30;
-            XNLTagRegNames = XNLLib<T>.getRegTagNameSpaces().Replace(".", "\\.");
+            XNLTagRegNames = XNLLib<T>.GetRegTagNameSpaces().Replace(".", "\\.");
             RegexStr_XNLTagGroupAll = RegexTemplate_XNLTagGroupAll.Replace("XNL", XNLTagRegNames);
             RegexStr_XNLTagPart1Group0 = RegexTemplate_XNLTagPart1Group0.Replace("XNL", XNLTagRegNames);
             RegexStr_XNLTagPart1Group3 = RegexTemplate_XNLTagPart1Group3.Replace("XNL", XNLTagRegNames);
             RegexStr_XNLTagPart1Group4 = RegexTemplate_XNLTagPart1Group4.Replace("XNL", XNLTagRegNames);
 
-            RegexStr_XNLTagWithName3GroupAll = RegexTemplate_XNLTagWithName3GroupAll.Replace("XNL", XNLTagRegNames);
+           // RegexStr_XNLTagWithName3GroupAll = RegexTemplate_XNLTagWithName3GroupAll.Replace("XNL", XNLTagRegNames);
             RegexStr_XNLSubTagName2GroupAll = RegexTemplate_XNLSubTagName2GroupAll.Replace("XNL", "[_a-zA-Z0-9\\.]");
 
             RegxpEngineCommon<T>.RegexObj_XNLTagGroupAll = new Regex(RegexStr_XNLTagGroupAll, XNL_RegexOptions);
@@ -226,72 +174,15 @@ namespace COM.SingNo.XNLEngine
             RegxpEngineCommon<T>.RegexObj_XNLTagPart1Group3 = new Regex(RegexStr_XNLTagPart1Group3, XNL_RegexOptions);
             //RegxpEngineCommon<T>.RegexObj_XNLTagPart1Group4 = new Regex(RegxpEngineCommon<T>.RegexStr_XNLTagPart1Group4.Replace("@XNL", XNLLib<T>.getRegTagNameSpaces()), XNL_RegexOptions);
         }
+
         
-        internal static Match matchTagGroupAll(string contentStr)
-        {
-            return Regex.Match(contentStr, RegexStr_XNLTagGroupAll, XNL_RegexOptions);// RegexObj_XNLTagGroupAll.Match(contentStr);
-        }
-        internal static MatchCollection matchTagsGroupAll(string contentStr)
-        {
-            return Regex.Matches(contentStr, RegexStr_XNLTagGroupAll, XNL_RegexOptions);
-        }
 
-        internal static Match matchTagGroupAllByName(string contentStr, string nameSpace, string tagName,string tagObjName)
+        internal static MatchCollection MatchSubTagsGroupAllByName(string contentStr,  string tagName, string tagObjName)
         {
-            string regStr = getTagRegStr(nameSpace, tagName, tagObjName);
-            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
-        }
-
-        internal static MatchCollection matchTagsGroupAllByName(string contentStr, string nameSpace, string tagName,string tagObjName)
-        {
-            string regStr = getTagRegStr(nameSpace, tagName, tagObjName);
+            string regStr = GetSubTagRegStr(tagName, tagObjName);
             return Regex.Matches(contentStr, regStr, XNL_RegexOptions);
         }
-
-
-        internal static Match matchSubTagGroupAllByName(string contentStr, string tagName, string tagObjName)
-        {
-            string regStr = getSubTagRegStr(tagName, tagObjName);
-            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
-        }
-
-        internal static string getTagRegStr(string nameSpace, string tagName, string tagObjName)
-        {
-            string regStr;
-            if (string.IsNullOrEmpty(nameSpace))
-            {
-                regStr = RegexStr_XNLTagWithName3GroupAll;
-            }
-            else
-            {
-                regStr = RegexTemplate_XNLTagWithName3GroupAll.Replace("XNL", nameSpace.Replace(".", "\\."));
-            }
-            if (string.IsNullOrEmpty(tagName))
-            {
-                regStr = regStr.Replace("TAG", "[_a-zA-Z0-9]+");
-            }
-            else
-            {
-                regStr = regStr.Replace("TAG", tagName.Replace(".", "\\."));
-            }
-            if (string.IsNullOrEmpty(tagObjName))
-            {
-                regStr = regStr.Replace("NAME", "[a-zA-Z0-9]+|");
-            }
-            else
-            {
-                regStr = regStr.Replace("NAME", tagObjName);
-            }
-            return regStr;
-        }
-
-
-        internal static MatchCollection matchSubTagsGroupAllByName(string contentStr,  string tagName, string tagObjName)
-        {
-            string regStr = getSubTagRegStr(tagName, tagObjName);
-            return Regex.Matches(contentStr, regStr, XNL_RegexOptions);
-        }
-        internal static string getSubTagRegStr(string tagName, string tagObjName)
+        internal static string GetSubTagRegStr(string tagName, string tagObjName)
         {
             string regStr;
             if (string.IsNullOrEmpty(tagName))
@@ -313,7 +204,7 @@ namespace COM.SingNo.XNLEngine
             return regStr;
         }
 
-        internal static XNLTagStruct createTagStruct(Match tagGroupAllMatch)
+        internal static XNLTagStruct CreateTagStruct(Match tagGroupAllMatch)
         {
             string _nameSpace = tagGroupAllMatch.Groups[1].Value;
             string _tagName = tagGroupAllMatch.Groups[2].Value;
@@ -321,68 +212,51 @@ namespace COM.SingNo.XNLEngine
             if (_tagInstanceName.StartsWith("::")) _tagInstanceName = _tagInstanceName.Substring(2);
             string tagParamStr = tagGroupAllMatch.Groups[4].Value;  //标签属性
             string tagContentStr = tagGroupAllMatch.Groups[5].Value;  //标签内容
-            XNLParams xnlParams = RegxpEngineCommon<T>.getXNLParams(tagParamStr);
-            Match attrsMatch = RegxpEngineCommon<T>.matchXNLAttrsTag(tagContentStr);
+            XNLParams xnlParams = RegxpEngineCommon<T>.GetXNLParams(tagParamStr);
+            Match attrsMatch = RegxpEngineCommon<T>.MatchXNLAttrsTag(tagContentStr);
             if (attrsMatch.Success)
             {
                 tagContentStr = tagContentStr.Substring(attrsMatch.Index + attrsMatch.Length); //UtilsCode.onceReplace(tagContentStr, attrsMatch.Value, "");
-                XNLParams params2 = RegxpEngineCommon<T>.getXNLParams(attrsMatch.Value);
+                XNLParams params2 = RegxpEngineCommon<T>.GetXNLParams(attrsMatch.Value);
                 if (params2 != null && xnlParams != null)
                 {
                     foreach (KeyValuePair<string, XNLParam> kv in params2)
                     {
                         xnlParams[kv.Key] = kv.Value;
-                        //if (xnlParams.ContainsKey(kv.Key))
-                        //{
-                        //    xnlParams[kv.Key] = kv.Value;
-                        //}
-                        //else
-                        //{
-                        //    xnlParams.Add(kv.Key, kv.Value);
-                        //}
                     }
                 }
             }
             XNLTagStruct tagStruct = new XNLTagStruct();
             tagStruct.nameSpace = _nameSpace;
             tagStruct.tagName = _tagName;
-            //if (string.IsNullOrEmpty(_tagInstanceName))
-            //{
-            //    _tagInstanceName = "_tag_" + _tagName + xnlcontext.z__TagFlagId.ToString();
-            //    xnlcontext.z__TagFlagId += 1;
-            //}
+
             tagStruct.instanceName = _tagInstanceName;
             tagStruct.tagParams = xnlParams;
             tagStruct.bodyContent = tagContentStr;
             tagStruct.allContent = tagGroupAllMatch.Value;
-            IXNLTag<T> tagObj = XNLLib<T>.getTagInstance(_nameSpace, _tagName);
+            IXNLTag<T> tagObj = XNLLib<T>.GetTagInstance(_nameSpace, _tagName);
             string subTagName = tagObj.subTagNames;
             //if (subTagName == null) subTagName = "";
             if (string.IsNullOrEmpty(subTagName)==false)
             {
-                //string _subTagNames = "";
-                //for (int t = 0; t < subTagName.Length; t++)
-                //{
-                //    _subTagNames += (t > 0 ? "|" : "") + subTagName[t];
-                //}
-                tagStruct.subTagStruct = getSubTagStructs(tagContentStr, subTagName, _tagInstanceName);
+                tagStruct.subTagStruct = GetSubTagStructs(tagContentStr, subTagName, _tagInstanceName);
             }
             return tagStruct;
         }
 
-        internal static XNLTagStruct createSubTagStruct(Match subTagGroupAllMatch) //, T xnlcontext
+        internal static XNLTagStruct CreateSubTagStruct(Match subTagGroupAllMatch) //, T xnlcontext
         {
             string _tagName = subTagGroupAllMatch.Groups[1].Value;
             string _tagInstanceName = subTagGroupAllMatch.Groups[2].Value.Trim();//.ToLower();
             if (_tagInstanceName.StartsWith("::")) _tagInstanceName = _tagInstanceName.Substring(2);
             string tagParamStr = subTagGroupAllMatch.Groups[3].Value;  //标签属性
             string tagContentStr = subTagGroupAllMatch.Groups[4].Value;  //标签内容
-            XNLParams xnlParams = RegxpEngineCommon<T>.getXNLParams(tagParamStr);
-            Match attrsMatch = RegxpEngineCommon<T>.matchXNLAttrsTag(tagContentStr);
+            XNLParams xnlParams = RegxpEngineCommon<T>.GetXNLParams(tagParamStr);
+            Match attrsMatch = RegxpEngineCommon<T>.MatchXNLAttrsTag(tagContentStr);
             if (attrsMatch.Success)
             {
                 tagContentStr = tagContentStr.Substring(attrsMatch.Index + attrsMatch.Length);
-                XNLParams params2 = RegxpEngineCommon<T>.getXNLParams(attrsMatch.Value);
+                XNLParams params2 = RegxpEngineCommon<T>.GetXNLParams(attrsMatch.Value);
                 if (params2 != null && xnlParams != null)
                 {
                     foreach (KeyValuePair<string, XNLParam> kv in params2)
@@ -400,11 +274,11 @@ namespace COM.SingNo.XNLEngine
             return tagStruct;
         }
 
-        internal static List<XNLTagStruct> getSubTagStructs(string contentStr, string subTagName, string tagObjName) //, T xnlContext
+        internal static List<XNLTagStruct> GetSubTagStructs(string contentStr, string subTagName, string tagObjName) //, T xnlContext
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
             if (string.IsNullOrEmpty(subTagName)) return null;
-            MatchCollection matchs = matchSubTagsGroupAllByName(contentStr, subTagName, tagObjName);
+            MatchCollection matchs = MatchSubTagsGroupAllByName(contentStr, subTagName, tagObjName);
             int curIndex = 0;
             if (matchs.Count > 0)
             {
@@ -418,7 +292,7 @@ namespace COM.SingNo.XNLEngine
                         tagStruct.allContent = contentStr.Substring(curIndex, match.Index - curIndex);
                         list.Add(tagStruct);
                     }
-                    tagStruct = createSubTagStruct(match);//, xnlContext
+                    tagStruct = CreateSubTagStruct(match);
                     /*
                     string tmpSubTagName=tagObj.getSubTagNames(subTagName);
                     if (!string.IsNullOrEmpty(tmpSubTagName))
@@ -441,7 +315,7 @@ namespace COM.SingNo.XNLEngine
             return null;
         }
        
-        internal static XNLTagStruct getTagStruct(string contentStr)
+        internal static XNLTagStruct GetTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
             XNLTagStruct tagStruct = null;
@@ -462,7 +336,7 @@ namespace COM.SingNo.XNLEngine
                 Match tmpMatch = matchs[0];
                 if (counts == 1 && tmpMatch.Index == 0 && tmpMatch.Length == contentStr.Length)
                 {
-                    tagStruct=createTagStruct(tmpMatch);
+                    tagStruct=CreateTagStruct(tmpMatch);
                 }
                 else
                 {
@@ -478,7 +352,7 @@ namespace COM.SingNo.XNLEngine
                             tmpStruct.allContent = contentStr.Substring(index, tmpMatch.Index - index);
                             tagStruct.subTagStruct.Add(tmpStruct);
                         }
-                        tagStruct.subTagStruct.Add(createTagStruct(tmpMatch));
+                        tagStruct.subTagStruct.Add(CreateTagStruct(tmpMatch));
                         index = tmpMatch.Index + tmpMatch.Length;
                     }
                     if(index<contentStr.Length)
@@ -507,7 +381,7 @@ namespace COM.SingNo.XNLEngine
             {
                 tokenValue = match.Groups[2].Value;
                 mode = ParseMode.Dynamic;
-                if (tokenValue.IndexOf(':') == 0)
+                if (tokenValue.IndexOf(':') == 0)  //maybe use &
                 {
                     mode = ParseMode.Static;
                     tokenValue = tokenValue.Remove(0, 1);
@@ -518,48 +392,321 @@ namespace COM.SingNo.XNLEngine
                 {
                     continue;
                 }
-                token = new XNLToken();
+
+                switch (match.Groups[1].Value)
+                {
+                    case "@": //属性
+                        token = new XNLToken();
+                        token.type = XNLTokenType.Attribute;
+                        if (dotInx == -1)
+                        {
+                            token.name = tokenValue;
+                            token.scope = string.Empty;
+                        }
+                        else
+                        {
+                            token.scope = tokenValue.Substring(0, dotInx);
+                            token.name = tokenValue.Substring(dotInx + 1);
+                        }
+                        break;
+                    case "$": // //表达式  统一概念 无参数 变量表达式  有参数  方法表达式  {$site.url}  "{$isemail({$siteurl},abc)}"  {$indexof({@a},)}
+                        token = GetExpression(tokenValue);
+                        if (token == null) continue;
+                        token.type = XNLTokenType.Express;
+                        break;
+                }
+
                 token.value = match.Value;
                 token.mode = mode;
 
-                if (dotInx == -1)
-                {
-                    token.Name = tokenValue;
-                    token.Scope = string.Empty;
-                }
-                else
-                {
-                    token.Scope = tokenValue.Substring(0, dotInx);
-                    token.Name = tokenValue.Substring(dotInx + 1);
-                }
-
-                switch(match.Groups[1].Value)
-                {
-                    case "@": //属性
-                        token.Type = XNLTokenType.Attribute;
-                        break;
-                    case "$": // //表达式  统一概念 无参数 变量表达式  有参数  方法表达式  {$site.url}  {$isemail({$siteurl})}
-
-                        //token.Type = XNLTokenType.Variable;
-                        //token.Type = XNLTokenType.Express;
-
-                        break;
-                }
-                
-                token.Index = match.Index;
-                token.Length = match.Length;
+                token.index = match.Index;
+                token.length = match.Length;
                 tokens.Add(token);
             }
             return tokens;
         }
 
 
-        //获取表达式描述,  将表达式 转为 标签 形式
-        internal static Dictionary<string, string> GetExpressionArgs(string ExpressionStr)
+        //获取表达式描述,  将表达式 转为 XNLExpression
+        internal static XNLExpression GetExpression(string ExpressionStr)
         {
+            
+            Match match = Regex.Match(ExpressionStr, @"^([_a-zA-Z0-9\.:]+)(.*?)$", XNL_RegexOptions);
+            if (match.Success)
+            {
+                XNLExpression express = new XNLExpression();
+
+                string names = match.Groups[1].Value;
+                var inx = names.LastIndexOf(':');
+                if (inx == 0 || inx == names.Length - 1)
+                {
+                    return null;
+                }
+                express.name = names;
+                if (inx != -1)
+                {
+                    express.scope = names.Substring(0, inx);
+                    names = names.Substring(inx + 1);
+                }
+
+                //分离  tag name and exp
+                inx = names.LastIndexOf('.');
+                if (inx == 0 || inx == names.Length - 1)
+                {
+                    return null;
+                }
+
+                if (inx!=-1)
+                {
+                    express.tagName = names.Substring(0, inx);
+                    express.name = names.Substring(inx + 1);
+                }
+
+                string args = match.Groups[2].Value.Trim();
+                if (string.IsNullOrEmpty(args) == false)
+                {
+                    char[] trims = new char[] { '\'', '"' };
+                    express.args = new List<XNLToken>();
+                    string match_args = args.Trim(new char[] { '(', ')' });
+                    //设置参数
+                    MatchCollection expMatchs;
+                    Dictionary<string, XNLExpression> nestedExp=null;
+                    while(true)
+                    {
+                        //匹配嵌套表达式
+                        //\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)
+                        expMatchs = Regex.Matches(match_args, @"(?::|)\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)", XNL_RegexOptions);
+                        if (expMatchs.Count > 0)
+                        {
+                            //嵌套表达式
+                            string _args = null;
+                            //解析 暂存
+                            foreach (Match m in expMatchs)
+                            {
+                               
+                                var _express = new XNLExpression();
+                                names = m.Groups[1].Value;
+                                _args = m.Groups[2].Value;
+
+                                if(m.Value.StartsWith(":"))
+                                {
+                                    _express.mode = ParseMode.Static;
+                                    _express.value = m.Value.Substring(2);
+                                }
+                                else
+                                {
+                                    _express.value = m.Value.Substring(1);
+                                }
+                                //_express.index = m.Index;
+                                //_express.length = m.Value.Length;
+                                
+                                _express.name = names;
+                                inx = names.LastIndexOf(':');
+
+                                if (inx != -1)
+                                {
+                                    _express.scope = names.Substring(0, inx);
+                                    names = names.Substring(inx + 1);
+                                }
+
+                                //分离  tag name and exp
+                                inx = names.LastIndexOf('.');
+
+                                if (inx != -1)
+                                {
+                                    _express.tagName = names.Substring(0, inx);
+                                    _express.name = names.Substring(inx + 1);
+                                }
+
+                                //解析参数
+                                if (string.IsNullOrEmpty(_args.Trim()) == false)
+                                {
+                                   
+                                    string[] s_arr = _args.Split(',');
+
+                                    _express.args = new List<XNLToken>(s_arr.Length);
+                                    string _s;
+                                    XNLToken _token;
+                                    for (var i = 0; i < s_arr.Length; i++)
+                                    {
+
+                                        _s = s_arr[i].Trim();
+                                        if(_s.StartsWith("@") || _s.StartsWith(":@"))
+                                        {
+                                            _token = new XNLToken() { type = XNLTokenType.Attribute };
+                                        }
+                                        else if (_s.StartsWith("$") || _s.StartsWith(":$"))
+                                        {
+                                            _token = new XNLExpression() { type = XNLTokenType.Express};
+                                        }
+                                        else
+                                        {
+                                            if ((_s.StartsWith("\"") && _s.EndsWith("\"")) || _s.StartsWith("'") && _s.EndsWith("'"))
+                                            {
+                                                _s = _s.Trim(trims);
+                                            }
+                                            else if (_s.StartsWith("~Exp~"))
+                                            {
+                                                _token = nestedExp[_s];
+                                                _express.args.Add(_token);
+                                                continue;
+                                            }
+                                            _token = new XNLToken() { type = XNLTokenType.Common, value = _s };
+                                        }
+                                        if (_token.type != XNLTokenType.Common)
+                                        {
+                                            if (_s[0] == ':')
+                                            {
+                                                _token.mode = ParseMode.Static;
+                                                _token.value = _s.Substring(2);
+                                            }
+                                            else
+                                            {
+                                                _token.value = _s.Substring(1);
+                                            }
+                                            if (_token.type == XNLTokenType.Express)
+                                            {
+                                                inx = _token.value.LastIndexOf(':');
+                                                names = _token.value;
+                                                _token.name = names;
+                                                if (inx != -1)
+                                                {
+                                                    _token.scope = _token.value.Substring(0, inx);
+                                                    names = _token.value.Substring(inx + 1);
+                                                }
+
+                                                //分离  tag name and exp
+                                                inx = names.LastIndexOf('.');
+
+                                                if (inx != -1)
+                                                {
+                                                    ((XNLExpression)_token).tagName = names.Substring(0, inx);
+                                                    _token.name = names.Substring(inx + 1);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                inx = _token.value.LastIndexOf('.');
+                                                if (inx == -1)
+                                                {
+                                                    _token.name = _token.value;
+                                                }
+                                                else
+                                                {
+                                                    _token.scope = _token.value.Substring(0, inx);
+                                                    _token.name = _token.value.Substring(inx + 1);
+                                                }
+                                            }
+                                        }
+                                        
+                                        _express.args.Add(_token);
+                                    }
+                                }
+                                //名称 参数
+                                if (nestedExp == null) nestedExp = new Dictionary<string, XNLExpression>();
+                                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
+                                string r = ra.Next().ToString();
+                                string key = "~Exp~" + r;
+
+                                nestedExp.Add(key, _express);
+                                //替换表达式
+                                match_args = match_args.Replace(m.Value, key);
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    //split match_args
+                    string[] e_arr = match_args.Split(',');
+                    string e_s;
+                    XNLToken e_token;
+                    for (var i = 0; i < e_arr.Length; i++)
+                    {
+                        e_s = e_arr[i].Trim();
+                        if (e_s.StartsWith("@") || e_s.StartsWith(":@"))
+                        {
+                            e_token = new XNLToken() { type = XNLTokenType.Attribute }; //, value = e_s.Remove(0, 1)
+                        }
+                        else if (e_s.StartsWith("$") || e_s.StartsWith(":@"))
+                        {
+                            e_token = new XNLExpression() { type = XNLTokenType.Express }; //, value = e_s.Remove(0, 1) 
+                        }
+                        else
+                        {
+                            if ((e_s.StartsWith("\"") && e_s.EndsWith("\"")) || e_s.StartsWith("'") && e_s.EndsWith("'"))
+                            {
+                                e_s = e_s.Trim(trims);
+                            }
+                            else if (e_s.StartsWith("~Exp~"))
+                            {
+                                e_token = nestedExp[e_s];
+                                express.args.Add(e_token);
+                                continue;
+                            }
+                            e_token = new XNLToken() { type = XNLTokenType.Common, value = e_s };
+                        }
+                        if (e_token.type != XNLTokenType.Common)
+                        {
+                            if (e_s[0] == ':')
+                            {
+                                e_token.mode = ParseMode.Static;
+                                e_token.value = e_s.Substring(2);
+                            }
+                            else
+                            {
+                                e_token.value = e_s.Substring(1);
+                            }
+                            if (e_token.type == XNLTokenType.Express)
+                            {
+                                inx = e_token.value.LastIndexOf(':');
+                                names = e_token.value; 
+                                if (inx != -1)
+                                {
+                                    e_token.scope = e_token.value.Substring(0, inx);
+                                    names = e_token.value.Substring(inx + 1);
+                                }
+
+                                //分离  tag name and exp
+                                inx = names.LastIndexOf('.');
+
+                                if (inx != -1)
+                                {
+                                    ((XNLExpression)e_token).tagName = names.Substring(0, inx);
+                                    e_token.name = names.Substring(inx + 1);
+                                }
+                            }
+                            else
+                            {
+                                inx = e_token.value.LastIndexOf('.');
+                                if (inx == -1)
+                                {
+                                    e_token.name = e_token.value;
+                                }
+                                else
+                                {
+                                    e_token.scope = e_token.value.Substring(0, inx);
+                                    e_token.name = e_token.value.Substring(inx + 1);
+                                }
+                            }
+                        }
+                        express.args.Add(e_token);
+                    }
+                }
+                
+                return express;
+            }
+            
             return null;
-            /*
-            //^([^\.]*)\((.*)?\)$
+        }
+    }
+}
+
+
+/*
+ * //^([^\.]*)\((.*)?\)$
             //^(.*)\.([^()]*)$|^(.*)\.(.*)\((.*)\)$
             //string tmpExpressStr = ExpressionStr.Trim();
             //tmpExpressStr = XNLCommon.decodeHTMLEscapecharacter(tmpExpressStr);
@@ -569,7 +716,7 @@ namespace COM.SingNo.XNLEngine
             {
                 #region 计算表达式
                 Match excMatch = Regex.Match(ExpressionStr, "^([^\\.]*)\\((.*)?\\)$", XNL_RegexOptions);
-                if (excMatch.Success) //内置方法表达式
+                if (excMatch.Success) //内置表达式  xnl.expression
                 {
                     string funcStr = excMatch.Groups[1].Value.Trim().ToLower();
                     string valueStrs = excMatch.Groups[2].Value;
@@ -601,9 +748,13 @@ namespace COM.SingNo.XNLEngine
                             }
                         }
                     }
-                } 
+                }
+            }
+            catch
+            {
 
-                Match excXnlMatch = Regex.Match(ExpressionStr, "^(.*)\\.([^()]*)$|^(.*)\\.(.*)\\((.*)\\)$", XNL_RegexOptions);
+            }
+ Match excXnlMatch = Regex.Match(ExpressionStr, "^(.*)\\.([^()]*)$|^(.*)\\.(.*)\\((.*)\\)$", XNL_RegexOptions);
                     if (excXnlMatch.Success)
                     {
                         if (excXnlMatch.Groups[1].Value.Trim() != "") //xnl.label
@@ -650,17 +801,7 @@ namespace COM.SingNo.XNLEngine
                             return returnStr;
                         }
             }
-            catch
-            {
-                
-            }
-             */ 
-        }
-    }
-}
-
-
-
+ * /
 
 //internal static XNLTagStruct getTagStruct(string contentStr, T xnlContext, string nameSpaceName, string tagName, string tagObjName)
 //{
@@ -1093,4 +1234,102 @@ namespace COM.SingNo.XNLEngine
                 return ExpressionStr;
             }
         }
+ * 
+ * 
+ *  //internal static Regex RegexObj_XNLAttriableVariable = new Regex(RegexStr_XNLAttriableVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLDataBaseVariable = new Regex(RegexStr_XNLDataBaseVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLReqFormVariable = new Regex(RegexStr_XNLReqFormVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLReqQueryVariable = new Regex(RegexStr_XNLReqQueryVariable, XNL_RegexOptions);
+
+        //internal static Regex RegexObj_XNLReqVariable = new Regex(RegexStr_XNLReqVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLSessionVariable = new Regex(RegexStr_XNLSessionVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLApplicationVariable = new Regex(RegexStr_XNLApplicationVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLAllPublicCariable = new Regex(RegexStr_XNLAllPublicCariable, XNL_RegexOptions);
+
+        //internal static Regex RegexObj_XNLExpressionVariable = new Regex(RegexStr_XNLExpressionVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLGlobalVariable = new Regex(RegexStr_XNLGlobalVariable, XNL_RegexOptions);
+        //internal static Regex RegexObj_XNLNotes = new Regex(RegexStr_XNLNotes, XNL_RegexOptions);
+ * 
+ * //internal const RegexOptions XNL_RegexOptionsNoCompiled = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
+        //@"<@XNL+:\w+[\s]*([^>]*)>([.\s\S]*)</\1:\2>"  //<(xnl|cms\.manage):([_a-zA-Z0-9]+)(::[_a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>  //捕捉所有
+        //<xnl|cms\.manage:[_a-zA-Z0-9]+(?:::[_a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)> //不分组捕捉前半部分
+        //<(xnl|cms\.manage):([_a-zA-Z0-9]+)(::[_a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)> 分组捕捉前半部分  1标签命名空间 2标签名 3标签实例名 4 标签参数
+
+        //internal const string RegexStr_XNLAttriableVariable = @"{@([^\s{}><:]+?)}";
+        //internal const string RegexStr_XNLDataBaseVariable = "{\\$([^\\s{><}:]+?)}";
+        //internal const string RegexTemplate_XNLAttriableVariable = @"{@([^\s{}><:]+?)(::NAME|)}";
+        //internal const string RegexTemplate_XNLDataBaseVariable = "{\\$([^\\s{><}:]+?)(::NAME|)}";
+
+
+        //internal const string RegexStr_XNLExpressionVariable = @"{\[([^{}]+)\]}";//"{\\[((?>[^{][^\\[])+?(?>[^\\]][^}])*?)\\]}"; // //{\[([^{}]+|{\[(?<o>)|\]}(?<-o>)?)(?(o)(?!))\]}
+        //internal const string RegexStr_XNLGlobalVariable = @"{!(\w+?)}";
+ * 
+ * //internal static string RegexStr_XNLTagWithName3GroupAll;// = @"<(@XNL):(@TAG)(@NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
+        //internal static string RegexStr_XNLSubTagName2GroupAll;// = @"<(@XNL)(@NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
 */
+/*
+         
+        internal static MatchCollection MatcgXNLTagInnerAttrs(string str)
+        {
+            MatchCollection paramColle = Regex.Matches(str, RegexStr_XNLInnerTagParams, XNL_RegexOptions);// RegxpEngineCommon<T>.RegexObj_XNLInnerTagParams.Matches(str);
+            return paramColle;
+        }
+      
+        internal static Match MatchTagGroupAll(string contentStr)
+        {
+            return Regex.Match(contentStr, RegexStr_XNLTagGroupAll, XNL_RegexOptions);// RegexObj_XNLTagGroupAll.Match(contentStr);
+        }
+        internal static MatchCollection MatchTagsGroupAll(string contentStr)
+        {
+            return Regex.Matches(contentStr, RegexStr_XNLTagGroupAll, XNL_RegexOptions);
+        }
+        
+        internal static Match MatchTagGroupAllByName(string contentStr, string nameSpace, string tagName,string tagObjName)
+        {
+            string regStr = GetTagRegStr(nameSpace, tagName, tagObjName);
+            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
+        }
+
+        internal static MatchCollection MatchTagsGroupAllByName(string contentStr, string nameSpace, string tagName,string tagObjName)
+        {
+            string regStr = GetTagRegStr(nameSpace, tagName, tagObjName);
+            return Regex.Matches(contentStr, regStr, XNL_RegexOptions);
+        }
+
+
+        internal static Match MatchSubTagGroupAllByName(string contentStr, string tagName, string tagObjName)
+        {
+            string regStr = GetSubTagRegStr(tagName, tagObjName);
+            return Regex.Match(contentStr, regStr, XNL_RegexOptions);
+        }
+
+        internal static string GetTagRegStr(string nameSpace, string tagName, string tagObjName)
+        {
+            string regStr;
+            if (string.IsNullOrEmpty(nameSpace))
+            {
+                regStr = RegexStr_XNLTagWithName3GroupAll;
+            }
+            else
+            {
+                regStr = RegexTemplate_XNLTagWithName3GroupAll.Replace("XNL", nameSpace.Replace(".", "\\."));
+            }
+            if (string.IsNullOrEmpty(tagName))
+            {
+                regStr = regStr.Replace("TAG", "[_a-zA-Z0-9]+");
+            }
+            else
+            {
+                regStr = regStr.Replace("TAG", tagName.Replace(".", "\\."));
+            }
+            if (string.IsNullOrEmpty(tagObjName))
+            {
+                regStr = regStr.Replace("NAME", "[a-zA-Z0-9]+|");
+            }
+            else
+            {
+                regStr = regStr.Replace("NAME", tagObjName);
+            }
+            return regStr;
+        }
+        */
