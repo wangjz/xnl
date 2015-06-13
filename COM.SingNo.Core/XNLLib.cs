@@ -8,16 +8,17 @@ namespace COM.SingNo.XNLCore
 {
     public class XNLLib<T> where T:XNLContext
     {
+        public static IXNLParser<T> xnlParser { get; private set; }
+
         private static Assembly libAssembly;
         public string nameSpace { get; private set; }
         public bool isCache { get; private set; }
-        //public Dictionary<string, string> extExpTags { get; private set; }
+
         private XNLCache<T> tagCache;
-        public XNLLib(string _nameSpace, bool _isCache)  //, Dictionary<string, string> _extExpTags
+        public XNLLib(string _nameSpace, bool _isCache) 
         {
             nameSpace = _nameSpace;
             isCache = _isCache;
-            //extExpTags = _extExpTags;
             if (_isCache)
             {
                 tagCache = new XNLCache<T>();
@@ -62,27 +63,10 @@ namespace COM.SingNo.XNLCore
             return obj;
         }
        
-        //private static List<string> delayRunTagList = new List<string>();
         private static string tagNameSpacesStr = "";
         private static Dictionary<string, XNLLib<T>> tagLibColls = new Dictionary<string, XNLLib<T>>();
         private static Dictionary<string, string[]> extExpColls = new Dictionary<string, string[]>();  //
-        /*
-        private static void addDelayRunTag(string tagFullName)
-        {
-            tagFullName = tagFullName.Trim().ToLower();
-            if (delayRunTagList.Contains(tagFullName) == false) delayRunTagList.Add(tagFullName);
-        }
-        private static void removeDelayRunTag(string tagFullName)
-        {
-            if (delayRunTagList.Count == 0) return;
-            tagFullName = tagFullName.Trim().ToLower();
-            if (delayRunTagList.Contains(tagFullName)) delayRunTagList.Remove(tagFullName);
-        }
-        public static bool checkTagIsDelayRun(string tagFullName)
-        {
-            return delayRunTagList.Contains(tagFullName);
-        }
-         */ 
+        
         private static void UpdateTagNameSpacesStr()
         {
             string str = "";
@@ -91,7 +75,9 @@ namespace COM.SingNo.XNLCore
                 str += (str??"|") + kv.Key;
             }
             tagNameSpacesStr = str;
+            if (xnlParser != null) xnlParser.Initialize();
         }
+
         /// <summary>
         /// 得到所有命名空间名称,以"|"分割
         /// </summary>
@@ -100,6 +86,7 @@ namespace COM.SingNo.XNLCore
         {
             return tagNameSpacesStr;
         }
+
         /// <summary>
         /// 注册标签命名空间
         /// </summary>
@@ -116,15 +103,7 @@ namespace COM.SingNo.XNLCore
             {
                 tagLibColls.Add(tagNameSpace, tagLib);
             }
-            /*
-            if (tagLib.extExpTags != null)
-            {
-                foreach (KeyValuePair<string, string> kv in tagLib.extExpTags)
-                {
-                    addExtExp(kv.Key, kv.Value);
-                }
-            }
-            */ 
+            
             UpdateTagNameSpacesStr();
         }
         /// <summary>
@@ -137,74 +116,16 @@ namespace COM.SingNo.XNLCore
             if (tagLibColls.ContainsKey(tagNameSpace))
             {
                 XNLLib<T> tagLib = tagLibColls[tagNameSpace];
-                /*
-                if (tagLib.extExpTags != null)
-                {
-                    foreach (KeyValuePair<string, string> kv in tagLib.extExpTags)
-                    {
-                        removeExtExp(kv.Key);
-                    }
-                }
-                 */ 
+          
                 tagLibColls.Remove(tagNameSpace);
             }
             UpdateTagNameSpacesStr();
         }
 
-        /*
-        private static void addExtExp(string extExpName, string executeTagFullName)
+       
+        public static void Initialize(IXNLParser<T> parser,List<XNLLib<T>> xnlLibs)
         {
-            executeTagFullName = executeTagFullName.Trim().ToLower();
-            extExpName = extExpName.Trim().ToLower().Replace(".", "\\.");
-            if (extExpColls.ContainsKey(extExpName) == false)
-            {
-                string[] tag_arr = executeTagFullName.Split(':');
-                extExpColls.Add(extExpName, new string[] { tag_arr[0], tag_arr[1], executeTagFullName });
-            }
-        }
-        private static void removeExtExp(string extExpName)
-        {
-            if (extExpColls.Count == 0) return;
-            extExpName = extExpName.Trim().ToLower();
-            foreach (KeyValuePair<string, string[]> kv in extExpColls)
-            {
-                if (Regex.IsMatch(extExpName, kv.Key))
-                {
-                    string[] strs = kv.Key.Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (strs.Length <= 1)
-                    {
-                        extExpColls.Remove(extExpName);
-                        return;
-                    }
-                    string str = "";
-                    for (int i = 0; i < strs.Length; i++)
-                    {
-                        if (strs[i] != extExpName)
-                        {
-                            str += (string.IsNullOrEmpty(str) ? "" : "|") + strs[i];
-                        }
-                    }
-                    extExpColls[str] = kv.Value;
-                    break;
-                }
-            }
-        }
-
-        public static string[] getExtExpTagInfo(string extExpName)
-        {
-            if (extExpColls.Count == 0) return null;
-            foreach (KeyValuePair<string, string[]> kv in extExpColls)
-            {
-                if (Regex.IsMatch(extExpName, "^(?:" + kv.Key + ")\\.\\w+"))
-                {
-                    return kv.Value;
-                }
-            }
-            return null;
-        }
-        */
-        public static void Initialize(List<XNLLib<T>> xnlLibs)
-        {
+            xnlParser = parser;
             if (xnlLibs != null)
             {
                 foreach (XNLLib<T> lib in xnlLibs)

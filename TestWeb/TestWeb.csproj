@@ -92,9 +92,13 @@
       <Project>{11790c63-e330-4095-a183-2870bb63d109}</Project>
       <Name>COM.SingNo.XNLCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\XNLEngine\COM.SingNo.XNLEngine.csproj">
-      <Project>{8349cbf6-7f34-47c2-99de-e3227516316f}</Project>
+    <ProjectReference Include="..\COM.SingNo.XNLEngine\COM.SingNo.XNLEngine.csproj">
+      <Project>{ade1e397-a532-4cbc-8622-d59ab21edbc3}</Project>
       <Name>COM.SingNo.XNLEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\COM.SingNo.XNLParser\COM.SingNo.XNLParser.csproj">
+      <Project>{8349cbf6-7f34-47c2-99de-e3227516316f}</Project>
+      <Name>COM.SingNo.XNLParser</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

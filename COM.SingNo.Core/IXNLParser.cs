@@ -13,8 +13,7 @@ namespace COM.SingNo.XNLCore
     /// </summary>
     public interface IXNLParser<T> where T : XNLContext
     {
-        //XNLOnErrorAction onTagErrorAction { get;}
-       
+        void Initialize();
         /// <summary>
         /// 清除xnl注释标签
         /// </summary>
@@ -22,22 +21,8 @@ namespace COM.SingNo.XNLCore
         /// <returns></returns>
         string RemoveXNLNotes(string contentStr);
 
-        //string replaceAttribleVariable(IXNLTag<T> tagObj,string contentStr);
-        /// <summary>
-        /// 解析所有基本变量标签
-        /// </summary>
-        /// <param name="contentStr"></param>
-        /// <param name="xnlContext"></param>
-        /// <returns></returns>
-        //string replaceAllBaseVariable(string contentStr, T xnlContext);
-
         XNLTagStruct GetTagStruct(string contentStr);
 
-        //List<XNLAttribute> GetTagTokens(string contentStr,string tagInstance);
-
-        //List<XNLExpression> GetTagTokens(string contentStr);
-
-        //List<XNLVariable> GetTagTokens(string contentStr);
 
         List<XNLToken> GetTagTokens(string contentStr);
     }

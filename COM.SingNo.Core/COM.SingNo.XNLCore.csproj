@@ -13,7 +13,8 @@
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>singno.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -44,7 +45,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CHS2PinYin.cs" />
     <Compile Include="Exceptions\ResponseEndException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IXNLParser.cs" />
@@ -53,28 +53,16 @@
     <Compile Include="Tags\For.cs" />
     <Compile Include="Tags\If.cs" />
     <Compile Include="Tags\Set.cs" />
-    <Compile Include="ParserEngine.cs" />
-    <Compile Include="XNLAttribute.cs" />
     <Compile Include="XNLCache.cs" />
     <Compile Include="XNLExpression.cs" />
     <Compile Include="XNLLib.cs" />
     <Compile Include="XNLResponse.cs" />
-    <Compile Include="XNLTagCache.cs" />
-    <Compile Include="UtilsCode.cs" />
-    <Compile Include="XNLBaseCommon.cs" />
-    <Compile Include="XNLConfig.cs" />
     <Compile Include="XNLContext.cs" />
     <Compile Include="IXNLTag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="XNLParam.cs" />
     <Compile Include="XNLParams.cs" />
     <Compile Include="XNLTagStruct.cs" />
     <Compile Include="XNLToken.cs" />
-    <Compile Include="XNLType.cs" />
-    <Compile Include="XNLVariable.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="singno.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
