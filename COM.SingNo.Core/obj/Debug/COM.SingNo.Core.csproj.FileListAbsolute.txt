@@ -1,0 +1,15 @@
+F:\singnoCMS\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.dll
+F:\singnoCMS\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.pdb
+F:\singnoCMS\COM.SingNo.Core\obj\Debug\ResolveAssemblyReference.cache
+F:\singnoCMS\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.dll
+F:\singnoCMS\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.pdb
+F:\SingNoCMS(V1)\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.dll
+F:\SingNoCMS(V1)\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.pdb
+F:\SingNoCMS(V1)\COM.SingNo.Core\obj\Debug\ResolveAssemblyReference.cache
+F:\SingNoCMS(V1)\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.dll
+F:\SingNoCMS(V1)\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.pdb
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.dll
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\bin\Debug\COM.SingNo.Core.pdb
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Debug\ResolveAssemblyReference.cache
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.dll
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Debug\COM.SingNo.Core.pdb

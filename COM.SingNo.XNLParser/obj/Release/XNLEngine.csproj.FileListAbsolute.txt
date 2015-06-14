@@ -1,0 +1,11 @@
+F:\singnoCMS\XNLEngine\bin\Release\SingnoCMS.XNLEngine.dll
+F:\singnoCMS\XNLEngine\bin\Release\SingnoCMS.XNLEngine.pdb
+F:\singnoCMS\XNLEngine\bin\Release\COM.Singno.Common.dll
+F:\singnoCMS\XNLEngine\bin\Release\LitJson.dll
+F:\singnoCMS\XNLEngine\bin\Release\COM.Singno.Common.pdb
+F:\singnoCMS\XNLEngine\bin\Release\LitJson.pdb
+F:\singnoCMS\XNLEngine\obj\Release\ResolveAssemblyReference.cache
+F:\singnoCMS\XNLEngine\obj\Release\SingnoCMS.XNLEngine.dll
+F:\singnoCMS\XNLEngine\obj\Release\SingnoCMS.XNLEngine.pdb
+F:\singnoCMS\XNLEngine\bin\Release\COM.SingNo.Core.dll
+F:\singnoCMS\XNLEngine\bin\Release\COM.SingNo.Core.pdb

@@ -1,0 +1,5 @@
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\bin\Release\COM.SingNo.XNLCore.dll
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\bin\Release\COM.SingNo.XNLCore.pdb
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Release\ResolveAssemblyReference.cache
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Release\COM.SingNo.XNLCore.dll
+F:\SingNoCMS(V1)_svn\COM.SingNo.Core\obj\Release\COM.SingNo.XNLCore.pdb

@@ -1,0 +1,13 @@
+F:\singnoCMS\XNLEngine\bin\Debug\singnoCMS.XNLEngine.dll
+F:\singnoCMS\XNLEngine\bin\Debug\singnoCMS.XNLEngine.pdb
+F:\singnoCMS\XNLEngine\obj\Debug\ResolveAssemblyReference.cache
+F:\singnoCMS\XNLEngine\obj\Debug\singnoCMS.XNLEngine.dll
+F:\singnoCMS\XNLEngine\obj\Debug\singnoCMS.XNLEngine.pdb
+F:\singnoCMS\XNLEngine\bin\Debug\singnoCMS.DAL.dll
+F:\singnoCMS\XNLEngine\bin\Debug\singnoCMS.DAL.pdb
+F:\singnoCMS\XNLEngine\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Common.dll
+F:\singnoCMS\XNLEngine\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Data.dll
+F:\singnoCMS\XNLEngine\bin\Debug\Microsoft.Practices.ObjectBuilder.dll
+F:\singnoCMS\XNLEngine\bin\Debug\LinqBridge.dll
+F:\singnoCMS\XNLEngine\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Common.xml
+F:\singnoCMS\XNLEngine\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Data.xml

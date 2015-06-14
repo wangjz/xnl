@@ -1,0 +1,5 @@
+C:\WorkSpace\xnl\COM.SingNo.Utils\obj\Debug\COM.SingNo.Utils.csprojResolveAssemblyReference.cache
+C:\WorkSpace\xnl\COM.SingNo.Utils\bin\Debug\COM.SingNo.Utils.dll
+C:\WorkSpace\xnl\COM.SingNo.Utils\bin\Debug\COM.SingNo.Utils.pdb
+C:\WorkSpace\xnl\COM.SingNo.Utils\obj\Debug\COM.SingNo.Utils.dll
+C:\WorkSpace\xnl\COM.SingNo.Utils\obj\Debug\COM.SingNo.Utils.pdb

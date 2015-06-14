@@ -1,0 +1,14 @@
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Debug\XNLEngine.dll
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Debug\XNLEngine.pdb
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Debug\ResolveAssemblyReference.cache
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Debug\XNLEngine.dll
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Debug\XNLEngine.pdb
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Debug\DAL.dll
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Debug\DAL.pdb
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Release\XNLEngine.dll
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Release\XNLEngine.pdb
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Release\DAL.dll
+E:\singnoCMS\XNLEngine\XNLEngine\bin\Release\DAL.pdb
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Release\ResolveAssemblyReference.cache
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Release\XNLEngine.dll
+E:\singnoCMS\XNLEngine\XNLEngine\obj\Release\XNLEngine.pdb

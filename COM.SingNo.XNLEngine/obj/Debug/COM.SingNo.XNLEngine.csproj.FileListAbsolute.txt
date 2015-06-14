@@ -1,0 +1,7 @@
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\COM.SingNo.XNLEngine.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\COM.SingNo.XNLEngine.pdb
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\COM.SingNo.XNLCore.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\COM.SingNo.XNLCore.pdb
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\COM.SingNo.XNLEngine.csprojResolveAssemblyReference.cache
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\COM.SingNo.XNLEngine.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\COM.SingNo.XNLEngine.pdb

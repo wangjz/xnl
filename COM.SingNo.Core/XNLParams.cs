@@ -4,13 +4,13 @@ using System.Text;
 
 namespace COM.SingNo.XNLCore
 {
-    public class XNLParams:Dictionary<string,object>
+    public class XNLParams:Dictionary<string,string>
     {
-        public new object this[string key]
+        public new string this[string key]
         {
             get
             {
-                object xnlParam;
+                string xnlParam;
                 this.TryGetValue(key, out xnlParam);
                 return xnlParam;
             }

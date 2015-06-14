@@ -10,50 +10,49 @@ namespace COM.SingNo.XNLCore
     {
         public static IXNLParser<T> xnlParser { get; private set; }
 
-        private static Assembly libAssembly;
+        private  Assembly libAssembly;
+        private string low_nameSpace;
+
         public string nameSpace { get; private set; }
+        
         public bool isCache { get; private set; }
 
-        private XNLCache<T> tagCache;
+        private static XNLCache<T> tagCache;
+
         public XNLLib(string _nameSpace, bool _isCache) 
         {
             nameSpace = _nameSpace;
+            low_nameSpace = _nameSpace.ToLower();
             isCache = _isCache;
-            if (_isCache)
-            {
-                tagCache = new XNLCache<T>();
-                if (_nameSpace=="xnl")
-                {
-                    tagCache.Add("if", new If<T>());
-                    tagCache.Add("set", new Set<T>());
-                    tagCache.Add("for", new For<T>());
-                    tagCache.Add("expression", new Expression<T>());
-                }
-            }
         }
-        private static IXNLTag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
+
+        private  IXNLTag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
         {
             if (libAssembly == null)
             {
                 libAssembly = Assembly.Load("COM.SingNo.XNLLib." + nameSpace);
             }
+
             Type tagType = libAssembly.GetType("COM.SingNo.XNLLib." + nameSpace + "." + tagName, false, true);//得到类型
+
             if (tagType == null)
             {
                 return null;
             }
             return  (IXNLTag<T>)Activator.CreateInstance(tagType);
         }
+
         public IXNLTag<T> GetTagInstance(string tagName)
         {
             IXNLTag<T> obj;
             if (isCache)
             {
-                obj = tagCache[tagName];
+                string _n = low_nameSpace + ":" + tagName;
+                obj = tagCache[_n];
                 if (obj == null)
                 {
                     obj = GetTagInstanceFromAssembly(nameSpace, tagName);
-                    if (obj != null) tagCache[tagName] = obj;
+                    if (obj != null) tagCache[_n] = obj;
                 }
             }
             else
@@ -65,7 +64,6 @@ namespace COM.SingNo.XNLCore
        
         private static string tagNameSpacesStr = "";
         private static Dictionary<string, XNLLib<T>> tagLibColls = new Dictionary<string, XNLLib<T>>();
-        private static Dictionary<string, string[]> extExpColls = new Dictionary<string, string[]>();  //
         
         private static void UpdateTagNameSpacesStr()
         {
@@ -126,6 +124,11 @@ namespace COM.SingNo.XNLCore
         public static void Initialize(IXNLParser<T> parser,List<XNLLib<T>> xnlLibs)
         {
             xnlParser = parser;
+            if(tagCache==null)tagCache = new XNLCache<T>();
+            tagCache.Add("xnl:if", new If<T>());
+            tagCache.Add("xnl:set", new Set<T>());
+            tagCache.Add("xnl:for", new For<T>());
+            tagCache.Add("xnl:expression", new Expression<T>());
             if (xnlLibs != null)
             {
                 foreach (XNLLib<T> lib in xnlLibs)
@@ -143,20 +146,26 @@ namespace COM.SingNo.XNLCore
 
         public static IXNLTag<T> GetTagInstance(string nameSpace, string tagName)
         {
-            //nameSpace = nameSpace.ToLower(); //标签库名
-            //tagName = tagName.ToLower();  //标签名
-            if (string.Compare(nameSpace,"xnl.mytag")!=0)
+            IXNLTag<T> obj = tagCache[nameSpace + ":" + tagName];
+            if(obj==null)
             {
                 XNLLib<T> tagLib = XNLLib<T>.GetTagLib(nameSpace);
                 if (tagLib == null) return null;
-                IXNLTag<T> obj =tagLib.GetTagInstance(tagName);
-                if (obj == null) return null;
-                return obj;
+                obj = tagLib.GetTagInstance(tagName);
             }
-            return null;
+            return obj;
         }
 
-        //重载标签  原标签全名  子类标签全名
-        //SetOverride
+        //重载标签
+        public bool SetTagOverride(string tagName, IXNLTag<T> destTag)
+        {
+            if (destTag==null)
+            {
+                return false;
+            }
+            tagCache[low_nameSpace + ":" + tagName] = destTag;
+            return true;
+        }
+        
     }
 }
