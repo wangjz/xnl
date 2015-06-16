@@ -604,7 +604,7 @@ namespace COM.SingNo.XNLEngine
                         bool isHas = false;
                         if (string.IsNullOrEmpty(token.scope))
                         {
-                            isHas = tagObj.ExistAttribute(token.name, tagObj.curTag);
+                            isHas = tagObj.ExistAttribute(token.name);
                         }
                         else if (token.scope == tagName || token.scope == tagObj.instanceName)
                         {
@@ -616,11 +616,11 @@ namespace COM.SingNo.XNLEngine
                             if (isDynamic)
                             {
                                 strBuilder.Append("\nbuffer.Append(");
-                                strBuilder.Append(tagObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + tagObj.curTag + "\"));");
+                                strBuilder.Append(tagObj.instanceName + ".GetAttribute(\"" + token.name + "\"));");
                             }
                             else
                             {
-                                strBuilder.Append(tagObj.GetAttribute(token.name, tagObj.curTag));
+                                strBuilder.Append(tagObj.GetAttribute(token.name));
                             }
                         }
                         else
@@ -636,7 +636,7 @@ namespace COM.SingNo.XNLEngine
                                     parentObj = (IXNLTag<T>)parentTag.tagObj;
                                     if (string.IsNullOrEmpty(token.scope))
                                     {
-                                        isHas = parentObj.ExistAttribute(token.name, parentObj.curTag);
+                                        isHas = parentObj.ExistAttribute(token.name);
                                     }
                                     else if (token.scope == parentTag.tagName || token.scope == parentObj.instanceName)
                                     {
@@ -651,11 +651,11 @@ namespace COM.SingNo.XNLEngine
                                 if (isDynamic)
                                 {
                                     strBuilder.Append("\nbuffer.Append(");
-                                    strBuilder.Append(parentObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + parentObj.curTag + "\"));");
+                                    strBuilder.Append(parentObj.instanceName + ".GetAttribute(\"" + token.name + "\"));");
                                 }
                                 else
                                 {
-                                    strBuilder.Append(parentObj.GetAttribute(token.name, parentObj.curTag));
+                                    strBuilder.Append(parentObj.GetAttribute(token.name));
                                 }
 
                             }
@@ -929,11 +929,11 @@ namespace COM.SingNo.XNLEngine
                                     }
                                     args_str += "}";
 
-                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + prevExpress.name + "\",null," + args_str + ")");
+                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + prevExpress.name + "\"," + args_str + ")");
                                 }
                                 else
                                 {
-                                    args.Push(t_tagObj.GetAttribute(prevExpress.name, null, t_args));
+                                    args.Push(t_tagObj.GetAttribute(prevExpress.name, t_args));
                                 }
                             }
                             prevExpress = null;
@@ -968,13 +968,13 @@ namespace COM.SingNo.XNLEngine
                     }
                     args_str += "}";
 
-                    return tagObj.instanceName + ".GetAttribute(\"" + express.name + "\",null," + args_str + ")";
+                    return tagObj.instanceName + ".GetAttribute(\"" + express.name + "\"," + args_str + ")";
                     //strBuilder.Append("\nbuffer.Append(" + tagObj.instanceName + ".GetAttribute(\"" + express.name + "\",null," + args_str + "));");
                 }
                 else
                 {
                     //strBuilder.Append(tagObj.GetAttribute(express.name, null, _args));
-                    return tagObj.GetAttribute(express.name, null, _args);
+                    return tagObj.GetAttribute(express.name , _args);
                 }
             }
             else
@@ -1054,7 +1054,7 @@ namespace COM.SingNo.XNLEngine
 
             if (string.IsNullOrEmpty(token.scope))
             {
-                isHas = tagObj.ExistAttribute(token.name, tagObj.curTag);
+                isHas = tagObj.ExistAttribute(token.name);
             }
             else if (token.scope == tagName || token.scope == tagObj.instanceName)
             {
@@ -1065,7 +1065,7 @@ namespace COM.SingNo.XNLEngine
             {
                 if (isDynamic)
                 {
-                    return tagObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + tagObj.curTag + "\")";
+                    return tagObj.instanceName + ".GetAttribute(\"" + token.name + "\")";
                 }
                 else
                 {
@@ -1085,7 +1085,7 @@ namespace COM.SingNo.XNLEngine
                         parentObj = (IXNLTag<T>)parentTag.tagObj;
                         if (string.IsNullOrEmpty(token.scope))
                         {
-                            isHas = parentObj.ExistAttribute(token.name, parentObj.curTag);
+                            isHas = parentObj.ExistAttribute(token.name);
                         }
                         else if (token.scope == parentTag.tagName || token.scope == parentObj.instanceName)
                         {
@@ -1100,7 +1100,7 @@ namespace COM.SingNo.XNLEngine
                 {
                     if (isDynamic)
                     {
-                        return parentObj.instanceName + ".GetAttribute(\"" + token.name + "\",\"" + parentObj.curTag + "\")";
+                        return parentObj.instanceName + ".GetAttribute(\"" + token.name + "\")";
                     }
                     else
                     {

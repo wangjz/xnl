@@ -45,19 +45,19 @@ namespace COM.SingNo.XNLCore.Tags
                 buffer.Remove(inx, len);
             }
         }
-        public void SetAttribute(string paramName, object value, string tagName = null)
+        public void SetAttribute(string paramName, object value)
         {
             attrs[paramName] = value;
         }
 
-        public object GetAttribute(string paramName, string tagName = null, object userData = null)
+        public object GetAttribute(string paramName, object userData = null)
         {
             if (paramName == "body") return body;
             object obj;
             TryGetAttribute(out obj, paramName);
             return obj;
         }
-        public bool TryGetAttribute(out object outValue, string paramName, string tagName = null, object userData = null)
+        public bool TryGetAttribute(out object outValue, string paramName, object userData = null)
         {
             if (paramName == "body")
             {
@@ -73,7 +73,7 @@ namespace COM.SingNo.XNLCore.Tags
             return new Set<T>();
         }
 
-        public bool ExistAttribute(string paramName, string tagName = null)
+        public bool ExistAttribute(string paramName)
         {
             if (paramName == "body") return true;
             return attrs.ContainsKey(paramName);

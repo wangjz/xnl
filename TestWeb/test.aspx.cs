@@ -35,11 +35,11 @@ namespace TestWeb
                 buffer.Append(@"  ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("lower", null, new ArrayList() { @"HELLO" }));
+                buffer.Append(exp_xnl_expression.GetAttribute("lower", new ArrayList() { @"HELLO" }));
                 buffer.Append(@" ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("iif", null, new ArrayList() { @"1>2", @"1", @"2" }));
+                buffer.Append(exp_xnl_expression.GetAttribute("iif", new ArrayList() { @"1>2", @"1", @"2" }));
                 buffer.Append(@" 111
 "" ""
 ");
@@ -87,11 +87,11 @@ namespace TestWeb
 ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("_", null, new ArrayList() { @"2+3" }));
+                buffer.Append(exp_xnl_expression.GetAttribute("_", new ArrayList() { @"2+3" }));
                 buffer.Append(@" ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("test", null, new ArrayList() { exp_xnl_expression.GetAttribute("go", null, new ArrayList() { exp_xnl_expression.GetAttribute("url"), "" }), "", @"123", @" 456 ", @"789", @"true", @"false" }));
+                buffer.Append(exp_xnl_expression.GetAttribute("test", new ArrayList() { exp_xnl_expression.GetAttribute("go", new ArrayList() { exp_xnl_expression.GetAttribute("url"), "" }), "", @"123", @" 456 ", @"789", @"true", @"false" }));
                 buffer.Append(@" ");
 
 
@@ -105,7 +105,7 @@ namespace TestWeb
 
                 buffer.Append(@"0");
 
-                buffer.Append(exp_xnl_expression.GetAttribute("lower", null, new ArrayList() { @"" }));
+                buffer.Append(exp_xnl_expression.GetAttribute("lower", new ArrayList() { @"" }));
                 t__1.SetAttribute("start", buffer.ToString(t__1_v_inx_0, buffer.Length - t__1_v_inx_0));
                 buffer.Remove(t__1_v_inx_0, buffer.Length - t__1_v_inx_0);
                 t__1.SetAttribute("end", @"5");
@@ -225,7 +225,7 @@ namespace TestWeb
                     OnTagDelegate t__2_delegate = delegate()
                     {
 
-                        buffer.Append(exp_xnl_expression.GetAttribute("test", null, new ArrayList() { exp_xnl_expression.GetAttribute("go", null, new ArrayList() { exp_xnl_expression.GetAttribute("url"), t__2.GetAttribute("a", "") }), t__2.GetAttribute("b", ""), @"123", @" 456 ", @"789", @"true", @"false" }));
+                        buffer.Append(exp_xnl_expression.GetAttribute("test", new ArrayList() { exp_xnl_expression.GetAttribute("go", new ArrayList() { exp_xnl_expression.GetAttribute("url"), t__2.GetAttribute("a", "") }), t__2.GetAttribute("b", ""), @"123", @" 456 ", @"789", @"true", @"false" }));
                         buffer.Append(@"gogogo");
                     };
                     t__2.OnTag(t__2_delegate);

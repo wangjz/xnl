@@ -12,11 +12,8 @@ namespace COM.SingNo.XNLCore.Tags
       public string test;
       public bool value;
 
-      public object tagA;
-      public object tagB;
-      public string tagTest;
-      public bool tagValue;
-      bool isSetParam;
+      bool isChange;
+
       public T xnlContext
       {
           get;
@@ -29,20 +26,16 @@ namespace COM.SingNo.XNLCore.Tags
 
       public void OnInit()
       {
+          a = "";
+          b = "";
           test = "=";
           value = true;
-
-          tagTest = "=";
-          tagValue = true;
-          isSetParam = false;
+          isChange = false;
       }
 
       public virtual void OnStart()
       {
-          tagA = a;
-          tagB = b;
-          tagTest = test;
-          value = LogicTest(a, b, test);
+         
       }
 
       public void OnEnd()
@@ -55,126 +48,79 @@ namespace COM.SingNo.XNLCore.Tags
           if (tagDelegate == null) return;
           if ("if" == curTag)
           {
-              if (isSetParam)
+              if (isChange)
               {
-                  tagValue = LogicTest(tagA, tagB, tagTest);
-                  if (tagValue) tagDelegate();
-                  isSetParam = false;
+                  value = LogicTest(a, b, test);
+                  isChange = false;
               }
-              else if (value) 
-              {
-                  tagDelegate();
-              }
+              if (value) tagDelegate();
           }
           else if ("else" == curTag)
           {
-              if(isSetParam)
+              if (isChange)
               {
-                  tagValue = LogicTest(tagA, tagB, tagTest);
-                  if (!tagValue) tagDelegate();
-                  isSetParam = false;
+                  value = LogicTest(a, b, test);
+                  isChange = false;
               }
-              else if(!value)
-              {
-                  tagDelegate();
-              }
+              if (!value) tagDelegate();
           }
           else
           {
+              if (isChange)
+              {
+                  value = LogicTest(a, b, test);
+                  isChange = false;
+              }
               if (value) tagDelegate();
           }
-          tagValue = value;
       }
 
-      public void SetAttribute(string paramName, object value, string tagName=null)
+      public void SetAttribute(string paramName, object value)
       {
-          if ("if" == tagName || "else" == tagName)
+          isChange = true;
+          if ("a" == paramName)
           {
-              isSetParam = true;
-              if("a"==paramName)
-              {
-                  tagA = value;
-              }
-              else if("b"==paramName)
-              {
-                  tagB = value;
-              }
-              else if("test"==paramName)
-              {
-                  if (value != null) tagTest = value.ToString();
-              }
+              a = value;
           }
-          else
+          else if ("b" == paramName)
           {
-              if ("a" == paramName)
-              {
-                  a = value;
-              }
-              else if ("b" == paramName)
-              {
-                  b = value;
-              }
-              else if ("test" == paramName)
-              {
-                  if (value != null) test = value.ToString();
-              }
+              b = value;
+          }
+          else if ("test" == paramName)
+          {
+              if (value != null) test = value.ToString();
           }
       }
 
-      public object GetAttribute(string paramName, string tagName = null, object userData = null)
+      public object GetAttribute(string paramName, object userData = null)
       {
           object v;
-          TryGetAttribute(out v, paramName, tagName);
+          TryGetAttribute(out v, paramName);
           return v;
       }
-      public bool TryGetAttribute(out object outValue, string paramName, string tagName = null, object userData = null)
+      public bool TryGetAttribute(out object outValue, string paramName , object userData = null)
       {
-          if ("if" == tagName || "else" == tagName)
+          if ("a" == paramName)
           {
-              if ("a" == paramName)
-              {
-                  outValue = tagA;
-                  return true;
-              }
-              else if ("b" == paramName)
-              {
-                  outValue = tagB;
-                  return true;
-              }
-              else if ("test" == paramName)
-              {
-                  outValue = tagTest;
-                  return true;
-              }
-              else if ("value" == paramName)
-              {
-                  outValue = tagValue;
-                  return true;
-              }
+              outValue = a;
+              return true;
           }
-          else
+          else if ("b" == paramName)
           {
-              if ("a" == paramName)
-              {
-                  outValue = a;
-                  return true;
-              }
-              else if ("b" == paramName)
-              {
-                  outValue = b;
-                  return true;
-              }
-              else if ("test" == paramName)
-              {
-                  outValue = test;
-                  return true;
-              }
-              else if ("value" == paramName)
-              {
-                  outValue = value;
-                  return true;
-              }
+              outValue = b;
+              return true;
           }
+          else if ("test" == paramName)
+          {
+              outValue = test;
+              return true;
+          }
+          else if ("value" == paramName)
+          {
+              outValue = value;
+              return true;
+          }
+
           outValue = null;
           return false;
       }
@@ -186,7 +132,7 @@ namespace COM.SingNo.XNLCore.Tags
           return new If<T>();
       }
 
-      public bool ExistAttribute(string paramName, string tagName=null)
+      public bool ExistAttribute(string paramName)
       {
           if (paramName == "a" || paramName == "b" || paramName == "test") return true;
           return false;

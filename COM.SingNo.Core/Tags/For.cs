@@ -86,7 +86,7 @@ namespace COM.SingNo.XNLCore.Tags
             }
         }
 
-        public void SetAttribute(string paramName, object value, string subTagName = null)
+        public void SetAttribute(string paramName, object value)
         {
             if (paramName == "start")
             {
@@ -120,14 +120,14 @@ namespace COM.SingNo.XNLCore.Tags
             }
         }
 
-        public object GetAttribute(string paramName, string tagName = null, object userData = null)
+        public object GetAttribute(string paramName, object userData = null)
         {
             object v ;
-            TryGetAttribute(out v, paramName, tagName);
+            TryGetAttribute(out v, paramName);
             return v;
         }
 
-        public bool TryGetAttribute(out object outValue, string paramName, string tagName = null, object userData = null)
+        public bool TryGetAttribute(out object outValue, string paramName , object userData = null)
         {
             if (paramName == "i")
             {
@@ -178,7 +178,7 @@ namespace COM.SingNo.XNLCore.Tags
         {
             return new For<T>();
         }
-        public bool ExistAttribute(string paramName, string tagName = null)
+        public bool ExistAttribute(string paramName)
         {
             if (paramName == "i" || paramName == "str" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
             return false;
