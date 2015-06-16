@@ -350,9 +350,15 @@ namespace COM.SingNo.XNLParser
                 string args = match.Groups[2].Value.Trim();
                 if (string.IsNullOrEmpty(args) == false)
                 {
-                    char[] trims = new char[] { '\'', '"' };
+                    //char[] trims = new char[] { '\'', '"' };
                     express.args = new List<XNLToken>();
-                    string match_args = args.Trim(new char[] { '(', ')' });
+                    string match_args = args;//.Trim(new char[] { '(', ')' });
+                    if (match_args.StartsWith("(") && match_args.EndsWith(")"))
+                    {
+                        match_args = match_args.Substring(1, match_args.Length - 2);
+                    }
+                    //if (match_args.StartsWith("("))match_args = match_args.Remove(0, 1);
+                   // if (match_args.StartsWith(")")) match_args = match_args.Remove(match_args.Length-1);
                     //设置参数
                     MatchCollection expMatchs;
                     Dictionary<string, XNLExpression> nestedExp=null;
@@ -426,9 +432,9 @@ namespace COM.SingNo.XNLParser
                                         }
                                         else
                                         {
-                                            if ((_s.StartsWith("\"") && _s.EndsWith("\"")) || _s.StartsWith("'") && _s.EndsWith("'"))
+                                            if ((_s.StartsWith("\"") && _s.EndsWith("\"")) || (_s.StartsWith("'") && _s.EndsWith("'")))
                                             {
-                                                _s = _s.Trim(trims);
+                                                _s = _s.Substring(1,_s.Length-2);//_s.Trim(trims);
                                             }
                                             else if (_s.StartsWith("~Exp~"))
                                             {
@@ -521,9 +527,9 @@ namespace COM.SingNo.XNLParser
                         }
                         else
                         {
-                            if ((e_s.StartsWith("\"") && e_s.EndsWith("\"")) || e_s.StartsWith("'") && e_s.EndsWith("'"))
+                            if ((e_s.StartsWith("\"") && e_s.EndsWith("\"")) || (e_s.StartsWith("'") && e_s.EndsWith("'")))
                             {
-                                e_s = e_s.Trim(trims);
+                                e_s = e_s.Substring(1,e_s.Length-2);// Trim(trims);
                             }
                             else if (e_s.StartsWith("~Exp~"))
                             {

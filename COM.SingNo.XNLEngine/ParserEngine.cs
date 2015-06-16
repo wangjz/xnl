@@ -89,7 +89,7 @@ namespace COM.SingNo.XNLEngine
 
                     if (parseMode == ParseMode.Dynamic)
                     {
-                        strBuilder.AppendLine("System.Text.StringBuilder buffer = xnlContext.response.buffer;");
+                        strBuilder.AppendLine("System.Text.StringBuilder buffer = xnlContext.response.buffer;\ntry\n{\n");
                     }
                 }
                 IXNLTag<T> tagObj = null;
@@ -129,8 +129,8 @@ namespace COM.SingNo.XNLEngine
                         isEnd = false;
                         index = strBuilder.Length;
 
-                        //try
-                        //{
+                        try
+                        {
                             
                             fullTagName = curStruct.nameSpace + ":" + curStruct.tagName;
                             if (tagsObj.TryGetValue(fullTagName, out tagObj) == false)
@@ -232,6 +232,7 @@ namespace COM.SingNo.XNLEngine
                             //
                             if (parseMode == ParseMode.Dynamic)
                             {
+                                strBuilder.AppendLine("try{\n");
                                 strBuilder.AppendLine(instanceName + ".OnStart();");
                             }
                             else
@@ -345,20 +346,22 @@ namespace COM.SingNo.XNLEngine
                             if (parseMode == ParseMode.Dynamic)
                             {
                                 strBuilder.AppendLine(instanceName + ".OnEnd();");
+                                strBuilder.AppendLine("}\ncatch (TagStopException)\n{\n");
+                                strBuilder.AppendLine(instanceName + ".OnEnd();\n}");
                             }
                             else
                             {
                                 tagObj.OnEnd();
                             }
-                        //}
-                        //catch (TagStopException)
-                        //{
-                        //    if(isEnd==false)tagObj.onEnd();
-                        //}
-                        //catch (ResponseEndException)
-                        //{
-                        //    break;
-                        //}
+                        }
+                        catch (TagStopException)
+                        {
+                            if (isEnd == false) tagObj.OnEnd();
+                        }
+                        catch (ResponseEndException)
+                        {
+                            break;
+                        }
                         //catch (Exception e)
                         //{
                         //    strBuilder.Append("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + "]出错:" + e.Message);
@@ -444,6 +447,10 @@ namespace COM.SingNo.XNLEngine
             //{
             //    return e.Message;
             //}
+            if (isNested == false && parseMode == ParseMode.Dynamic)
+            {
+                strBuilder.AppendLine("\n}\ncatch (ResponseEndException){}");
+            }
             return strBuilder.ToString();
         }
 

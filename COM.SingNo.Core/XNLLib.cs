@@ -70,7 +70,7 @@ namespace COM.SingNo.XNLCore
             string str = "";
             foreach (KeyValuePair<string, XNLLib<T>> kv in tagLibColls)
             {
-                str += (str??"|") + kv.Key;
+                str += (str==""?"":"|") + kv.Key;
             }
             tagNameSpacesStr = str;
             if (xnlParser != null) xnlParser.Initialize();
