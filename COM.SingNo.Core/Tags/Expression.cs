@@ -60,7 +60,7 @@ namespace COM.SingNo.XNLCore.Tags
 
         public object GetAttribute(string paramName, object userData = null)
         {
-            if (string.IsNullOrEmpty(paramName)) return "";
+            if (string.IsNullOrEmpty(paramName)) return null;
             ArrayList args = null;
             if (userData!=null)
             {
@@ -72,7 +72,7 @@ namespace COM.SingNo.XNLCore.Tags
                     switch (paramName)
                     {
                         case "get":
-                            if (args == null || args.Count < 1 || args[0] == null) return "";
+                            if (args == null || args.Count < 1 || args[0] == null) return null;
                             return HttpContext.Current.Request.QueryString[args[0].ToString()];
                     }
                     break;
@@ -80,7 +80,7 @@ namespace COM.SingNo.XNLCore.Tags
                     switch (paramName)
                     {
                         case "post":
-                            if (args == null || args.Count < 1 || args[0] == null) return "";
+                            if (args == null || args.Count < 1 || args[0] == null) return null;
                             return HttpContext.Current.Request.Form[args[0].ToString()];
                     }
                     break;
@@ -88,7 +88,7 @@ namespace COM.SingNo.XNLCore.Tags
                     switch (paramName)
                     {
                         case "lower":
-                            if (args == null || args.Count < 1 || args[0] == null) return "";
+                            if (args == null || args.Count < 1 || args[0] == null) return null;
                             return ToLower(args[0].ToString());
                     }
                     break;
@@ -97,11 +97,11 @@ namespace COM.SingNo.XNLCore.Tags
                     switch(paramName)
                     {
                         case "indexof":
-                            if (args == null || args.Count < 2 || args[0] == null) return "";
+                            if (args == null || args.Count < 2 || args[0] == null) return null;
                             if (args[1] == null) return -1;
                             return args[0].ToString().IndexOf(args[1].ToString());
                         case "iif":
-                            if (args == null || args.Count < 3 || args[0] == null) return "";
+                            if (args == null || args.Count < 3 || args[0] == null) return null;
                             if (dt == null) dt = new DataTable();
                             return dt.Compute(string.Format(@"iif({0},{1},{2})",args[0],args[1],args[2]),args.Count > 3 ? args[3].ToString():"");
                     }
@@ -110,11 +110,11 @@ namespace COM.SingNo.XNLCore.Tags
                     switch (paramName)
                     {
                         case "replace":
-                            if (args == null || args.Count < 3 || args[0] == null) return "";
+                            if (args == null || args.Count < 3 || args[0] == null) return null;
                             if (args[1] == null || args[2] == null) return args[0];
                             return args[0].ToString().Replace(args[1].ToString(), args[2].ToString());
                         case "request":
-                            if (args == null || args.Count < 1 || args[0] == null) return "";
+                            if (args == null || args.Count < 1 || args[0] == null) return null;
                             return HttpContext.Current.Request[args[0].ToString()];
                     }
                     break;
@@ -129,8 +129,11 @@ namespace COM.SingNo.XNLCore.Tags
                     switch (paramName)
                     {
                         case "session":
-                            if (args == null || args.Count < 1 || args[0] == null) return "";
+                            if (args == null || args.Count < 1 || args[0] == null) return null;
                             return HttpContext.Current.Session[args[0].ToString()];
+                        case "stop":
+                            xnlContext.response.Stop();
+                            return null;
                     }
                     break;
                 case 'e':
@@ -150,10 +153,10 @@ namespace COM.SingNo.XNLCore.Tags
                 }
                 catch
                 {
-                    return "";
+                    return null;
                 }
             }
-            return "";
+            return null;
         }
 
         public bool TryGetAttribute(out object outValue, string paramName, object userData = null)

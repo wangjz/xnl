@@ -22,4 +22,3 @@ C:\WorkSpace\xnl\COM.SingNo.Core\bin\Debug\COM.SingNo.XNLCore.dll
 C:\WorkSpace\xnl\COM.SingNo.Core\bin\Debug\COM.SingNo.XNLCore.pdb
 C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\COM.SingNo.XNLCore.dll
 C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\COM.SingNo.XNLCore.pdb
-C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\COM.SingNo.XNLCore.csprojResolveAssemblyReference.cache

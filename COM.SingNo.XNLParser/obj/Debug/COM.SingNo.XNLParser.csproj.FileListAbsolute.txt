@@ -1,7 +1,7 @@
-C:\WorkSpace\xnl\COM.SingNo.XNLParser\obj\Debug\COM.SingNo.XNLParser.csprojResolveAssemblyReference.cache
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\bin\Debug\COM.SingNo.XNLParser.dll
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\bin\Debug\COM.SingNo.XNLParser.pdb
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\bin\Debug\COM.SingNo.XNLCore.dll
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\bin\Debug\COM.SingNo.XNLCore.pdb
+C:\WorkSpace\xnl\COM.SingNo.XNLParser\obj\Debug\COM.SingNo.XNLParser.csprojResolveAssemblyReference.cache
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\obj\Debug\COM.SingNo.XNLParser.dll
 C:\WorkSpace\xnl\COM.SingNo.XNLParser\obj\Debug\COM.SingNo.XNLParser.pdb

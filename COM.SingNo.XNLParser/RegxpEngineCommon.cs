@@ -357,8 +357,7 @@ namespace COM.SingNo.XNLParser
                     {
                         match_args = match_args.Substring(1, match_args.Length - 2);
                     }
-                    //if (match_args.StartsWith("("))match_args = match_args.Remove(0, 1);
-                   // if (match_args.StartsWith(")")) match_args = match_args.Remove(match_args.Length-1);
+
                     //设置参数
                     MatchCollection expMatchs;
                     Dictionary<string, XNLExpression> nestedExp=null;
@@ -529,7 +528,7 @@ namespace COM.SingNo.XNLParser
                         {
                             if ((e_s.StartsWith("\"") && e_s.EndsWith("\"")) || (e_s.StartsWith("'") && e_s.EndsWith("'")))
                             {
-                                e_s = e_s.Substring(1,e_s.Length-2);// Trim(trims);
+                                e_s = e_s.Substring(1,e_s.Length-2);
                             }
                             else if (e_s.StartsWith("~Exp~"))
                             {

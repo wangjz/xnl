@@ -14,19 +14,20 @@ namespace TestWeb
         {
             XNLContext context = new XNLContext();
 
-            var temp = @"<xnl:if a=""{$get(action)}"">
-    {@a}
-    <if b=""add"">
-        添加表单
-        {$end}
-    </if>
-    {@b}
-    <if b=""modify"">
-        {@b}
+            var temp = @"<xnl:if a=""1"" b=""2"">
+    <if>
         修改表单
-        {$end}
     </if>
-    {@a} {@b}
+    <else>=====
+
+        <xnl:for start=""1"" end=""3"">
+
+            {@i}
+
+        </xnl:for>
+
+        ====
+    </else>
 </xnl:if>";
             
             var str = ParserEngine<XNLContext>.Parse(temp, context);

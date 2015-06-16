@@ -80,11 +80,11 @@ namespace COM.SingNo.XNLCore.Tags
           isChange = true;
           if ("a" == paramName)
           {
-              a = value;
+              a = (value??"");
           }
           else if ("b" == paramName)
           {
-              b = value;
+              b = (value??"");
           }
           else if ("test" == paramName)
           {
