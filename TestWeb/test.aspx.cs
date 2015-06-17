@@ -4,48 +4,48 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using COM.SingNo.XNLCore;
+using Com.AimUI.TagCore;
 using System.Collections;
-using COM.SingNo.XNLCore.Exceptions;
+using Com.AimUI.TagCore.Exceptions;
 namespace TestWeb
 {
     public partial class test : System.Web.UI.Page
     {
-        private void parse<T>(T xnlContext) where T : XNLContext
+        private void parse<T>(T tagContext) where T : TagContext
         {
 
-            IXNLTag<T> i2 = null;
-            IXNLTag<T> t__2 = null;
-            IXNLTag<T> t__1 = null;
-            IXNLTag<T> t__0 = null;
-            IXNLTag<T> exp_xnl_expression = null;
-            System.Text.StringBuilder buffer = xnlContext.response.buffer;
+            ITag<T> i2 = null;
+            ITag<T> t__2 = null;
+            ITag<T> t__1 = null;
+            ITag<T> t__0 = null;
+            ITag<T> exp_at_expression = null;
+            System.Text.StringBuilder buffer = tagContext.response.buffer;
             try
             {
               
                 buffer.Append(@"hgjg ");
 
 
-                exp_xnl_expression = XNLLib<T>.GetTagInstance("xnl", "expression").Create();
-                exp_xnl_expression.xnlContext = xnlContext;
-                exp_xnl_expression.instanceName = "exp_xnl_expression";
-                exp_xnl_expression.OnInit();
+                exp_at_expression = TagLib<T>.GetTagInstance("at", "expression").Create();
+                exp_at_expression.tagContext = tagContext;
+                exp_at_expression.instanceName = "exp_at_expression";
+                exp_at_expression.OnInit();
 
-                buffer.Append(exp_xnl_expression.GetAttribute("now"));
+                buffer.Append(exp_at_expression.GetAttribute("now"));
                 buffer.Append(@"  ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("lower", new ArrayList() { @"HELLO" }));
+                buffer.Append(exp_at_expression.GetAttribute("lower", new ArrayList() { @"HELLO" }));
                 buffer.Append(@" ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("iif", new ArrayList() { @"1>2", @"1", @"2" }));
+                buffer.Append(exp_at_expression.GetAttribute("iif", new ArrayList() { @"1>2", @"1", @"2" }));
                 buffer.Append(@" 111
 "" ""
 ");
 
-                t__0 = XNLLib<T>.GetTagInstance("xnl", "set").Create();
-                t__0.xnlContext = xnlContext;
+                t__0 = TagLib<T>.GetTagInstance("at", "set").Create();
+                t__0.tagContext = tagContext;
                 t__0.instanceName = "t__0";
                 t__0.OnInit();
                 t__0.SetAttribute("a", @"test a");
@@ -87,25 +87,25 @@ namespace TestWeb
 ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("_", new ArrayList() { @"2+3" }));
+                buffer.Append(exp_at_expression.GetAttribute("_", new ArrayList() { @"2+3" }));
                 buffer.Append(@" ");
 
 
-                buffer.Append(exp_xnl_expression.GetAttribute("test", new ArrayList() { exp_xnl_expression.GetAttribute("go", new ArrayList() { exp_xnl_expression.GetAttribute("url"), "" }), "", @"123", @" 456 ", @"789", @"true", @"false" }));
+                buffer.Append(exp_at_expression.GetAttribute("test", new ArrayList() { exp_at_expression.GetAttribute("go", new ArrayList() { exp_at_expression.GetAttribute("url"), "" }), "", @"123", @" 456 ", @"789", @"true", @"false" }));
                 buffer.Append(@" ");
 
 
                 buffer.Append(@"{@test}");
 
-                t__1 = XNLLib<T>.GetTagInstance("xnl", "for").Create();
-                t__1.xnlContext = xnlContext;
+                t__1 = TagLib<T>.GetTagInstance("at", "for").Create();
+                t__1.tagContext = tagContext;
                 t__1.instanceName = "t__1";
                 t__1.OnInit();
                 int t__1_v_inx_0 = buffer.Length;
 
                 buffer.Append(@"0");
 
-                buffer.Append(exp_xnl_expression.GetAttribute("lower", new ArrayList() { @"" }));
+                buffer.Append(exp_at_expression.GetAttribute("lower", new ArrayList() { @"" }));
                 t__1.SetAttribute("start", buffer.ToString(t__1_v_inx_0, buffer.Length - t__1_v_inx_0));
                 buffer.Remove(t__1_v_inx_0, buffer.Length - t__1_v_inx_0);
                 t__1.SetAttribute("end", @"5");
@@ -119,8 +119,8 @@ namespace TestWeb
                     OnTagDelegate t__1_delegate = delegate()
                     {
 
-                        t__2 = XNLLib<T>.GetTagInstance("xnl", "if").Create();
-                        t__2.xnlContext = xnlContext;
+                        t__2 = TagLib<T>.GetTagInstance("at", "if").Create();
+                        t__2.tagContext = tagContext;
                         t__2.instanceName = "t__2";
                         t__2.OnInit();
                         t__2.SetAttribute("a", @"1");
@@ -158,7 +158,7 @@ namespace TestWeb
                                 buffer.Append(@"这是else项  ");
 
                                 i2 = t__2.Create();
-                                i2.xnlContext = xnlContext;
+                                i2.tagContext = tagContext;
                                 i2.instanceName = "i2";
                                 i2.OnInit();
                                 try
@@ -212,8 +212,8 @@ namespace TestWeb
                 buffer.Append(@"  ;ljlkhlh ");
                 if (t__2 == null)
                 {
-                    t__2 = XNLLib<T>.GetTagInstance("xnl", "if").Create();
-                    t__2.xnlContext = xnlContext;
+                    t__2 = TagLib<T>.GetTagInstance("at", "if").Create();
+                    t__2.tagContext = tagContext;
                     t__2.instanceName = "t__2";
                     t__2.OnInit();
                 }
@@ -225,7 +225,7 @@ namespace TestWeb
                     OnTagDelegate t__2_delegate = delegate()
                     {
 
-                        buffer.Append(exp_xnl_expression.GetAttribute("test", new ArrayList() { exp_xnl_expression.GetAttribute("go", new ArrayList() { exp_xnl_expression.GetAttribute("url"), t__2.GetAttribute("a", "") }), t__2.GetAttribute("b", ""), @"123", @" 456 ", @"789", @"true", @"false" }));
+                        buffer.Append(exp_at_expression.GetAttribute("test", new ArrayList() { exp_at_expression.GetAttribute("go", new ArrayList() { exp_at_expression.GetAttribute("url"), t__2.GetAttribute("a", "") }), t__2.GetAttribute("b", ""), @"123", @" 456 ", @"789", @"true", @"false" }));
                         buffer.Append(@"gogogo");
                     };
                     t__2.OnTag(t__2_delegate);
@@ -240,15 +240,16 @@ namespace TestWeb
                 buffer.Append(@" jhk 222");
 
             }
-            catch (ResponseEndException) { }
+            catch (ResponseEndException) { }
+
 
             Response.Write(buffer.ToString());
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            XNLContext xnlContext = new XNLContext();
-            parse(xnlContext);
+            TagContext tagContext = new TagContext();
+            parse(tagContext);
         }
     }
 }

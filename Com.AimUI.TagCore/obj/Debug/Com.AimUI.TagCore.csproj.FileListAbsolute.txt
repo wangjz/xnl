@@ -1,0 +1,5 @@
+C:\WorkSpace\xnl\COM.SingNo.Core\bin\Debug\Com.AimUI.TagCore.dll
+C:\WorkSpace\xnl\COM.SingNo.Core\bin\Debug\Com.AimUI.TagCore.pdb
+C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\Com.AimUI.TagCore.csprojResolveAssemblyReference.cache
+C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\Com.AimUI.TagCore.dll
+C:\WorkSpace\xnl\COM.SingNo.Core\obj\Debug\Com.AimUI.TagCore.pdb

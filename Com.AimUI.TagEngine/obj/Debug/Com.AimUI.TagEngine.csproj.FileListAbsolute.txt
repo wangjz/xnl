@@ -1,0 +1,14 @@
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\Com.AimUI.TagEngine.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\Com.AimUI.TagEngine.pdb
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\Com.AimUI.TagCore.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\bin\Debug\Com.AimUI.TagCore.pdb
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\Com.AimUI.TagEngine.csprojResolveAssemblyReference.cache
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\Com.AimUI.TagEngine.dll
+C:\WorkSpace\xnl\COM.SingNo.XNLEngine\obj\Debug\Com.AimUI.TagEngine.pdb
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\bin\Debug\Com.AimUI.TagEngine.dll
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\bin\Debug\Com.AimUI.TagEngine.pdb
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\bin\Debug\Com.AimUI.TagCore.dll
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\bin\Debug\Com.AimUI.TagCore.pdb
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\obj\Debug\Com.AimUI.TagEngine.csprojResolveAssemblyReference.cache
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\obj\Debug\Com.AimUI.TagEngine.dll
+C:\WorkSpace\AimUITag\Com.AimUI.TagEngine\obj\Debug\Com.AimUI.TagEngine.pdb

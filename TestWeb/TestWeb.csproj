@@ -88,17 +88,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\COM.SingNo.Core\COM.SingNo.XNLCore.csproj">
+    <ProjectReference Include="..\Com.AimUI.TagCore\Com.AimUI.TagCore.csproj">
       <Project>{11790c63-e330-4095-a183-2870bb63d109}</Project>
-      <Name>COM.SingNo.XNLCore</Name>
+      <Name>Com.AimUI.TagCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\COM.SingNo.XNLEngine\COM.SingNo.XNLEngine.csproj">
+    <ProjectReference Include="..\Com.AimUI.TagEngine\Com.AimUI.TagEngine.csproj">
       <Project>{ade1e397-a532-4cbc-8622-d59ab21edbc3}</Project>
-      <Name>COM.SingNo.XNLEngine</Name>
+      <Name>Com.AimUI.TagEngine</Name>
     </ProjectReference>
-    <ProjectReference Include="..\COM.SingNo.XNLParser\COM.SingNo.XNLParser.csproj">
+    <ProjectReference Include="..\Com.AimUI.TagParser\Com.AimUI.TagParser.csproj">
       <Project>{8349cbf6-7f34-47c2-99de-e3227516316f}</Project>
-      <Name>COM.SingNo.XNLParser</Name>
+      <Name>Com.AimUI.TagParser</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

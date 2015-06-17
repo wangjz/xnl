@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using COM.SingNo.XNLCore;
-using COM.SingNo.XNLEngine;
+using Com.AimUI.TagCore;
+using Com.AimUI.TagEngine;
 using System.Text;
 namespace TestWeb
 {
@@ -12,32 +12,32 @@ namespace TestWeb
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            XNLContext context = new XNLContext();
+            TagContext context = new TagContext();
 
-            var temp = @"<xnl:if a=""1"" b=""2"">
+            var temp = @"<at:if a=""1"" b=""2"">
     <if>
         修改表单
     </if>
     <else>=====
-
-        <xnl:for start=""1"" end=""3"">
+        {$now}
+        <at:for start=""1"" end=""3"">
 
             {@i}
 
-        </xnl:for>
+        </at:for>
 
         ====
     </else>
-</xnl:if>";
+</at:if>";
             
-            var str = ParserEngine<XNLContext>.Parse(temp, context);
+            var str = ParserEngine<TagContext>.Parse(temp, context);
             
             Response.Write(str);
 
             Response.Write("\n");
 
             context.response.buffer.Remove(0, context.response.buffer.Length);
-            str = ParserEngine<XNLContext>.Parse(temp, context, ParseMode.Dynamic);
+            str = ParserEngine<TagContext>.Parse(temp, context, ParseMode.Dynamic);
 
             Response.Write(str);
         }

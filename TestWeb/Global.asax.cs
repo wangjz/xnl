@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
-using COM.SingNo.XNLCore;
-using COM.SingNo.XNLEngine;
-using COM.SingNo.XNLParser;
+using Com.AimUI.TagCore;
+using Com.AimUI.TagEngine;
+using Com.AimUI.TagParser;
 namespace TestWeb
 {
     public class Global : System.Web.HttpApplication
@@ -13,7 +13,7 @@ namespace TestWeb
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            ParserEngine<XNLContext>.Initialize(RegexParser<XNLContext>.GetInstance(), new List<XNLLib<XNLContext>> { new XNLLib<XNLContext>("xnl", true) });
+            ParserEngine<TagContext>.Initialize(RegexParser<TagContext>.GetInstance());
         }
 
         protected void Session_Start(object sender, EventArgs e)
