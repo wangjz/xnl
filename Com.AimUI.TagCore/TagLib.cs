@@ -165,13 +165,13 @@ namespace Com.AimUI.TagCore
         }
 
         //扩展标签
-        public bool SetTagExtend(string tagName, ITag<T> destTag)
+        public static bool SetTagExtend(string nameSpace,string tagName, ITag<T> destTag)
         {
             if (destTag==null)
             {
                 return false;
             }
-            tagCache[low_nameSpace + ":" + tagName] = destTag;
+            tagCache[nameSpace.ToLower() + ":" + tagName.ToLower()] = destTag;
             return true;
         }
         

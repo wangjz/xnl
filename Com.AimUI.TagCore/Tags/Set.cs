@@ -9,6 +9,7 @@ namespace Com.AimUI.TagCore.Tags
     {
         Dictionary<string, object> attrs;
         string body;
+        int inx = -1;
         public T tagContext
         {
             get;
@@ -26,11 +27,19 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnStart()
         {
+            inx = tagContext.response.buffer.Length;
         }
 
         public void OnEnd()
         {
-
+            if(inx!=-1)
+            {
+                StringBuilder buffer = tagContext.response.buffer;
+                int len = buffer.Length - inx;
+                body = buffer.ToString(inx, len);
+                buffer.Remove(inx, len);
+                inx = -1;
+            }
         }
 
         //子标签解析
@@ -38,12 +47,7 @@ namespace Com.AimUI.TagCore.Tags
         {
             if(tagDelegate!=null)
             {
-                StringBuilder buffer = tagContext.response.buffer;
-                int inx = buffer.Length;
                 tagDelegate();
-                int len = buffer.Length - inx;
-                body = buffer.ToString(inx, len);
-                buffer.Remove(inx, len);
             }
         }
         public void SetAttribute(string paramName, object value)

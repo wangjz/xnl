@@ -150,7 +150,19 @@ namespace Com.AimUI.TagCore.Tags
                 try
                 {
                     if (dt == null) dt = new DataTable();
-                    return dt.Compute( args[0].ToString(), args.Count > 1 ? args[1].ToString() : "");
+                    if (args.Count<2)
+                    {
+                        return dt.Compute(args[0].ToString(),"");
+                    }
+                    else
+                    {
+                        string _s = "";
+                        for (int i = 0; i < args.Count;i++)
+                        {
+                            _s += args[i].ToString();
+                        }
+                        return dt.Compute(_s, "");
+                    }
                 }
                 catch
                 {
