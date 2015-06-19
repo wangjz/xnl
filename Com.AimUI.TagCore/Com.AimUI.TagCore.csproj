@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ResponseEndException.cs" />
+    <Compile Include="Exceptions\TagParseException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="Tags\BaseTag.cs" />

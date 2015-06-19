@@ -143,7 +143,7 @@ namespace Com.AimUI.TagEngine
                                 }
                                 catch
                                 {
-                                    throw (new Exception("未找到标签" + fullTagName + "的实现"));
+                                    throw (new TagParseException("未找到标签" + fullTagName + "的实现"));
                                 }
                                 tagsObj[fullTagName] = tagObj;
                             }
@@ -158,6 +158,18 @@ namespace Com.AimUI.TagEngine
                                     curStruct.instanceName = "";// instanceName;
                                     tagId += 1;
                                 }
+                                else
+                                {
+                                    //检测是否命名冲突
+                                    if (nameTags.ContainsKey(instanceName))
+                                    {
+                                        throw new TagParseException("tag " + fullTagName + "#" + instanceName + ":命名冲突");
+                                    }
+                                    var fullInsName = fullTagName + "_" + instanceName;
+                                    nameTags[fullInsName] = tagObj;
+                                    nameTags[instanceName] = tagObj;
+                                }
+                                //tagId += 1;
                                 tagObj.tagContext = tagContext;
                                 tagObj.instanceName = instanceName;
                                 if (isDynamic)
@@ -180,8 +192,15 @@ namespace Com.AimUI.TagEngine
                                 bool isCreate = nameTags.TryGetValue(fullInsName, out newTagObj);
                                 if (isCreate == false)
                                 {
+                                    //检测是否命名冲突
+                                    if (nameTags.ContainsKey(instanceName))
+                                    {
+                                        throw new TagParseException("tag " + fullTagName + "#" + instanceName + ":命名冲突");
+                                    }
+
                                     newTagObj = tagObj.Create();
                                     nameTags[fullInsName] = newTagObj;
+                                    nameTags[instanceName] = newTagObj;
                                     if (isDynamic)
                                     {
                                         strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + instanceName + "=null;\n");
@@ -357,10 +376,14 @@ namespace Com.AimUI.TagEngine
                         {
                             break;
                         }
-                        //catch (Exception e)
-                        //{
-                        //    strBuilder.Append("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + "]出错:" + e.Message);
-                        //}
+                        catch (TagParseException)
+                        {
+                            throw;
+                        }
+                        catch(Exception e)
+                        {
+                            throw new TagParseException("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]错误:" + e.Message);
+                        }
                     }
 
                     if (curStruct == tagStruct)
@@ -944,7 +967,7 @@ namespace Com.AimUI.TagEngine
                 }
                 catch
                 {
-                    throw (new Exception("未找到标签" + fullTagName + "的实现"));
+                    throw (new TagParseException("未找到标签" + fullTagName + "的实现"));
                 }
                 tagsObj[fullTagName] = tagObj;
             }
@@ -1240,14 +1263,31 @@ namespace Com.AimUI.TagEngine
 
             string t_ns = null;
             string t_name = null;
-            string i_name = null;
             if (scopeInx != -1)
             {
                 ns = token.scope.Substring(0, scopeInx);
                 name = token.scope.Substring(scopeInx + 1);
             }
+
+            /*
+            ITag<T> tagObj;
+            isOk = nameTags.TryGetValue(name, out tagObj);
+            if (isOk)
+            {
+                if (isDynamic)
+                {
+                    return tagObj.instanceName + ".GetAttribute(\"" + token.name + "\")";
+                }
+                else
+                {
+                    return tagObj.GetAttribute(token.name);
+                }
+            }
+            */
+
             int _inx1 = -1;
             int _inx2 = -1;
+            string i_name = null;
             foreach (KeyValuePair<string, ITag<T>> kv in nameTags)
             {
                 _inx1 = kv.Key.IndexOf(':');

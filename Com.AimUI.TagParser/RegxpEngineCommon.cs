@@ -18,20 +18,20 @@ namespace Com.AimUI.TagParser
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
-        internal static string RegexStr_TagGroupAll;// = @"<(@AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
-        //internal static string RegexStr_TagPart1Group0;// = @"<@AT:[_a-zA-Z0-9]+(?:::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal static string RegexStr_TagPart1Group3;// = @"<(@AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal static string RegexStr_TagPart1Group4;// = @"<(@AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
+        internal static string RegexStr_TagGroupAll;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
+        //internal static string RegexStr_TagPart1Group0;// = @"<@AT:[_a-zA-Z0-9]+(?:\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
+        //internal static string RegexStr_TagPart1Group3;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
+        //internal static string RegexStr_TagPart1Group4;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
         
 
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
-        //internal const string RegexTemplate_TagPart1Group0 = @"<AT:[_a-zA-Z0-9]+(?:::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal const string RegexTemplate_TagPart1Group3 = @"<(AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal const string RegexTemplate_TagPart1Group4 = @"<(AT):([_a-zA-Z0-9]+)(::[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
+        //internal const string RegexTemplate_TagPart1Group0 = @"<AT:[_a-zA-Z0-9]+(?:\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
+        //internal const string RegexTemplate_TagPart1Group3 = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
+        //internal const string RegexTemplate_TagPart1Group4 = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
 
        
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(::NAME|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
        
         //internal static Regex RegexObj_TagGroupAll;
         //internal static Regex RegexObj_TagPart1Group3;
@@ -105,13 +105,14 @@ namespace Com.AimUI.TagParser
             {
                 regStr = RegexTemplate_SubTagName2GroupAll.Replace("AT", tagName.Replace(".", "\\."));
             }
+
             if (string.IsNullOrEmpty(tagObjName)||tagObjName.StartsWith("t__"))
             {
-                regStr = regStr.Replace("::NAME|", "");
+                regStr = regStr.Replace("NAME", "");
             }
             else
             {
-                regStr = regStr.Replace("NAME",  tagObjName.Replace(".", "\\."));
+                regStr = regStr.Replace("NAME", "\\#" + tagObjName.Replace(".", "\\."));
             }
             return regStr;
         }
@@ -121,7 +122,7 @@ namespace Com.AimUI.TagParser
             string _nameSpace = tagGroupAllMatch.Groups[1].Value;
             string _tagName = tagGroupAllMatch.Groups[2].Value;
             string _tagInstanceName = tagGroupAllMatch.Groups[3].Value.Trim();//.ToLower();
-            if (_tagInstanceName.StartsWith("::")) _tagInstanceName = _tagInstanceName.Substring(2);
+            if (_tagInstanceName.StartsWith("#")) _tagInstanceName = _tagInstanceName.Substring(1);
             string tagParamStr = tagGroupAllMatch.Groups[4].Value;  //标签属性
             string tagContentStr = tagGroupAllMatch.Groups[5].Value;  //标签内容
             TagParams tagParams = RegxpEngineCommon<T>.GetTagParams(tagParamStr);
@@ -147,7 +148,7 @@ namespace Com.AimUI.TagParser
         {
             string _tagName = subTagGroupAllMatch.Groups[1].Value;
             string _tagInstanceName = subTagGroupAllMatch.Groups[2].Value.Trim();//.ToLower();
-            if (_tagInstanceName.StartsWith("::")) _tagInstanceName = _tagInstanceName.Substring(2);
+            if (_tagInstanceName.StartsWith("#")) _tagInstanceName = _tagInstanceName.Substring(1);
             string tagParamStr = subTagGroupAllMatch.Groups[3].Value;  //标签属性
             string tagContentStr = subTagGroupAllMatch.Groups[4].Value;  //标签内容
             TagParams tagParams = RegxpEngineCommon<T>.GetTagParams(tagParamStr);
