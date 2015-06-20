@@ -31,7 +31,7 @@ namespace Com.AimUI.TagParser
 
        
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(NAME)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
        
         //internal static Regex RegexObj_TagGroupAll;
         //internal static Regex RegexObj_TagPart1Group3;
@@ -108,11 +108,11 @@ namespace Com.AimUI.TagParser
 
             if (string.IsNullOrEmpty(tagObjName)||tagObjName.StartsWith("t__"))
             {
-                regStr = regStr.Replace("NAME", "");
+                regStr = regStr.Replace(@"\#NAME|", "");
             }
             else
             {
-                regStr = regStr.Replace("NAME", "\\#" + tagObjName.Replace(".", "\\."));
+                regStr = regStr.Replace("NAME|", tagObjName.Replace(".", "\\."));
             }
             return regStr;
         }
