@@ -29,7 +29,7 @@ namespace Com.AimUI.TagCore
             }
         }
 
-        private string _tagName = "expression";
+        private string _tagName = "exp";
         public string tagName
         {
             get 
@@ -40,7 +40,7 @@ namespace Com.AimUI.TagCore
             {
                 if (string.IsNullOrEmpty(value))
                 {
-                    _tagName = "expression";
+                    _tagName = "exp";
                 }
                 else
                 {
@@ -48,12 +48,6 @@ namespace Com.AimUI.TagCore
                 }
             }
         }
-
-       
-        /// <summary>
-        /// 参数列表
-        /// </summary>
-        public IList<TagToken> args { get; set; }
 
         public TagExpression()
         {

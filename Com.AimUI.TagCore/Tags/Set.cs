@@ -55,21 +55,12 @@ namespace Com.AimUI.TagCore.Tags
             attrs[paramName] = value;
         }
 
-        public object GetAttribute(string paramName, object userData = null)
+        public object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
         {
             if (paramName == "body") return body;
             object obj;
-            TryGetAttribute(out obj, paramName);
+            attrs.TryGetValue(paramName, out obj);
             return obj;
-        }
-        public bool TryGetAttribute(out object outValue, string paramName, object userData = null)
-        {
-            if (paramName == "body")
-            {
-                outValue = body;
-                return true;
-            }
-            return attrs.TryGetValue(paramName, out outValue);
         }
 
         //创建 
@@ -80,8 +71,9 @@ namespace Com.AimUI.TagCore.Tags
 
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "body") return true;
-            return attrs.ContainsKey(paramName);
+            return true;
+            //if (paramName == "body") return true;
+            //return attrs.ContainsKey(paramName);
         }
 
         public string subTagNames

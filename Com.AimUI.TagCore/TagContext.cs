@@ -23,6 +23,21 @@ namespace Com.AimUI.TagCore
 
         public TagResponse response { get; protected set; }
 
+        public virtual string GetInclude(string src, Encoding encoding = null)
+        {
+            if (string.IsNullOrEmpty(src)) return null;
+            if(src.IndexOf(":\\")!=-1)
+            {
+                if (encoding == null) encoding = Encoding.UTF8;
+                return System.IO.File.ReadAllText(src, encoding);
+            }
+            if(workDirPath!=null)
+            {
+                if (encoding == null) encoding = Encoding.UTF8;
+                return System.IO.File.ReadAllText(workDirPath+src, encoding);
+            }
+            return null;
+        }
         //public ParseMode parseMode { get; protected set; }
 
         //工作目录

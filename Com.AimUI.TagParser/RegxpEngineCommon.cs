@@ -19,24 +19,12 @@ namespace Com.AimUI.TagParser
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
         internal static string RegexStr_TagGroupAll;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
-        //internal static string RegexStr_TagPart1Group0;// = @"<@AT:[_a-zA-Z0-9]+(?:\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal static string RegexStr_TagPart1Group3;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal static string RegexStr_TagPart1Group4;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
-        
-
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
-        //internal const string RegexTemplate_TagPart1Group0 = @"<AT:[_a-zA-Z0-9]+(?:\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal const string RegexTemplate_TagPart1Group3 = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(?:[\s]*|[\s]+[^:>]+)>";
-        //internal const string RegexTemplate_TagPart1Group4 = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1:\2\3>";
 
        
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1\2>";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1\2>";
        
-        //internal static Regex RegexObj_TagGroupAll;
-        //internal static Regex RegexObj_TagPart1Group3;
-
-
         internal const string RegexStr_TagToken = @"{([@$])([_a-zA-Z0-9\.:]+.*?)}";  //{([@$])((?>{(?<n>)|}(?<-n>)|(?!{|}).)*?)(?(n)(?!))}
        
         /// <summary>
@@ -76,15 +64,7 @@ namespace Com.AimUI.TagParser
             Regex.CacheSize = 30;
             TagRegNames = TagLib<T>.GetRegTagNameSpaces().Replace(".", "\\.");
             RegexStr_TagGroupAll = RegexTemplate_TagGroupAll.Replace("AT", TagRegNames);
-            //RegexStr_TagPart1Group0 = RegexTemplate_TagPart1Group0.Replace("AT", TagRegNames);
-            //RegexStr_TagPart1Group3 = RegexTemplate_TagPart1Group3.Replace("AT", TagRegNames);
-            //RegexStr_TagPart1Group4 = RegexTemplate_TagPart1Group4.Replace("AT", TagRegNames);
-
             RegexStr_SubTagName2GroupAll = RegexTemplate_SubTagName2GroupAll.Replace("AT", "[_a-zA-Z0-9\\.]");
-
-            //RegexObj_TagGroupAll = new Regex(RegexStr_TagGroupAll, Tag_RegexOptions);
-            
-            //RegexObj_TagPart1Group3 = new Regex(RegexStr_TagPart1Group3, Tag_RegexOptions);
         }
 
         
@@ -135,9 +115,10 @@ namespace Com.AimUI.TagParser
             tagStruct.tagParams = tagParams;
             tagStruct.bodyContent = tagContentStr;
             tagStruct.allContent = tagGroupAllMatch.Value;
+
             ITag<T> tagObj = TagLib<T>.GetTagInstance(_nameSpace, _tagName);
             string subTagName = tagObj.subTagNames;
-            if (string.IsNullOrEmpty(subTagName)==false)
+            if (string.IsNullOrEmpty(subTagName) == false)
             {
                 tagStruct.subTagStruct = GetSubTagStructs(tagContentStr, subTagName, _tagInstanceName);
             }
@@ -199,17 +180,18 @@ namespace Com.AimUI.TagParser
         internal static TagStruct GetTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
-            TagStruct tagStruct = null;
             int index = 0;
             MatchCollection matchs = Regex.Matches(contentStr, RegexStr_TagGroupAll, Tag_RegexOptions); //RegexObj_TagGroupAll.Matches(contentStr);
             int counts = matchs.Count;
-            if (counts == 0)
+            //if (counts > 0)
+            //{
+            //    return null;
+            //    //tagStruct = new TagStruct();
+            //    //tagStruct.allContent = contentStr;
+            //}
+            if (counts > 0)
             {
-                tagStruct = new TagStruct();
-                tagStruct.allContent = contentStr;
-            }
-            else
-            {
+                TagStruct tagStruct = null;
                 Match tmpMatch = matchs[0];
                 if (counts == 1 && tmpMatch.Index == 0 && tmpMatch.Length == contentStr.Length)
                 {
@@ -239,9 +221,9 @@ namespace Com.AimUI.TagParser
                         tagStruct.subTagStruct.Add(tmpStruct);
                     }
                 }
+                return tagStruct;
             }
-            
-            return tagStruct;
+            return null;
         }
 
         internal static List<TagToken> GetTagTokens(string contentStr)
@@ -252,28 +234,35 @@ namespace Com.AimUI.TagParser
             List<TagToken> tokens = new List<TagToken>(matchs.Count);
             TagToken token = null;
             string tokenValue = null;
-            int dotInx = -1;
-            ParseMode mode = ParseMode.Dynamic;
+            //int dotInx = -1;
+            //bool byRef = false;
             foreach(Match match in matchs)
             {
+                
                 tokenValue = match.Groups[2].Value;
-                mode = ParseMode.Dynamic;
-                if (tokenValue.IndexOf(':') == 0) //sample {:@a}
+                if (tokenValue[0] == ':') //sample {@:a}
                 {
-                    mode = ParseMode.Static;
+                    //byRef = true;
                     tokenValue = tokenValue.Remove(0, 1);
                 }
+                //else
+                //{
+                //    byRef = false;
+                //}
 
-                dotInx = tokenValue.LastIndexOf('.');
-                if (dotInx == 0 || dotInx == tokenValue.Length - 1)
-                {
-                    continue;
-                }
-
+                //dotInx = tokenValue.LastIndexOf('.');
+                //if (dotInx == 0 || dotInx == tokenValue.Length - 1)
+                //{
+                //    continue;
+                //}
+                if ((tokenValue.Length == 1 && tokenValue[0] == '.') || tokenValue[tokenValue.Length - 1] == '.') continue;
                 switch (match.Groups[1].Value)
                 {
                     case "@": //属性
-                        token = new TagToken();
+                        token = GetAttrToken(tokenValue);
+                        if (token == null) continue;
+                            /*
+                            new TagToken();
                         token.type = TagTokenType.Attribute;
                         if (dotInx == -1)
                         {
@@ -285,6 +274,7 @@ namespace Com.AimUI.TagParser
                             token.scope = tokenValue.Substring(0, dotInx);
                             token.name = tokenValue.Substring(dotInx + 1);
                         }
+                             */ 
                         break;
                     case "$": // //表达式  统一概念 无参数 变量表达式  有参数  方法表达式  {$site.url}  "{$isemail({$siteurl},abc)}"
                         token = GetExpression(tokenValue);
@@ -294,8 +284,7 @@ namespace Com.AimUI.TagParser
                 }
 
                 token.value = match.Value;
-                token.mode = mode;
-
+                //token.byRef = byRef;
                 token.index = match.Index;
                 token.length = match.Length;
                 tokens.Add(token);
@@ -303,7 +292,355 @@ namespace Com.AimUI.TagParser
             return tokens;
         }
 
+        internal static TagToken GetAttrToken(string tokenValue)
+        {
+            //int dotInx = tokenValue.LastIndexOf('.');
+            //if (dotInx == 0 || dotInx == tokenValue.Length - 1)
+            //{
+            //    return null;
+            //}
+            Match match = Regex.Match(tokenValue, @"^([_a-zA-Z0-9\.:]+)(.*?)$", Tag_RegexOptions);
+            if (match.Success)
+            {
+                TagToken token = new TagToken() { type = TagTokenType.Attribute };
+                tokenValue = match.Groups[1].Value;
+                int dotInx = tokenValue.LastIndexOf('.');
+                if (dotInx == 0 || dotInx == tokenValue.Length - 1)
+                {
+                    return null;
+                }
+                if (dotInx == -1)
+                {
+                    token.name = tokenValue;
+                    token.scope = string.Empty;
+                }
+                else
+                {
+                    token.scope = tokenValue.Substring(0, dotInx);
+                    token.name = tokenValue.Substring(dotInx + 1);
+                }
+                string args = match.Groups[2].Value.Trim();
+                token.args = GetTokenArgs(args);
+                return token;
+            }
 
+            return null;
+        }
+
+        internal static IList<TagToken> GetTokenArgs(string args)
+        {
+            if (string.IsNullOrEmpty(args) == false)
+            {
+                string names = null;
+                var inx = 0;
+                List<TagToken> t_args = new List<TagToken>();
+                string match_args = args;
+                if (match_args.StartsWith("(") && match_args.EndsWith(")"))
+                {
+                    match_args = match_args.Substring(1, match_args.Length - 2);
+                }
+
+                //设置参数
+                MatchCollection tokenMatchs;
+                Dictionary<string, TagToken> nestedExp = null;
+                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
+                int random = ra.Next();
+                while (true)
+                {
+                    //匹配嵌套表达式
+                    //\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)
+                    tokenMatchs = Regex.Matches(match_args, @"[@$]([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)", Tag_RegexOptions);
+                    if (tokenMatchs.Count > 0)
+                    {
+                        //嵌套表达式
+                        string _args = null;
+                        //解析 暂存
+                        foreach (Match m in tokenMatchs)
+                        {
+
+                            names = m.Groups[1].Value;
+                            _args = m.Groups[2].Value;
+
+                            TagToken tagToken = null;
+                            if (m.Value[0] == '@')
+                            {
+                                tagToken = new TagToken() { type = TagTokenType.Attribute };
+                            }
+                            else
+                            {
+                                tagToken = new TagExpression() { type = TagTokenType.Express };
+                            }
+
+                            if (m.Value[1] == ':')
+                            {
+                                //_express.byRef = true;
+                                names = names.Substring(1);
+                                tagToken.value = m.Value.Substring(2);
+                            }
+                            else
+                            {
+                                tagToken.value = m.Value.Substring(1);
+                            }
+                            
+                            tagToken.name = names;
+                            if (tagToken.type == TagTokenType.Attribute)
+                            {
+                                inx = names.LastIndexOf('.');
+                                if (inx == -1)
+                                {
+                                    tagToken.name = names;
+                                    tagToken.scope = string.Empty;
+                                }
+                                else
+                                {
+                                    tagToken.scope = names.Substring(0, inx);
+                                    tagToken.name = names.Substring(inx + 1);
+                                }
+                            }
+                            else
+                            {
+                                inx = names.LastIndexOf(':');
+
+                                if (inx != -1)
+                                {
+                                    tagToken.scope = names.Substring(0, inx);
+                                    names = names.Substring(inx + 1);
+                                }
+
+                                //分离  tag name and exp
+                                inx = names.LastIndexOf('.');
+
+                                if (inx != -1)
+                                {
+                                    ((TagExpression)tagToken).tagName = names.Substring(0, inx);
+                                    tagToken.name = names.Substring(inx + 1);
+                                }
+                            }
+
+                            //解析参数
+                            if (string.IsNullOrEmpty(_args.Trim()) == false)
+                            {
+
+                                string[] s_arr = _args.Split(',');
+
+                                tagToken.args = new List<TagToken>(s_arr.Length);
+                                string _s;
+                                TagToken _token;
+                                for (var i = 0; i < s_arr.Length; i++)
+                                {
+
+                                    _s = s_arr[i].Trim();
+                                    if (_s.StartsWith("@") || _s.StartsWith("@:"))
+                                    {
+                                        _token = new TagToken() { type = TagTokenType.Attribute };
+                                    }
+                                    else if (_s.StartsWith("$") || _s.StartsWith("$:"))
+                                    {
+                                        _token = new TagExpression() { type = TagTokenType.Express };
+                                    }
+                                    else
+                                    {
+                                        if ((_s.StartsWith("\"") && _s.EndsWith("\"")) || (_s.StartsWith("'") && _s.EndsWith("'")))
+                                        {
+                                            _s = _s.Substring(1, _s.Length - 2);//_s.Trim(trims);
+                                        }
+                                        else if (_s.StartsWith("~Exp~"))
+                                        {
+                                            _token = nestedExp[_s];
+                                            tagToken.args.Add(_token);
+                                            continue;
+                                        }
+                                        _token = new TagToken() { type = TagTokenType.Common, value = _s };
+                                    }
+                                    if (_token.type != TagTokenType.Common)
+                                    {
+                                        if (_s[1] == ':')
+                                        {
+                                            //_token.byRef = true;
+                                            _token.value = _s.Substring(2);
+                                        }
+                                        else
+                                        {
+                                            _token.value = _s.Substring(1);
+                                        }
+                                        if (_token.type == TagTokenType.Express)
+                                        {
+                                            inx = _token.value.LastIndexOf(':');
+                                            names = _token.value;
+                                            _token.name = names;
+                                            if (inx != -1)
+                                            {
+                                                _token.scope = _token.value.Substring(0, inx);
+                                                names = _token.value.Substring(inx + 1);
+                                            }
+
+                                            //分离  tag name and exp
+                                            inx = names.LastIndexOf('.');
+
+                                            if (inx != -1)
+                                            {
+                                                ((TagExpression)_token).tagName = names.Substring(0, inx);
+                                                _token.name = names.Substring(inx + 1);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            inx = _token.value.LastIndexOf('.');
+                                            if (inx == -1)
+                                            {
+                                                _token.name = _token.value;
+                                            }
+                                            else
+                                            {
+                                                _token.scope = _token.value.Substring(0, inx);
+                                                _token.name = _token.value.Substring(inx + 1);
+                                            }
+                                        }
+                                    }
+
+                                    tagToken.args.Add(_token);
+                                }
+                            }
+                            //名称 参数
+                            if (nestedExp == null) nestedExp = new Dictionary<string, TagToken>();
+                            string key = "~Exp~" + random;
+                            random += 1;
+                            nestedExp.Add(key, tagToken);
+                            //替换表达式
+                            match_args = match_args.Replace(m.Value, key);
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                //split match_args
+                string[] e_arr = match_args.Split(',');
+                string e_s;
+                TagToken e_token;
+                for (var i = 0; i < e_arr.Length; i++)
+                {
+                    e_s = e_arr[i].Trim();
+                    if (e_s.StartsWith("@") || e_s.StartsWith("@:"))
+                    {
+                        e_token = new TagToken() { type = TagTokenType.Attribute };
+                    }
+                    else if (e_s.StartsWith("$") || e_s.StartsWith("$:"))
+                    {
+                        e_token = new TagExpression() { type = TagTokenType.Express };
+                    }
+                    else
+                    {
+                        if ((e_s.StartsWith("\"") && e_s.EndsWith("\"")) || (e_s.StartsWith("'") && e_s.EndsWith("'")))
+                        {
+                            e_s = e_s.Substring(1, e_s.Length - 2);
+                        }
+                        else if (e_s.StartsWith("~Exp~"))
+                        {
+                            e_token = nestedExp[e_s];
+                            t_args.Add(e_token);
+                            continue;
+                        }
+                        e_token = new TagToken() { type = TagTokenType.Common, value = e_s };
+                    }
+                    if (e_token.type != TagTokenType.Common)
+                    {
+                        if (e_s[1] == ':')
+                        {
+                            //e_token.byRef = true;
+                            e_token.value = e_s.Substring(2);
+                        }
+                        else
+                        {
+                            e_token.value = e_s.Substring(1);
+                        }
+
+                        if (e_token.type == TagTokenType.Express)
+                        {
+                            inx = e_token.value.LastIndexOf(':');
+                            names = e_token.value;
+                            if (inx != -1)
+                            {
+                                e_token.scope = e_token.value.Substring(0, inx);
+                                names = e_token.value.Substring(inx + 1);
+                            }
+
+                            //分离  tag name and exp
+                            inx = names.LastIndexOf('.');
+
+                            if (inx != -1)
+                            {
+                                ((TagExpression)e_token).tagName = names.Substring(0, inx);
+                                e_token.name = names.Substring(inx + 1);
+                            }
+                        }
+                        else
+                        {
+                            inx = e_token.value.LastIndexOf('.');
+                            if (inx == -1)
+                            {
+                                e_token.name = e_token.value;
+                            }
+                            else
+                            {
+                                e_token.scope = e_token.value.Substring(0, inx);
+                                e_token.name = e_token.value.Substring(inx + 1);
+                            }
+                        }
+                    }
+                    t_args.Add(e_token);
+                }
+                return t_args;
+            }
+            return null;
+        }
+
+        //获取表达式描述
+        internal static TagExpression GetExpression(string ExpressionStr)
+        {
+
+            Match match = Regex.Match(ExpressionStr, @"^([_a-zA-Z0-9\.:]+)(.*?)$", Tag_RegexOptions);
+            if (match.Success)
+            {
+                TagExpression express = new TagExpression();
+
+                string names = match.Groups[1].Value;
+                var inx = names.LastIndexOf(':');
+                if (inx == 0 || inx == names.Length - 1)
+                {
+                    return null;
+                }
+                express.name = names;
+                if (inx != -1)
+                {
+                    express.scope = names.Substring(0, inx);
+                    names = names.Substring(inx + 1);
+                }
+
+                //分离  tag name and exp
+                inx = names.LastIndexOf('.');
+                if (inx == 0 || inx == names.Length - 1)
+                {
+                    return null;
+                }
+
+                if (inx != -1)
+                {
+                    express.tagName = names.Substring(0, inx);
+                    express.name = names.Substring(inx + 1);
+                }
+
+                string args = match.Groups[2].Value.Trim();
+                express.args = GetTokenArgs(args);
+                return express;
+            }
+
+            return null;
+        }
+
+        /*
         //获取表达式描述
         internal static TagExpression GetExpression(string ExpressionStr)
         {
@@ -342,9 +679,8 @@ namespace Com.AimUI.TagParser
                 string args = match.Groups[2].Value.Trim();
                 if (string.IsNullOrEmpty(args) == false)
                 {
-                    //char[] trims = new char[] { '\'', '"' };
                     express.args = new List<TagToken>();
-                    string match_args = args;//.Trim(new char[] { '(', ')' });
+                    string match_args = args;
                     if (match_args.StartsWith("(") && match_args.EndsWith(")"))
                     {
                         match_args = match_args.Substring(1, match_args.Length - 2);
@@ -353,11 +689,13 @@ namespace Com.AimUI.TagParser
                     //设置参数
                     MatchCollection expMatchs;
                     Dictionary<string, TagExpression> nestedExp=null;
+                    Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
+                    int random = ra.Next();
                     while(true)
                     {
                         //匹配嵌套表达式
                         //\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)
-                        expMatchs = Regex.Matches(match_args, @"(?::|)\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)", Tag_RegexOptions);
+                        expMatchs = Regex.Matches(match_args, @"\$([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)", Tag_RegexOptions);
                         if (expMatchs.Count > 0)
                         {
                             //嵌套表达式
@@ -370,9 +708,9 @@ namespace Com.AimUI.TagParser
                                 names = m.Groups[1].Value;
                                 _args = m.Groups[2].Value;
 
-                                if(m.Value.StartsWith(":"))
+                                if(m.Value[1]==':')
                                 {
-                                    _express.mode = ParseMode.Static;
+                                    //_express.byRef = true;
                                     _express.value = m.Value.Substring(2);
                                 }
                                 else
@@ -413,11 +751,11 @@ namespace Com.AimUI.TagParser
                                     {
 
                                         _s = s_arr[i].Trim();
-                                        if(_s.StartsWith("@") || _s.StartsWith(":@"))
+                                        if(_s.StartsWith("@") || _s.StartsWith("@:"))
                                         {
                                             _token = new TagToken() { type = TagTokenType.Attribute };
                                         }
-                                        else if (_s.StartsWith("$") || _s.StartsWith(":$"))
+                                        else if (_s.StartsWith("$") || _s.StartsWith("$:"))
                                         {
                                             _token = new TagExpression() { type = TagTokenType.Express};
                                         }
@@ -437,9 +775,9 @@ namespace Com.AimUI.TagParser
                                         }
                                         if (_token.type != TagTokenType.Common)
                                         {
-                                            if (_s[0] == ':')
+                                            if (_s[1] == ':')
                                             {
-                                                _token.mode = ParseMode.Static;
+                                                //_token.byRef = true;
                                                 _token.value = _s.Substring(2);
                                             }
                                             else
@@ -486,10 +824,8 @@ namespace Com.AimUI.TagParser
                                 }
                                 //名称 参数
                                 if (nestedExp == null) nestedExp = new Dictionary<string, TagExpression>();
-                                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
-                                string r = ra.Next().ToString();
-                                string key = "~Exp~" + r;
-
+                                string key = "~Exp~" + random;
+                                random += 1;
                                 nestedExp.Add(key, _express);
                                 //替换表达式
                                 match_args = match_args.Replace(m.Value, key);
@@ -508,11 +844,11 @@ namespace Com.AimUI.TagParser
                     for (var i = 0; i < e_arr.Length; i++)
                     {
                         e_s = e_arr[i].Trim();
-                        if (e_s.StartsWith("@") || e_s.StartsWith(":@"))
+                        if (e_s.StartsWith("@") || e_s.StartsWith("@:"))
                         {
                             e_token = new TagToken() { type = TagTokenType.Attribute };
                         }
-                        else if (e_s.StartsWith("$") || e_s.StartsWith(":@"))
+                        else if (e_s.StartsWith("$") || e_s.StartsWith("$:"))
                         {
                             e_token = new TagExpression() { type = TagTokenType.Express };
                         }
@@ -532,9 +868,9 @@ namespace Com.AimUI.TagParser
                         }
                         if (e_token.type != TagTokenType.Common)
                         {
-                            if (e_s[0] == ':')
+                            if (e_s[1] == ':')
                             {
-                                e_token.mode = ParseMode.Static;
+                                //e_token.byRef = true;
                                 e_token.value = e_s.Substring(2);
                             }
                             else
@@ -583,5 +919,6 @@ namespace Com.AimUI.TagParser
             
             return null;
         }
+         */ 
     }
 }

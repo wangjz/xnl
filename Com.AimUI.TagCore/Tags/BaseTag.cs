@@ -58,11 +58,11 @@ namespace Com.AimUI.TagCore.Tags
             throw new NotImplementedException();
         }
 
-        public object GetAttribute(string paramName, object userData = null)
+        public object GetAttribute(string paramName, object userData = null, bool byRef = false)
         {
             return null;
         }
-        public bool TryGetAttribute(out object outValue, string paramName, object userData = null)
+        public bool TryGetAttribute(out object outValue, string paramName, object userData = null, bool byRef = false)
         {
             outValue = null;
             return false;

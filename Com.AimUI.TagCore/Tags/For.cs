@@ -121,58 +121,43 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public object GetAttribute(string paramName, object userData = null)
-        {
-            object v ;
-            TryGetAttribute(out v, paramName);
-            return v;
-        }
-
-        public bool TryGetAttribute(out object outValue, string paramName , object userData = null)
+        public object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
         {
             if (paramName == "i")
             {
-                outValue = i;
-                return true;
+                return i;
             }
             else if (paramName == "pos")
             {
-                outValue = pos;
-                return true;
+                return pos;
             }
             else if (paramName == "start")
             {
-                outValue = start;
-                return true;
+                return start;
             }
             else if (paramName == "end")
             {
-                outValue = end;
-                return true;
+                return end;
             }
             else if (paramName == "str")
             {
-                if(strs!=null&&i<strs.Length)
+                if (strs != null && i < strs.Length)
                 {
-                    outValue = strs[i];
-                    return true;
+                    return strs[i];
                 }
-                outValue = "";
-                return true;
+                return  "";
             }
             else if (paramName == "split")
             {
-                outValue = split;
-                return true;
+                return split;
             }
             else if (paramName == "step")
             {
-                outValue = step;
-                return true;
+                return step;
             }
-            outValue = null;
-            return false;
+            return null;
         }
+
 
         //创建 
         public ITag<T> Create()

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using Com.AimUI.TagCore.Tags;
+using Com.AimUI.TagCore.Exceptions;
 
 namespace Com.AimUI.TagCore
 {
@@ -132,7 +133,8 @@ namespace Com.AimUI.TagCore
             tagCache.Add("at:if", new If<T>());
             tagCache.Add("at:set", new Set<T>());
             tagCache.Add("at:for", new For<T>());
-            tagCache.Add("at:expression", new Expression<T>());
+            tagCache.Add("at:exp", new Exp<T>());
+            tagCache.Add("at:inc", new Inc<T>());
             if (tagLibs != null)
             {
                 foreach (TagLib<T> lib in tagLibs)
@@ -161,6 +163,7 @@ namespace Com.AimUI.TagCore
                 if (tagLib == null) return null;
                 obj = tagLib.GetTagInstance(tagName);
             }
+            if (obj == null) throw (new TagParseException("未找到标签" + nameSpace + ":" + tagName + "的实现"));
             return obj;
         }
 

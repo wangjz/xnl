@@ -24,11 +24,10 @@ namespace Com.AimUI.TagCore
         void OnTag(OnTagDelegate tagDelegate=null);
 
         void OnEnd();
+
         void SetAttribute(string paramName, object value);
 
-        object GetAttribute(string paramName, object userData = null);
-
-        bool TryGetAttribute(out object outValue, string paramName, object userData = null);
+        object GetAttribute(string paramName, object[] userData = null); //, bool byRef = false
 
         bool ExistAttribute(string paramName);
         ITag<T> Create();

@@ -93,39 +93,26 @@ namespace Com.AimUI.TagCore.Tags
           }
       }
 
-      public object GetAttribute(string paramName, object userData = null)
-      {
-          object v;
-          TryGetAttribute(out v, paramName);
-          return v;
-      }
-      public bool TryGetAttribute(out object outValue, string paramName , object userData = null)
+      public object GetAttribute(string paramName, object[] userData = null)  //, bool byRef = false
       {
           if ("a" == paramName)
           {
-              outValue = a;
-              return true;
+              return a;
           }
           else if ("b" == paramName)
           {
-              outValue = b;
-              return true;
+              return b;
           }
           else if ("test" == paramName)
           {
-              outValue = test;
-              return true;
+              return  test;
           }
           else if ("value" == paramName)
           {
-              outValue = value;
-              return true;
+              return value;
           }
-
-          outValue = null;
-          return false;
+          return null;
       }
-
      
       //创建 
       public ITag<T> Create()
@@ -178,6 +165,7 @@ namespace Com.AimUI.TagCore.Tags
                   case "!=":
                       if (!v1.Equals(v2)) return true;
                       break;
+                  case ">":
                   case "&gt;":
                       if (v2 == null) return true;
                       s = v1.ToString();
@@ -195,6 +183,7 @@ namespace Com.AimUI.TagCore.Tags
                           }
                       }
                       break;
+                  case "<":
                   case "&lt;":
                       if (v2 == null) return false;
                       s = v1.ToString();
@@ -211,6 +200,7 @@ namespace Com.AimUI.TagCore.Tags
                           }
                       }
                       break;
+                  case ">=":
                   case "&gt;=": //>=
                       if (v2 == null) return true;
                       s = v1.ToString();
@@ -227,6 +217,7 @@ namespace Com.AimUI.TagCore.Tags
                           }
                       }
                       break;
+                  case "<=":
                   case "&lt;=":  //<=
                       if (v2 == null) return false;
                       s = v1.ToString();

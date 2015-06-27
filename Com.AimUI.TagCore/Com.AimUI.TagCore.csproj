@@ -49,10 +49,10 @@
     <Compile Include="Exceptions\TagParseException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IParser.cs" />
-    <Compile Include="Tags\BaseTag.cs" />
-    <Compile Include="Tags\Expression.cs" />
+    <Compile Include="Tags\Exp.cs" />
     <Compile Include="Tags\For.cs" />
     <Compile Include="Tags\If.cs" />
+    <Compile Include="Tags\Inc.cs" />
     <Compile Include="Tags\Set.cs" />
     <Compile Include="ITagCache.cs" />
     <Compile Include="TagExpression.cs" />

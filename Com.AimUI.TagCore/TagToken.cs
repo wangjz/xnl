@@ -9,8 +9,6 @@ namespace Com.AimUI.TagCore
         Common,
         Attribute, //属性 @
         Express //= 2,  //表达式 $
-        //Variable, //= 1变量 $
-        //tag
     }
     public class TagToken
     {
@@ -25,8 +23,17 @@ namespace Com.AimUI.TagCore
         //在内容中的长度
         public int length { get; set; }
 
-        public ParseMode mode { get; set; }
+        //public ParseMode mode { get; set; }
+        /// <summary>
+        /// 是否序列化输出
+        /// </summary>
+        //public bool byRef { get; set; }
 
         public string value { get; set; }
+
+        /// <summary>
+        /// 参数列表
+        /// </summary>
+        public IList<TagToken> args { get; set; }
     }
 }
