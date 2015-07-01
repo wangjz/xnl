@@ -343,7 +343,7 @@ namespace Com.AimUI.TagParser
                 //设置参数
                 MatchCollection tokenMatchs;
                 Dictionary<string, TagToken> nestedExp = null;
-                Random ra = new Random(unchecked((int)DateTime.Now.Ticks));//保证产生的数字的随机性 
+                Random ra = new Random();// unchecked((int)DateTime.Now.Ticks) 保证产生的数字的随机性 
                 int random = ra.Next();
                 while (true)
                 {

@@ -159,7 +159,11 @@ namespace Com.AimUI.TagEngine
                         if (curStruct.nameSpace == "at" && curStruct.tagName == "inc")
                         {
                             //include tag
-                            string include = tagContext.GetInclude(curStruct.tagParams["src"]);
+                            string ref_ns = curStruct.nameSpace;
+                            string ref_tagName = curStruct.tagName;
+                            string include = tagContext.GetInclude(curStruct.tagParams["src"], ref ref_ns, ref ref_tagName);
+                            if ("at" != ref_ns) curStruct.nameSpace = ref_ns;
+                            if ("inc" != ref_tagName) curStruct.tagName = ref_tagName;
                             if (string.IsNullOrEmpty(include) == false)
                             {
                                 curStruct.bodyContent = include;
@@ -175,21 +179,7 @@ namespace Com.AimUI.TagEngine
                         {
                             
                             fullTagName = curStruct.nameSpace + ":" + curStruct.tagName;
-                            /*
-                            if (tagsObj.TryGetValue(fullTagName, out tagObj) == false)
-                            {
-                                isTagNew = true;
-                                try
-                                {
-                                    tagObj = TagLib<T>.GetTagInstance(curStruct.nameSpace, curStruct.tagName).Create();
-                                }
-                                catch
-                                {
-                                    throw (new TagParseException("未找到标签" + fullTagName + "的实现"));
-                                }
-                                tagsObj[fullTagName] = tagObj;
-                            }
-                             */ 
+
                             isTagNew = GetTagInstance(curStruct.nameSpace, curStruct.tagName, tagsObj, out tagObj);
 
                             instanceName = curStruct.instanceName;
@@ -426,7 +416,7 @@ namespace Com.AimUI.TagEngine
                         }
                         catch(Exception e)
                         {
-                            throw new TagParseException("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]错误:" + e.Message);
+                            throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]:" + e.Message,e);
                         }
                     }
 
