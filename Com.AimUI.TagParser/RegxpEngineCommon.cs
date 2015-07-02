@@ -147,6 +147,7 @@ namespace Com.AimUI.TagParser
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
             if (string.IsNullOrEmpty(subTagName)) return null;
+            if (contentStr.Length < 7 || contentStr.Trim().Length < 7) return null;
             MatchCollection matchs = MatchSubTagsGroupAllByName(contentStr, subTagName, tagObjName);
             int curIndex = 0;
             if (matchs.Count > 0)
@@ -180,6 +181,7 @@ namespace Com.AimUI.TagParser
         internal static TagStruct GetTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
+            if (contentStr.Length<11 || contentStr.Trim().Length < 11) return null;
             int index = 0;
             MatchCollection matchs = Regex.Matches(contentStr, RegexStr_TagGroupAll, Tag_RegexOptions); //RegexObj_TagGroupAll.Matches(contentStr);
             int counts = matchs.Count;
@@ -229,6 +231,7 @@ namespace Com.AimUI.TagParser
         internal static List<TagToken> GetTagTokens(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
+            if (contentStr.Length<4||contentStr.Trim().Length<4) return null;
             MatchCollection matchs = Regex.Matches(contentStr, RegexStr_TagToken);
             if (matchs.Count == 0) return null;
             List<TagToken> tokens = new List<TagToken>(matchs.Count);
@@ -446,9 +449,52 @@ namespace Com.AimUI.TagParser
                                         }
                                         else if (_s.StartsWith("~Exp~"))
                                         {
-                                            _token = nestedExp[_s];
-                                            tagToken.args.Add(_token);
-                                            continue;
+                                            try
+                                            {
+                                                if (_s.Length > 10)
+                                                {
+                                                    s_arr[i] = _s.Substring(10);
+                                                    i -= 1;
+                                                    _s = _s.Substring(0, 10);
+                                                }
+
+                                                _token = nestedExp[_s];
+                                                tagToken.args.Add(_token);
+                                                continue;
+                                            }
+                                            catch
+                                            {
+                                                //_s = Regex.Replace(_s, "~Exp~[\\d]{5}", "");
+                                            }
+                                        }
+                                        else if (_s.IndexOf("~Exp~") != -1)
+                                        {
+                                            MatchCollection matchs = Regex.Matches(_s, "~Exp~[\\d]{5}");
+                                            if (matchs.Count > 0)
+                                            {
+                                                int _index = 0;
+                                                foreach (Match match in matchs)
+                                                {
+                                                    if (match.Index > _index)
+                                                    {
+                                                        tagToken.args.Add(new TagToken() { type = TagTokenType.Common, value = _s.Substring(_index, match.Index - _index) });
+                                                        _index = match.Index + match.Value.Length;
+                                                        try
+                                                        {
+                                                            _token = nestedExp[match.Value];
+                                                            tagToken.args.Add(_token);
+                                                        }
+                                                        catch
+                                                        {
+                                                        }
+                                                    }
+                                                }
+                                                if (_s.Length > _index)
+                                                {
+                                                    tagToken.args.Add(new TagToken() { type = TagTokenType.Common, value = _s.Substring(_index) });
+                                                }
+                                                continue;
+                                            }
                                         }
                                         _token = new TagToken() { type = TagTokenType.Common, value = _s };
                                     }
@@ -503,7 +549,16 @@ namespace Com.AimUI.TagParser
                             }
                             //名称 参数
                             if (nestedExp == null) nestedExp = new Dictionary<string, TagToken>();
-                            string key = "~Exp~" + random;
+
+                            string key = "~Exp~" + random.ToString();
+                            if (key.Length > 10)
+                            {
+                                key = key.Substring(0, 10);
+                            }
+                            else if(key.Length<10)
+                            {
+                                key = key.PadRight(10, '0');
+                            }
                             random += 1;
                             nestedExp.Add(key, tagToken);
                             //替换表达式
@@ -539,9 +594,52 @@ namespace Com.AimUI.TagParser
                         }
                         else if (e_s.StartsWith("~Exp~"))
                         {
-                            e_token = nestedExp[e_s];
-                            t_args.Add(e_token);
-                            continue;
+                            try
+                            {
+                                if(e_s.Length>10)
+                                {
+                                    e_arr[i] = e_s.Substring(10);
+                                    i -= 1;
+                                    e_s = e_s.Substring(0, 10);
+                                }
+
+                                e_token = nestedExp[e_s];
+                                t_args.Add(e_token);
+                                continue;
+                            }
+                            catch
+                            {
+                                //e_s = Regex.Replace(e_s, "~Exp~[\\d]{5}", "");
+                            }
+                        }
+                        else  if(e_s.IndexOf("~Exp~")!=-1)
+                        {
+                            MatchCollection matchs = Regex.Matches(e_s, "~Exp~[\\d]{5}");
+                            if (matchs.Count>0)
+                            {
+                                int _index=0;
+                                foreach(Match match in matchs)
+                                {
+                                    if (match.Index > _index)
+                                    {
+                                        t_args.Add(new TagToken() { type = TagTokenType.Common, value = e_s.Substring(_index, match.Index - _index) });
+                                        _index = match.Index + match.Value.Length;
+                                        try
+                                        {
+                                            e_token = nestedExp[match.Value];
+                                            t_args.Add(e_token);
+                                        }
+                                        catch
+                                        {
+                                        }
+                                    }
+                                }
+                                if(e_s.Length>_index)
+                                {
+                                    t_args.Add(new TagToken() { type = TagTokenType.Common, value = e_s.Substring(_index) });
+                                }
+                                continue;
+                            } 
                         }
                         e_token = new TagToken() { type = TagTokenType.Common, value = e_s };
                     }
