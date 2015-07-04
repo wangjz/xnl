@@ -65,21 +65,6 @@ namespace Com.AimUI.TagEngine
                 if(strBuilder.Length==0)strBuilder.Capacity = Convert.ToInt32(templateStr.Length * 1.5);
                 //构建标签结构
                 tagStruct = tagParser.GetTagStruct(templateStr);
-                if (tagStruct == null)
-                {
-                    if(isDynamic)
-                    {
-                        strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;\nbuffer.Append(@\"");
-                        strBuilder.Append(templateStr.Replace("\"", "\"\""));
-                        strBuilder.AppendLine("\");");
-
-                    }
-                    else
-                    {
-                        strBuilder.Append(templateStr);
-                    }
-                    return;
-                }
             }
             //try
             //{
@@ -120,8 +105,18 @@ namespace Com.AimUI.TagEngine
 
                     if (isDynamic && isTop)
                     {
-                        strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;\ntry\n{");
+                        if (tagStruct == null){
+                            strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;");
+                        }
+                        else{
+                            strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;\ntry\n{");
+                        }
                     }
+                }
+                if (tagStruct == null)
+                {
+                    OnNoTagAction(tagContext, templateStr, tagsObj, isDynamic);
+                    return;
                 }
                 ITag<T> tagObj = null;
                 TagStruct curStruct = tagStruct;
@@ -1243,6 +1238,43 @@ namespace Com.AimUI.TagEngine
             }
         }
 
+
+        static int GetArgsCount(IList<TagToken> tokens)
+        {
+            if (tokens == null || tokens.Count == 0) return 0;
+            int _count = 0;
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                var local_args = tokens[i].args;
+                if (local_args == null || local_args.Count == 0)
+                {
+                   _count += 1;
+                }
+                else if (tokens[i].type != TagTokenType.Common)
+                {
+                    _count += 1;
+                }
+                else
+                {
+                    for (int j = 0; j < local_args.Count; j++)
+                    {
+                        if (local_args[j].args == null || local_args[j].args.Count == 0)
+                        {
+                            _count += 1;
+                        }
+                        else if(local_args[j].type== TagTokenType.Common)
+                        {
+                            _count += GetArgsCount(local_args[j].args);
+                        }
+                        else
+                        {
+                            _count += 1;
+                        }
+                    }
+                }
+            }
+            return _count;
+        }
         /// <summary>
         /// 处理标 不明 属性访问
         /// </summary>
@@ -1385,6 +1417,7 @@ namespace Com.AimUI.TagEngine
             if (token.args != null)
             {
                 Stack<IEnumerator<TagToken>> tokens = new Stack<IEnumerator<TagToken>>();
+                Stack<TagToken> prevTokens = new Stack<TagToken>();
                 IEnumerator<TagToken> curTokens = token.args.GetEnumerator();
                 TagToken prevToken = null;
                 TagToken curToken = null;
@@ -1399,13 +1432,24 @@ namespace Com.AimUI.TagEngine
 
                         if (tokenType == TagTokenType.Common)
                         {
-                            if (isDynamic)
+                            if (curToken.args == null)
                             {
-                                args.Push("@\"" + curToken.value.Replace("\"", "\\\"") + "\"");
+                                if (isDynamic)
+                                {
+                                    args.Push("@\"" + curToken.value.Replace("\"", "\\\"") + "\"");
+                                }
+                                else
+                                {
+                                    args.Push(curToken.value);
+                                }
                             }
                             else
                             {
-                                args.Push(curToken.value);
+                                //prevToken = curToken;
+                                //prevTokens.Push(curToken);
+                                tokens.Push(curTokens);
+                                curTokens = curToken.args.GetEnumerator();
+                                continue;
                             }
                         }
                         else if (tokenType == TagTokenType.Express)
@@ -1431,7 +1475,8 @@ namespace Com.AimUI.TagEngine
                             }
                             else
                             {
-                                prevToken = curToken;
+                                //prevToken = curToken;
+                                prevTokens.Push(curToken);
                                 tokens.Push(curTokens);
                                 curTokens = curToken.args.GetEnumerator();
                                 continue;
@@ -1455,7 +1500,8 @@ namespace Com.AimUI.TagEngine
                             }
                             else
                             {
-                                prevToken = curToken;
+                                //prevToken = curToken;
+                                prevTokens.Push(curToken);
                                 tokens.Push(curTokens);
                                 curTokens = curToken.args.GetEnumerator();
                                 continue;
@@ -1464,6 +1510,7 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
+                        if(prevTokens.Count>0) prevToken = prevTokens.Pop();
                         if (prevToken != null)
                         {
                             //出栈
@@ -1526,6 +1573,62 @@ namespace Com.AimUI.TagEngine
                 for (var i = 0; i < _count; i++)
                 {
                     _args.Insert(0, args.Pop());
+                }
+
+                if (_args.Count > token.args.Count)
+                {
+                    ArrayList tmp_args = new ArrayList(token.args.Count);
+
+                    int tmp_count = 0;
+                    TagToken local_token;
+                    string local_str;
+                    int inx = 0;
+                    for (int i = 0; i < token.args.Count; i++)
+                    {
+                        local_token = token.args[i];
+                        if (local_token.type == TagTokenType.Common && local_token.args != null && local_token.args.Count > 0)
+                        {
+                            var local_args = token.args[i].args;
+                            if (local_args == null || local_args.Count == 0)
+                            {
+                                tmp_count = 1;
+                            }
+                            else
+                            {
+                                tmp_count = GetArgsCount(local_args);
+                            }
+                            
+                            local_str = "";
+
+                            for (int j = 0; j < tmp_count; j++)
+                            {
+                                string args_v = (_args[inx] == null ? "" : Convert.ToString(_args[inx]));
+                                if (isDynamic)
+                                {
+                                    if (args_v.Length > 0 && args_v.IndexOf(".GetAttribute(") == -1)
+                                    {
+                                        local_str += (local_str.Length > 0 ? "+@\"" : "@\"") + args_v.Replace("\"", "\"\"") + "\"";
+                                    }
+                                    else
+                                    {
+                                        local_str += (local_str.Length > 0 ? "+" : "") + "Convert.ToString(" + args_v + ")";
+                                    }
+                                }
+                                else
+                                {
+                                    local_str += args_v;
+                                }
+                                inx += 1;
+                            }
+                            tmp_args.Add(local_str);
+                        }
+                        else
+                        {
+                            tmp_args.Add(_args[inx]);
+                            inx += 1;
+                        }
+                    }
+                    _args = tmp_args;
                 }
 
                 if (isDynamic)
