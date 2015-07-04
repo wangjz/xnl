@@ -769,178 +769,6 @@ namespace Com.AimUI.TagEngine
             } 
         }
 
-        /*
-        static object ParseExpression(TagExpression express, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, TagStruct tagStruct = null ,ITag<T> parentTagObj= null)
-        {
-            var ns =  express.scope;
-
-            var tagName = express.tagName;
-
-            ITag<T> tagObj;
-
-            ITag<T> t_tagObj;
-
-            InitExpressTagObj(ns, tagName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj);
-
-            if (express.args != null)
-            {
-                Stack<IEnumerator<TagToken>> tokens = new Stack<IEnumerator<TagToken>>();
-                IEnumerator<TagToken> curTokens = express.args.GetEnumerator();
-                TagExpression curExpress = null;
-                TagExpression prevExpress = null;
-                TagToken curToken = null;
-                Stack args = new Stack();
-                while(true)
-                {
-                    bool isHas = curTokens.MoveNext();
-                    if(isHas)
-                    {
-                        curToken = curTokens.Current;
-                        TagTokenType tokenType = curToken.type;
-
-                        if (tokenType == TagTokenType.Common)
-                        {
-                            if(isDynamic)
-                            {
-                                args.Push("@\"" + curToken.value.Replace("\"","\\\"") + "\"");
-                            }
-                            else
-                            {
-                                args.Push(curToken.value);
-                            }
-                        }
-                        else if (tokenType == TagTokenType.Express)
-                        {
-                            curExpress = (TagExpression)curToken;
-                            if (curExpress.args==null)
-                            {
-                                ns = curExpress.scope;
-
-                                tagName = curExpress.tagName;
-
-                                InitExpressTagObj(ns, tagName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
-
-                                if (isDynamic)
-                                {
-                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + curExpress.name + "\")");
-                                }
-                                else
-                                {
-                                    args.Push(t_tagObj.GetAttribute(curExpress.name));
-                                }
-                            }
-                            else
-                            {
-                                prevExpress = curExpress;
-                                tokens.Push(curTokens);
-                                curTokens = curExpress.args.GetEnumerator();
-                                continue;
-                            }
-                        }
-                        else if (tokenType == TagTokenType.Attribute)
-                        {
-                            //遍历查找
-                            if(tagStruct!=null)
-                            {
-                                args.Push(ParseAttribule(curToken,parentTagObj,tagStruct,isDynamic,tagContext,tagsObj));
-                            }
-                            else
-                            {
-                                args.Push("");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (prevExpress!=null)
-                        {
-                            //出栈
-                            if (prevExpress.args!=null)
-                            {
-                                var count = prevExpress.args.Count;
-                                ArrayList t_args = new ArrayList(count);
-                                for (var i = 0; i < count; i++)
-                                {
-                                    t_args.Insert(0, args.Pop());
-                                }
-
-                                //执行
-                                ns = prevExpress.scope;
-
-                                tagName = prevExpress.tagName;
-
-                                InitExpressTagObj(ns, tagName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
-
-                                if (isDynamic)
-                                {
-                                    //设置参数
-                                    string args_str = "new object[] { ";
-                                    for (var i = 0; i < count; i++)
-                                    {
-                                        string str = t_args[i].ToString();
-                                        args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
-                                    }
-                                    args_str += "}";
-
-                                    args.Push(t_tagObj.instanceName + ".GetAttribute(\"" + prevExpress.name + "\"," + args_str + ")");
-                                }
-                                else
-                                {
-                                    args.Push(t_tagObj.GetAttribute(prevExpress.name, t_args.ToArray()));
-                                }
-                            }
-                            prevExpress = null;
-                        }
-                        if(tokens.Count>0)
-                        {
-                            curTokens = tokens.Pop();
-                            continue;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                int _count = args.Count;
-                ArrayList _args = new ArrayList(_count);
-                for (var i = 0; i < _count; i++)
-                {
-                    _args.Insert(0, args.Pop());
-                }
-
-                if (isDynamic)
-                {
-                    //设置参数
-                    string args_str = "new object[] { ";
-                    for (var i = 0; i < _count; i++)
-                    {
-                        string str = _args[i].ToString();
-                        args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
-                    }
-                    args_str += "}";
-
-                    return tagObj.instanceName + ".GetAttribute(\"" + express.name + "\"," + args_str + ")";
-                }
-                else
-                {
-                    return tagObj.GetAttribute(express.name , _args.ToArray());
-                }
-            }
-            else
-            {
-                if (isDynamic)
-                {
-                    return tagObj.instanceName + ".GetAttribute(\"" + express.name + "\")";
-                }
-                else
-                {
-                    return tagObj.GetAttribute(express.name);
-                }
-            }
-        }
-        */
         static bool GetTagInstance(string nameSpace, string tagName, Dictionary<string, ITag<T>> tagsObj, out ITag<T> tagObj)
         {
             bool isTagNew = false;
@@ -1607,7 +1435,7 @@ namespace Com.AimUI.TagEngine
                                 {
                                     if (args_v.Length > 0 && args_v.IndexOf(".GetAttribute(") == -1)
                                     {
-                                        local_str += (local_str.Length > 0 ? "+@\"" : "@\"") + args_v.Replace("\"", "\"\"") + "\"";
+                                        local_str += (local_str.Length > 0 ? "+" : "") + args_v;
                                     }
                                     else
                                     {
@@ -1629,6 +1457,7 @@ namespace Com.AimUI.TagEngine
                         }
                     }
                     _args = tmp_args;
+                    _count = _args.Count;
                 }
 
                 if (isDynamic)
