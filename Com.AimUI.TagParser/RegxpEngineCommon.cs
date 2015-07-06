@@ -18,14 +18,14 @@ namespace Com.AimUI.TagParser
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
-        internal static string RegexStr_TagGroupAll;// = @"<(@AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)([\s]*|[\s]+[^:>]+)>([.\s\S]*?)</\1:\2\3>";
+        internal static string RegexStr_TagGroupAll;
         internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1:\2\3>";
 
        
         internal static string RegexStr_SubTagName2GroupAll;
         internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1\2>";
        
-        internal const string RegexStr_TagToken = @"{([@$])([_a-zA-Z0-9\.:]+.*?)}";  //{([@$])((?>{(?<n>)|}(?<-n>)|(?!{|}).)*?)(?(n)(?!))}
+        internal const string RegexStr_TagToken = @"{([@$])([_a-zA-Z0-9\.:]+.*?)}";
        
         /// <summary>
         /// 清除注释标签
@@ -34,6 +34,8 @@ namespace Com.AimUI.TagParser
         /// <returns></returns>
         internal static string RemoveTagNotes(string contentStr)
         {
+            if (contentStr.Length < 13) return contentStr;
+
             return Regex.Replace(contentStr, RegexStr_TagNotes, "", Tag_RegexOptions);
         }
 

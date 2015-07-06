@@ -23,16 +23,11 @@ namespace Com.AimUI.TagEngine
             return tagContext.response.buffer.ToString();
         }
 
-        public static void Parse(string templateStr, T tagContext,ParseMode parseMode = ParseMode.Static)
+        public static void Parse(string templateStr, T tagContext, ParseMode parseMode = ParseMode.Static)
         {
-            if (tagParser == null)
-            {
-                throw new TagParseException("解析引擎未设置");
-            }
-
             bool isNested = false;
             bool isTop = true;
-            TagStruct tagStruct=null;
+            TagStruct tagStruct = null;
 
             if (templateStr == null)
             {
@@ -46,32 +41,25 @@ namespace Com.AimUI.TagEngine
                 }
                 else
                 {
-                    return;// string.Empty;
+                    return;
                 }
             }
             if (isNested == false && string.IsNullOrEmpty(templateStr))
             {
-                return;// string.Empty;
+                return;
             }
 
             StringBuilder strBuilder = tagContext.response.buffer;
 
             TagResponse response = tagContext.response;
             bool isDynamic = (parseMode == ParseMode.Dynamic);
-            if (isNested == false)
+
+            try
             {
-                //清除注释标签
-                templateStr = tagParser.RemoveNoteTag(templateStr);
-                if(strBuilder.Length==0)strBuilder.Capacity = Convert.ToInt32(templateStr.Length * 1.5);
-                //构建标签结构
-                tagStruct = tagParser.GetTagStruct(templateStr);
-            }
-            //try
-            //{
 
                 Dictionary<string, ITag<T>> tagsObj = null;
                 Dictionary<string, ITag<T>> nameTags = null;  //命名标签对象
-                
+
                 int tagId = 0;
                 int index = strBuilder.Length;
                 if (isNested)
@@ -79,7 +67,7 @@ namespace Com.AimUI.TagEngine
                     tagsObj = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__tags");
                     nameTags = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__nameTags");
                     tagId = (int)TagContext.GetItem(tagContext, "$__tagid");
-                    
+
                 }
                 else
                 {
@@ -102,13 +90,20 @@ namespace Com.AimUI.TagEngine
                         TagContext.SetItem(tagContext, "$__nameTags", nameTags);
                     }
 
+                    //清除注释标签
+                    templateStr = tagParser.RemoveNoteTag(templateStr);
+                    if (isTop) strBuilder.Capacity = Convert.ToInt32(templateStr.Length * 1.5);
+                    //构建标签结构
+                    tagStruct = tagParser.GetTagStruct(templateStr);
 
                     if (isDynamic && isTop)
                     {
-                        if (tagStruct == null){
+                        if (tagStruct == null)
+                        {
                             strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;");
                         }
-                        else{
+                        else
+                        {
                             strBuilder.AppendLine("if(buffer==null) buffer = tagContext.response.buffer;\ntry\n{");
                         }
                     }
@@ -121,24 +116,24 @@ namespace Com.AimUI.TagEngine
                 ITag<T> tagObj = null;
                 TagStruct curStruct = tagStruct;
                 int subTagCount = 0;
-                bool isNoSubTag = false;            
+                bool isNoSubTag = false;
                 bool isTagName = false;
                 string instanceName = "";
                 bool isEnd = false;
                 string fullTagName = null;
                 bool isTagNew = false;
-                       
-                while(true)
+
+                while (true)
                 {
                     subTagCount = 0;
                     isNoSubTag = (curStruct.subTagStruct == null || curStruct.subTagStruct.Count == 0);
-                    
+
                     if (isNoSubTag == false) subTagCount = curStruct.subTagStruct.Count;
 
                     if (subTagCount > 0 && string.IsNullOrEmpty(curStruct.tagName))
                     {
                         curStruct = curStruct.subTagStruct[0];
-                    }      
+                    }
 
                     isTagName = !string.IsNullOrEmpty(curStruct.tagName);
                     isNoSubTag = (curStruct.subTagStruct == null || curStruct.subTagStruct.Count == 0);
@@ -147,7 +142,7 @@ namespace Com.AimUI.TagEngine
                     if (isNoSubTag && isTagName == false)
                     {
                         index = strBuilder.Length;
-                        if (string.IsNullOrEmpty(curStruct.bodyContent)==false) OnNoTagAction(tagContext, curStruct.bodyContent,tagsObj,isDynamic);
+                        if (string.IsNullOrEmpty(curStruct.bodyContent) == false) OnNoTagAction(tagContext, curStruct.bodyContent, tagsObj, isDynamic);
                     }
                     else if (isTagName)
                     {
@@ -172,13 +167,13 @@ namespace Com.AimUI.TagEngine
 
                         try
                         {
-                            
+
                             fullTagName = curStruct.nameSpace + ":" + curStruct.tagName;
 
                             isTagNew = GetTagInstance(curStruct.nameSpace, curStruct.tagName, tagsObj, out tagObj);
 
                             instanceName = curStruct.instanceName;
-                           
+
                             if (isTagNew)
                             {
                                 if (string.IsNullOrEmpty(instanceName))
@@ -214,9 +209,9 @@ namespace Com.AimUI.TagEngine
                                     tagObj.OnInit();
                                 }
                             }
-                            else if (string.IsNullOrEmpty(instanceName)==false) //命名tag
+                            else if (string.IsNullOrEmpty(instanceName) == false) //命名tag
                             {
-                                ITag<T> newTagObj ;
+                                ITag<T> newTagObj;
                                 var fullInsName = fullTagName + "_" + instanceName;
                                 bool isCreate = nameTags.TryGetValue(fullInsName, out newTagObj);
                                 if (isCreate == false)
@@ -233,7 +228,7 @@ namespace Com.AimUI.TagEngine
                                     if (isDynamic)
                                     {
                                         strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + instanceName + "=null;\n");
-                                        strBuilder.AppendLine("\n"+instanceName + " = " + tagObj.instanceName + ".Create();");
+                                        strBuilder.AppendLine("\n" + instanceName + " = " + tagObj.instanceName + ".Create();");
                                         strBuilder.AppendLine(instanceName + ".tagContext = tagContext;");
                                         strBuilder.AppendLine(instanceName + ".instanceName = \"" + instanceName + "\";");
                                         strBuilder.AppendLine(instanceName + ".OnInit();");
@@ -248,7 +243,7 @@ namespace Com.AimUI.TagEngine
                                         tagObj.instanceName = instanceName;
                                         tagObj.OnInit();
                                     }
-                                   
+
                                 }
                                 else
                                 {
@@ -270,7 +265,7 @@ namespace Com.AimUI.TagEngine
                                     strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\").Create();");
                                     strBuilder.AppendLine("\t" + instanceName + ".tagContext = tagContext;");
                                     strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
-                                    strBuilder.AppendLine("\t"+instanceName + ".OnInit();\n}");
+                                    strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
                                 }
                             }
                             curStruct.tagObj = tagObj;
@@ -278,7 +273,7 @@ namespace Com.AimUI.TagEngine
                             {
                                 ParseTagParams(tagContext, strBuilder, curStruct.tagParams, tagObj, instanceName, curStruct, tagsObj, isDynamic);
                             }
-                            
+
                             if (isDynamic)
                             {
                                 strBuilder.AppendLine("try{");
@@ -288,19 +283,19 @@ namespace Com.AimUI.TagEngine
                             {
                                 tagObj.OnStart();
                             }
-                            
-                           
+
+
                             if (isNoSubTag)
                             {
                                 tagObj.curTag = null;
                                 if (isDynamic)
                                 {
                                     strBuilder.AppendLine(instanceName + ".curTag = null;");
-                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim())==false)
+                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
                                     {
                                         strBuilder.AppendLine("Com.AimUI.TagCore.OnTagDelegate " + instanceName + "_delegate=delegate (){");
                                         TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                        OnTagAction(tagObj, curStruct,tagsObj,isDynamic);
+                                        OnTagAction(tagObj, curStruct, tagsObj, isDynamic);
                                         strBuilder.AppendLine("};");
                                         strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
                                     }
@@ -316,7 +311,7 @@ namespace Com.AimUI.TagEngine
                                         tagObj.OnTag(delegate()
                                         {
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                            OnTagAction(tagObj, curStruct,tagsObj,isDynamic);
+                                            OnTagAction(tagObj, curStruct, tagsObj, isDynamic);
                                         });
                                     }
                                     else
@@ -336,7 +331,7 @@ namespace Com.AimUI.TagEngine
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
                                         tagObj.curTag = "";
-                                        if(string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
+                                        if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
                                         {
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
                                             OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
@@ -347,16 +342,16 @@ namespace Com.AimUI.TagEngine
                                         tagObj.curTag = tmpSubTag.tagName;
                                         if (tmpSubTag.tagParams != null)
                                         {
-                                            ParseTagParams(tagContext, strBuilder, tmpSubTag.tagParams, tagObj, instanceName, tmpSubTag, tagsObj, isDynamic); 
+                                            ParseTagParams(tagContext, strBuilder, tmpSubTag.tagParams, tagObj, instanceName, tmpSubTag, tagsObj, isDynamic);
                                         }
                                         if (isDynamic)
                                         {
                                             strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
-                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim())==false)
+                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
                                             {
                                                 strBuilder.AppendLine("Com.AimUI.TagCore.OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
                                                 TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                                OnTagAction(tagObj, tmpSubTag,tagsObj, isDynamic);
+                                                OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
                                                 strBuilder.AppendLine("};");
                                                 strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_" + tagObj.curTag + "_delegate);");
                                             }
@@ -373,7 +368,7 @@ namespace Com.AimUI.TagEngine
                                                 tagObj.OnTag(delegate()
                                                 {
                                                     TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                                    OnTagAction(tagObj, tmpSubTag,tagsObj, isDynamic);
+                                                    OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
                                                 });
                                             }
                                             else
@@ -409,9 +404,9 @@ namespace Com.AimUI.TagEngine
                         {
                             throw;
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
-                            throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]:" + e.Message,e);
+                            throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]:" + e.Message, e);
                         }
                     }
 
@@ -437,15 +432,19 @@ namespace Com.AimUI.TagEngine
                         break;
                     }
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    return e.Message;
-            //}
-                if (isTop && isDynamic)
+            }
+            catch (NullReferenceException)
+            {
+                if (tagParser == null)
                 {
-                    strBuilder.AppendLine("\n}\ncatch (Com.AimUI.TagCore.Exceptions.ResponseEndException){}");
+                    throw new TagParseException("解析引擎未设置");
                 }
+                throw;
+            }
+            if (isTop && isDynamic)
+            {
+                strBuilder.AppendLine("\n}\ncatch (Com.AimUI.TagCore.Exceptions.ResponseEndException){}");
+            }
         }
 
         static bool TestNestedTag(string content,out TagStruct outStruct)
