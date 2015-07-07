@@ -5,19 +5,33 @@ using System.Web;
 
 namespace Com.AimUI.TagCore
 {
-    //解析模式  静态 动态
+    /// <summary>
+    /// 解析模式  静态 动态
+    /// </summary>
     public enum ParseMode
     {
         Static,
         Dynamic,
-        //Code  //代码模式
     }
+
+    /// <summary>
+    /// 值返回前处理方式
+    /// </summary>
+    public enum ValuePreAction
+    {
+        NONE,
+        JSON_Serialize, // :
+        XML_Serialize,
+        USER_Defined
+    }
+
+    public delegate object OnValuePreActionDelegate(object value, byte actionCode, byte charCode);
+
     public class TagContext
     {
        
-        public TagContext(/*ParseMode parseMode = ParseMode.Static*/)
+        public TagContext()
         {
-            //this.parseMode = parseMode;
             response = new TagResponse();
         }
 
@@ -38,10 +52,22 @@ namespace Com.AimUI.TagCore
             }
             return null;
         }
-        //public ParseMode parseMode { get; protected set; }
+
+        public static object OnValuePreAction(object value, byte actionCode, byte charCode = 0)
+        {
+            if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode, charCode);
+            return value;
+        }
 
         //工作目录
         public string workDirPath { get; set; }
+
+        protected static OnValuePreActionDelegate onValuePreActionDelegate {  get;  set; }
+
+        public static void SetValuePreActionDelegate(OnValuePreActionDelegate actionDelegate)
+        {
+            onValuePreActionDelegate = actionDelegate;
+        }
         /// <summary>
         /// 自定义项集合
         /// </summary>

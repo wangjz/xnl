@@ -50,6 +50,7 @@ namespace Com.AimUI.TagCore
         }
 
         public TagExpression()
+            : base()
         {
             type = TagTokenType.Express;
         }

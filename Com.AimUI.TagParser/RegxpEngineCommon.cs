@@ -233,21 +233,29 @@ namespace Com.AimUI.TagParser
             List<TagToken> tokens = new List<TagToken>(matchs.Count);
             TagToken token = null;
             string tokenValue = null;
-            //int dotInx = -1;
-            //bool byRef = false;
+            ValuePreAction valuePreAction = ValuePreAction.NONE;
             foreach(Match match in matchs)
             {
                 
                 tokenValue = match.Groups[2].Value;
-                if (tokenValue[0] == ':') //sample {@:a}
+                char act_char = tokenValue[0];
+                if(act_char == 58 )
                 {
-                    //byRef = true;
+                    valuePreAction = ValuePreAction.JSON_Serialize;
                     tokenValue = tokenValue.Remove(0, 1);
                 }
-                //else
-                //{
-                //    byRef = false;
-                //}
+                else if (act_char > 32 && act_char < 48)
+                {
+                    if(act_char==33)
+                    {
+                        valuePreAction = ValuePreAction.XML_Serialize;
+                    }
+                    else
+                    {
+                        valuePreAction = ValuePreAction.USER_Defined;
+                    }
+                    tokenValue = tokenValue.Remove(0, 1);
+                }
 
                 if ((tokenValue.Length == 1 && tokenValue[0] == '.') || tokenValue[tokenValue.Length - 1] == '.') continue;
                 switch (match.Groups[1].Value)
@@ -256,15 +264,15 @@ namespace Com.AimUI.TagParser
                         token = GetAttrToken(tokenValue);
                         if (token == null) continue;
                         break;
-                    case "$": // //表达式  统一概念 无参数 变量表达式  有参数  方法表达式  {$site.url}  "{$isemail({$siteurl},abc)}"
+                    case "$": // //表达式
                         token = GetExpression(tokenValue);
                         if (token == null) continue;
                         token.type = TagTokenType.Express;
                         break;
                 }
-
+                if(valuePreAction!= ValuePreAction.NONE)token.actionChar = act_char;
                 token.value = match.Value;
-                //token.byRef = byRef;
+                token.action = valuePreAction;
                 token.index = match.Index;
                 token.length = match.Length;
                 tokens.Add(token);
@@ -346,16 +354,30 @@ namespace Com.AimUI.TagParser
                                 tagToken = new TagExpression() { type = TagTokenType.Express };
                             }
 
-                            if (m.Value[1] == ':')
+                            char act_char = m.Value[1];
+                            if (act_char == 58 || (act_char > 32 && act_char < 48))
                             {
-                                //_express.byRef = true;
+                                if(act_char==58)
+                                {
+                                    tagToken.action = ValuePreAction.JSON_Serialize;
+                                }
+                                else if (act_char == 33)
+                                {
+                                    tagToken.action = ValuePreAction.XML_Serialize;
+                                }
+                                else
+                                {
+                                    tagToken.action = ValuePreAction.USER_Defined;
+                                }
                                 names = names.Substring(1);
                                 tagToken.value = m.Value.Substring(2);
+                                tagToken.actionChar = act_char;
                             }
                             else
                             {
                                 tagToken.value = m.Value.Substring(1);
                             }
+                            
                             
                             tagToken.name = names;
                             if (tagToken.type == TagTokenType.Attribute)
@@ -417,7 +439,7 @@ namespace Com.AimUI.TagParser
                                     {
                                         if ((_s.StartsWith("\"") && _s.EndsWith("\"")) || (_s.StartsWith("'") && _s.EndsWith("'")))
                                         {
-                                            _s = _s.Substring(1, _s.Length - 2);//_s.Trim(trims);
+                                            _s = _s.Substring(1, _s.Length - 2);
                                         }
                             
                                         if (_s.IndexOf("~Exp~") != -1)
@@ -432,7 +454,7 @@ namespace Com.AimUI.TagParser
                                                     continue;
                                                 }
 
-                                                _token = new TagToken() { type = TagTokenType.Common }; //, value = _s
+                                                _token = new TagToken() { type = TagTokenType.Common };
                                                 _token.args = new List<TagToken>(matchs.Count);
 
                                                 int _index = 0;
@@ -463,15 +485,29 @@ namespace Com.AimUI.TagParser
                                     }
                                     if (_token.type != TagTokenType.Common)
                                     {
-                                        if (_s[1] == ':')
+                                        act_char = _s[1];
+                                        if (act_char == 58 || (act_char > 32 && act_char < 48))
                                         {
-                                            //_token.byRef = true;
+                                            if (act_char == 58)
+                                            {
+                                                _token.action = ValuePreAction.JSON_Serialize;
+                                            }
+                                            else if (act_char == 33)
+                                            {
+                                                _token.action = ValuePreAction.XML_Serialize;
+                                            }
+                                            else
+                                            {
+                                                _token.action = ValuePreAction.USER_Defined;
+                                            }
+                                            _token.actionChar = act_char;
                                             _token.value = _s.Substring(2);
                                         }
                                         else
                                         {
                                             _token.value = _s.Substring(1);
                                         }
+       
                                         if (_token.type == TagTokenType.Express)
                                         {
                                             inx = _token.value.LastIndexOf(':');
@@ -559,7 +595,7 @@ namespace Com.AimUI.TagParser
                                     t_args.Add(e_token);
                                     continue;
                                 }
-                                e_token = new TagToken() { type = TagTokenType.Common }; //, value = e_s
+                                e_token = new TagToken() { type = TagTokenType.Common };
                                 e_token.args = new List<TagToken>(matchs.Count);
                                 int _index=0;
                                 foreach(Match match in matchs)
@@ -589,9 +625,22 @@ namespace Com.AimUI.TagParser
                     }
                     if (e_token.type != TagTokenType.Common)
                     {
-                        if (e_s[1] == ':')
+                        char act_char = e_s[1];
+                        if (act_char == 58 || (act_char > 32 && act_char < 48))
                         {
-                            //e_token.byRef = true;
+                            if (act_char == 58)
+                            {
+                                e_token.action = ValuePreAction.JSON_Serialize;
+                            }
+                            else if (act_char == 33)
+                            {
+                                e_token.action = ValuePreAction.XML_Serialize;
+                            }
+                            else
+                            {
+                                e_token.action = ValuePreAction.USER_Defined;
+                            }
+                            e_token.actionChar = act_char;
                             e_token.value = e_s.Substring(2);
                         }
                         else
