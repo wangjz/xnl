@@ -270,7 +270,7 @@ namespace Com.AimUI.TagParser
                         token.type = TagTokenType.Express;
                         break;
                 }
-                if(valuePreAction!= ValuePreAction.NONE)token.actionChar = act_char;
+                if(valuePreAction!= ValuePreAction.NONE)token.actionCharCode = (byte)act_char;
                 token.value = match.Value;
                 token.action = valuePreAction;
                 token.index = match.Index;
@@ -326,12 +326,11 @@ namespace Com.AimUI.TagParser
                 //设置参数
                 MatchCollection tokenMatchs;
                 Dictionary<string, TagToken> nestedExp = null;
-                Random ra = new Random();// unchecked((int)DateTime.Now.Ticks) 保证产生的数字的随机性 
+                Random ra = new Random();
                 int random = ra.Next(10000,90000);
                 while (true)
                 {
                     //匹配嵌套表达式
-                    //\$\s*([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)
                     tokenMatchs = Regex.Matches(match_args, @"[@$]([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)", Tag_RegexOptions);
                     if (tokenMatchs.Count > 0)
                     {
@@ -371,7 +370,7 @@ namespace Com.AimUI.TagParser
                                 }
                                 names = names.Substring(1);
                                 tagToken.value = m.Value.Substring(2);
-                                tagToken.actionChar = act_char;
+                                tagToken.actionCharCode = (byte)act_char;
                             }
                             else
                             {
@@ -500,7 +499,7 @@ namespace Com.AimUI.TagParser
                                             {
                                                 _token.action = ValuePreAction.USER_Defined;
                                             }
-                                            _token.actionChar = act_char;
+                                            _token.actionCharCode = (byte)act_char;
                                             _token.value = _s.Substring(2);
                                         }
                                         else
@@ -640,7 +639,7 @@ namespace Com.AimUI.TagParser
                             {
                                 e_token.action = ValuePreAction.USER_Defined;
                             }
-                            e_token.actionChar = act_char;
+                            e_token.actionCharCode = (byte)act_char;
                             e_token.value = e_s.Substring(2);
                         }
                         else
@@ -665,6 +664,10 @@ namespace Com.AimUI.TagParser
                             {
                                 ((TagExpression)e_token).tagName = names.Substring(0, inx);
                                 e_token.name = names.Substring(inx + 1);
+                            }
+                            else
+                            {
+                                e_token.name = names;
                             }
                         }
                         else

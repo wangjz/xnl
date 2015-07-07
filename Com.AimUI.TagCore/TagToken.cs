@@ -28,7 +28,7 @@ namespace Com.AimUI.TagCore
         /// </summary>
         public ValuePreAction action { get; set; }
 
-        public char actionChar { get; set; }
+        public byte actionCharCode { get; set; }
 
         public string value { get; set; }
 
