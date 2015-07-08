@@ -692,10 +692,10 @@ namespace Com.AimUI.TagParser
         }
 
         //获取表达式描述
-        internal static TagExpression GetExpression(string ExpressionStr)
+        internal static TagExpression GetExpression(string expressionStr)
         {
 
-            Match match = Regex.Match(ExpressionStr, @"^([_a-zA-Z0-9\.:]+)(.*?)$", Tag_RegexOptions);
+            Match match = Regex.Match(expressionStr, @"^([_a-zA-Z0-9\.:]+)(.*?)$", Tag_RegexOptions);
             if (match.Success)
             {
                 TagExpression express = new TagExpression();

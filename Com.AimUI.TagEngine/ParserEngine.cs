@@ -88,6 +88,8 @@ namespace Com.AimUI.TagEngine
                         TagContext.SetItem(tagContext, "$__tags", tagsObj);
 
                         TagContext.SetItem(tagContext, "$__nameTags", nameTags);
+
+                        TagContext.SetItem(tagContext, "$__tagid", tagId);
                     }
 
                     //清除注释标签
@@ -146,7 +148,7 @@ namespace Com.AimUI.TagEngine
                     }
                     else if (isTagName)
                     {
-                        if (curStruct.nameSpace == "at" && curStruct.tagName == "inc")
+                        if (curStruct.nameSpace == "at" && curStruct.tagName == "inc" && curStruct.tagParams!=null)
                         {
                             //include tag
                             string ref_ns = curStruct.nameSpace;
@@ -158,6 +160,27 @@ namespace Com.AimUI.TagEngine
                             {
                                 curStruct.bodyContent = include;
                                 curStruct.subTagStruct = null;
+                            }
+
+                            string isStatic = Convert.ToString(curStruct.tagParams["static"]);
+
+                            if (isDynamic && isStatic != null && ("1" == isStatic || "true" == isStatic.Trim()))
+                            {
+                                index = strBuilder.Length;
+                                TagContext.SetItem(tagContext, "$__tagid", tagId);
+                                TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
+                                Parse(null, tagContext);
+                                int len = strBuilder.Length - index;
+                                if (len > 0)
+                                {
+                                    include = strBuilder.ToString(index, len);
+                                    strBuilder.Remove(index, len);
+
+                                    strBuilder.Append("\nbuffer.Append(@\"");
+                                    strBuilder.Append(include.Replace("\"", "\"\""));
+                                    strBuilder.AppendLine("\");");
+                                }
+                                goto TagNext;
                             }
                         }
 
@@ -409,7 +432,7 @@ namespace Com.AimUI.TagEngine
                             throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]:" + e.Message, e);
                         }
                     }
-
+                TagNext:
                     if (curStruct == tagStruct)
                     {
                         tagStruct = null;
@@ -738,7 +761,7 @@ namespace Com.AimUI.TagEngine
                             }
                             else
                             {
-                                object ret = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic);//ParseExpression((TagExpression)token, strBuilder,tagsObj, tagContext, isDynamic);
+                                object ret = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic);
                                 if (isDynamic)
                                 {
                                     strBuilder.Append("\nbuffer.Append(" + ret + ");");
@@ -993,7 +1016,7 @@ namespace Com.AimUI.TagEngine
                         }
                         else if (token.type == TagTokenType.Express)
                         {
-                            v_result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic, curStruct, tagObj);//ParseExpression((TagExpression)token, strBuilder, tagsObj, tagContext, isDynamic, curStruct, tagObj);
+                            v_result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic, curStruct, tagObj);
                         }
                     }
                     else

@@ -8,6 +8,7 @@ namespace Com.AimUI.TagCore.Tags
     {
         Dictionary<string, object> attrs;
         public string src;
+        public bool isStatic = false;
         public string subTagNames
         {
             get { return null; }
@@ -59,6 +60,7 @@ namespace Com.AimUI.TagCore.Tags
         public object GetAttribute(string paramName, object[] userData = null)
         {
             if (paramName == "src") return src;
+            if (paramName == "static") return isStatic;
             object obj;
             attrs.TryGetValue(paramName, out obj);
             return obj;

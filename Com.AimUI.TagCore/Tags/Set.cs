@@ -36,9 +36,12 @@ namespace Com.AimUI.TagCore.Tags
             {
                 StringBuilder buffer = tagContext.response.buffer;
                 int len = buffer.Length - inx;
-                body = buffer.ToString(inx, len);
-                buffer.Remove(inx, len);
-                inx = -1;
+                if (len > 0)
+                {
+                    body = buffer.ToString(inx, len);
+                    buffer.Remove(inx, len);
+                    inx = -1;
+                }
             }
         }
 
