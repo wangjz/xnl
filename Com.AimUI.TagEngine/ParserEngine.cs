@@ -148,7 +148,7 @@ namespace Com.AimUI.TagEngine
                     }
                     else if (isTagName)
                     {
-                        if (curStruct.nameSpace == "at" && curStruct.tagName == "inc" && curStruct.tagParams!=null)
+                        if (curStruct.tagName == "inc" && curStruct.nameSpace == "at" && curStruct.tagParams!=null)
                         {
                             //include tag
                             string ref_ns = curStruct.nameSpace;
@@ -156,6 +156,7 @@ namespace Com.AimUI.TagEngine
                             string include = tagContext.GetInclude(curStruct.tagParams["src"], ref ref_ns, ref ref_tagName);
                             if ("at" != ref_ns) curStruct.nameSpace = ref_ns;
                             if ("inc" != ref_tagName) curStruct.tagName = ref_tagName;
+
                             if (string.IsNullOrEmpty(include) == false)
                             {
                                 curStruct.bodyContent = include;
@@ -166,6 +167,7 @@ namespace Com.AimUI.TagEngine
 
                             if (isDynamic && isStatic != null && ("1" == isStatic || "true" == isStatic.Trim()))
                             {
+                                curStruct.tagName = "inc2";
                                 index = strBuilder.Length;
                                 TagContext.SetItem(tagContext, "$__tagid", tagId);
                                 TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
@@ -182,6 +184,10 @@ namespace Com.AimUI.TagEngine
                                 }
                                 goto TagNext;
                             }
+                        }
+                        else if (isNested && isDynamic == false && curStruct.tagName == "inc2" && curStruct.nameSpace == "at")
+                        {
+                            curStruct.tagName = "inc";
                         }
 
                         isTagNew = false;
