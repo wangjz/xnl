@@ -416,23 +416,27 @@ namespace Com.AimUI.TagParser
                             //解析参数
                             if (string.IsNullOrEmpty(_args.Trim()) == false)
                             {
-
                                 string[] s_arr = _args.Split(',');
-
                                 tagToken.args = new List<TagToken>(s_arr.Length);
                                 string _s;
                                 TagToken _token;
                                 for (var i = 0; i < s_arr.Length; i++)
                                 {
-
                                     _s = s_arr[i].Trim();
-                                    if (_s.StartsWith("@") || _s.StartsWith("@:"))
+                                    if (_s.Length > 1 && Regex.IsMatch(_s, @"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"))
                                     {
-                                        _token = new TagToken() { type = TagTokenType.Attribute };
-                                    }
-                                    else if (_s.StartsWith("$") || _s.StartsWith("$:"))
-                                    {
-                                        _token = new TagExpression() { type = TagTokenType.Express };
+                                        if (_s.StartsWith("@"))
+                                        {
+                                            _token = new TagToken() { type = TagTokenType.Attribute };
+                                        }
+                                        else if (_s.StartsWith("$"))
+                                        {
+                                            _token = new TagExpression() { type = TagTokenType.Express };
+                                        }
+                                        else
+                                        {
+                                            _token = new TagToken() { type = TagTokenType.Common, value = _s };
+                                        }
                                     }
                                     else
                                     {
@@ -568,13 +572,20 @@ namespace Com.AimUI.TagParser
                 for (var i = 0; i < e_arr.Length; i++)
                 {
                     e_s = e_arr[i].Trim();
-                    if (e_s.StartsWith("@") || e_s.StartsWith("@:"))
+                    if (e_s.Length>1 && Regex.IsMatch(e_s, @"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"))
                     {
-                        e_token = new TagToken() { type = TagTokenType.Attribute };
-                    }
-                    else if (e_s.StartsWith("$") || e_s.StartsWith("$:"))
-                    {
-                        e_token = new TagExpression() { type = TagTokenType.Express };
+                        if (e_s.StartsWith("@"))
+                        {
+                            e_token = new TagToken() { type = TagTokenType.Attribute };
+                        }
+                        else if (e_s.StartsWith("$"))
+                        {
+                            e_token = new TagExpression() { type = TagTokenType.Express };
+                        }
+                        else
+                        {
+                            e_token = new TagToken() { type = TagTokenType.Common, value = e_s };
+                        }
                     }
                     else
                     {

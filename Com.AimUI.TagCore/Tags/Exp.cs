@@ -136,6 +136,7 @@ namespace Com.AimUI.TagCore.Tags
                                 }
                                 userData[0] = str;
                             }
+
                             try
                             {
                                 string exp_s = Convert.ToString(userData[0]);
@@ -159,7 +160,8 @@ namespace Com.AimUI.TagCore.Tags
                                 {
                                     right_s = "'" + right_s.Replace("'", "''") + "'";
                                 }
-
+                                if (exp_s.StartsWith("=")) exp_s = "null" + exp_s;
+                                if (exp_s.EndsWith("=")) exp_s = exp_s + "null";
                                 return dt.Compute(string.Format(@"iif({0},{1},{2})", exp_s, left_s, right_s), "");
                             }
                             catch (Exception)
