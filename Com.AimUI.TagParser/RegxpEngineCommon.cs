@@ -256,6 +256,10 @@ namespace Com.AimUI.TagParser
                     }
                     tokenValue = tokenValue.Remove(0, 1);
                 }
+                else
+                {
+                    valuePreAction = ValuePreAction.NONE;
+                }
 
                 if ((tokenValue.Length == 1 && tokenValue[0] == '.') || tokenValue[tokenValue.Length - 1] == '.') continue;
                 switch (match.Groups[1].Value)
