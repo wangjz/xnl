@@ -190,6 +190,21 @@ namespace Com.AimUI.TagEngine
                             curStruct.tagName = "inc";
                         }
 
+                        if (curStruct.nameSpace == "at" && curStruct.tagName == "pre")
+                        {
+                            if (isDynamic)
+                            {
+                                strBuilder.Append("\nbuffer.Append(@\"");
+                                strBuilder.Append(curStruct.bodyContent.Replace("\"", "\"\""));
+                                strBuilder.AppendLine("\");");
+                            }
+                            else
+                            {
+                                strBuilder.Append(curStruct.bodyContent);
+                            }
+                            goto TagNext;
+                        }
+
                         isTagNew = false;
                         isEnd = false;
                         index = strBuilder.Length;
