@@ -19,11 +19,12 @@ namespace Com.AimUI.TagParser
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
         internal static string RegexStr_TagGroupAll;
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>((?<n><AT:[_a-zA-Z0-9]+(?:\#[a-zA-Z0-9]+|)(?:\s*|\s+.+?""\s*)>)|(?<-n></\1:\2\3>)|[.\s\S]*)(?(n)(?!))</\1:\2\3>";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>((?><\1\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2\3>(?<-n>)|(?!<\1\2\3(?:\s*|\s+.+?""\s*)>|</\1\2\3>)[.\s\S])*(?(n)(?!)))</\1\2\3>";
         //@"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1:\2\3>";
 
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1\2>";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>";
+        //@"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>([.\s\S]*?)</\1\2>";
        
         internal const string RegexStr_TagToken = @"{([@$])([_a-zA-Z0-9\.:]+.*?)}";
        
