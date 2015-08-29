@@ -151,7 +151,7 @@ namespace Com.AimUI.TagParser
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
             if (string.IsNullOrEmpty(subTagName)) return null;
-            if (contentStr.Length < 7 || contentStr.Trim().Length < 7) return null;
+            if (contentStr.Length < 7) return null; //|| contentStr.Trim().Length < 7
             MatchCollection matchs = MatchSubTagsGroupAllByName(contentStr, subTagName, tagObjName);
             int curIndex = 0;
             if (matchs.Count > 0)
@@ -185,7 +185,7 @@ namespace Com.AimUI.TagParser
         internal static TagStruct GetTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
-            if (contentStr.Length<11 || contentStr.Trim().Length < 11) return null;
+            if (contentStr.Length < 11) return null; //|| contentStr.Trim().Length < 11
             int index = 0;
             MatchCollection matchs = Regex.Matches(contentStr, RegexStr_TagGroupAll, Tag_RegexOptions); //RegexObj_TagGroupAll.Matches(contentStr);
             int counts = matchs.Count;
@@ -229,7 +229,7 @@ namespace Com.AimUI.TagParser
         internal static List<TagToken> GetTagTokens(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
-            if (contentStr.Length<4||contentStr.Trim().Length<4) return null;
+            if (contentStr.Length < 4) return null; //||contentStr.Trim().Length<4
             MatchCollection matchs = Regex.Matches(contentStr, RegexStr_TagToken);
             if (matchs.Count == 0) return null;
             List<TagToken> tokens = new List<TagToken>(matchs.Count);
