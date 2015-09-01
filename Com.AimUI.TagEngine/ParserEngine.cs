@@ -20,7 +20,7 @@ namespace Com.AimUI.TagEngine
         public static string ParseToString(string templateStr, T tagContext, ParseMode parseMode = ParseMode.Static)
         {
             Parse(templateStr,tagContext,parseMode);
-            return tagContext.response.buffer.ToString();
+            return tagContext.GetTagResponse().buffer.ToString();
         }
 
         public static void Parse(string templateStr, T tagContext, ParseMode parseMode = ParseMode.Static)
@@ -49,9 +49,9 @@ namespace Com.AimUI.TagEngine
                 return;
             }
 
-            StringBuilder strBuilder = tagContext.response.buffer;
 
-            TagResponse response = tagContext.response;
+            TagResponse response = tagContext.GetTagResponse();
+            StringBuilder strBuilder = response.buffer;
             bool isDynamic = (parseMode == ParseMode.Dynamic);
 
             try
@@ -560,7 +560,7 @@ namespace Com.AimUI.TagEngine
         static void ParseAction(T tagContext, ITag<T> tagObj, string body, TagStruct tagStruct,Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             if (string.IsNullOrEmpty(body)) return;
-            StringBuilder strBuilder = tagContext.response.buffer;
+            StringBuilder strBuilder = tagContext.GetTagResponse().buffer;
             List<TagToken> tokens = tagParser.GetTagTokens(body);
             
             if (tokens != null)
@@ -687,7 +687,7 @@ namespace Com.AimUI.TagEngine
 
         static void OnNoTagAction(T tagContext, string body, Dictionary<string, ITag<T>> tagsObj,bool isDynamic)
         {
-            StringBuilder strBuilder = tagContext.response.buffer;
+            StringBuilder strBuilder = tagContext.GetTagResponse().buffer;
             List<TagToken> tokens = tagParser.GetTagTokens(body);
             if (tokens == null)
             {

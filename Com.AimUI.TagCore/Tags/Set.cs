@@ -10,6 +10,7 @@ namespace Com.AimUI.TagCore.Tags
         Dictionary<string, object> attrs;
         string body;
         int inx = -1;
+        private StringBuilder buffer;
         public T tagContext
         {
             get;
@@ -23,18 +24,18 @@ namespace Com.AimUI.TagCore.Tags
         public void OnInit()
         {
             attrs = new Dictionary<string, object>();
+            buffer = tagContext.GetTagResponse().buffer;
         }
 
         public void OnStart()
         {
-            inx = tagContext.response.buffer.Length;
+            inx = buffer.Length;
         }
 
         public void OnEnd()
         {
             if(inx!=-1)
             {
-                StringBuilder buffer = tagContext.response.buffer;
                 int len = buffer.Length - inx;
                 if (len > 0)
                 {

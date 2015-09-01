@@ -35,7 +35,12 @@ namespace Com.AimUI.TagCore
             response = new TagResponse();
         }
 
-        public TagResponse response { get; protected set; }
+        protected TagResponse response { get; set; }
+
+        public virtual TagResponse GetTagResponse()
+        {
+            return response;
+        }
 
         public virtual string GetInclude(string src, ref string tagNamespace,ref string tagName, Encoding encoding = null)
         {
@@ -60,7 +65,7 @@ namespace Com.AimUI.TagCore
         }
 
         //工作目录
-        public string workDirPath { get; set; }
+        protected string workDirPath { get; set; }
 
         protected static OnValuePreActionDelegate onValuePreActionDelegate {  get;  set; }
 

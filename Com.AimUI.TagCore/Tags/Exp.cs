@@ -255,7 +255,7 @@ namespace Com.AimUI.TagCore.Tags
                             if (userData == null || userData.Length < 1 || userData[0] == null) return null;
                             return HttpContext.Current.Session[userData[0].ToString()];
                         case "stop":
-                            tagContext.response.Stop();
+                            tagContext.GetTagResponse().Stop();
                             return null;
                     }
                     break;
