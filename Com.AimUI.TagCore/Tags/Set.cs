@@ -75,8 +75,6 @@ namespace Com.AimUI.TagCore.Tags
         public bool ExistAttribute(string paramName)
         {
             return true;
-            //if (paramName == "body") return true;
-            //return attrs.ContainsKey(paramName);
         }
 
         public string subTagNames
@@ -85,12 +83,6 @@ namespace Com.AimUI.TagCore.Tags
             {
                 return null;
             }
-        }
-
-        public ParseMode parseMode
-        {
-            get;
-            set;
         }
     }
 }

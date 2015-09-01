@@ -13,8 +13,27 @@ namespace Com.AimUI.TagCore
     public class TagToken
     {
         public TagTokenType type { get; set; }
+
+        private string _name;
         //名称
-        public string name { get; set; }
+        public string name 
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if(value!=null)
+                {
+                    _name = value.ToLower();
+                }
+                else
+                {
+                    _name = null;
+                }
+            }
+        }
 
         //域名称  标签所在实例名称  或 标签名称
         public virtual string scope { get; set; }

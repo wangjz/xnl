@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
 using System.Text;
 using System.Web;
 
@@ -71,6 +72,31 @@ namespace Com.AimUI.TagCore.Tags
                         case "get":
                             if (userData == null || userData.Length < 1 || userData[0] == null) return null;
                             return HttpContext.Current.Request.QueryString[userData[0].ToString()];
+                        case "getvalue":
+                            if (userData == null || userData.Length < 2 || userData[0] == null) return null;
+                            string _name = Convert.ToString(userData[1]);
+                            if (string.IsNullOrEmpty(_name)) return null;
+                            try
+                            {
+                                object obj = userData[0];
+                                
+                                if(obj is Array)
+                                {
+                                    int inx;
+                                    if (int.TryParse(_name, out inx))
+                                    {
+                                        object [] _arr = obj as object[];
+                                        if(_arr==null)return null;
+                                        return _arr[inx];
+                                    }
+                                }
+                                return obj.GetType().GetProperty(_name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
+                            }
+                            catch (Exception)
+                            {
+                                return null;
+                            }
+                            
                     }
                     break;
                 case 'p':

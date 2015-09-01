@@ -15,6 +15,7 @@ namespace Com.AimUI.TagCore.Tags
 
       bool isChange;
 
+      private byte _break = 0;
       public T tagContext
       {
           get;
@@ -46,6 +47,7 @@ namespace Com.AimUI.TagCore.Tags
       //子标签解析
       public void OnTag(OnTagDelegate tagDelegate=null)
       {
+          if (_break == 2) return;
           if (tagDelegate == null) return;
           if ("if" == curTag)
           {
@@ -54,7 +56,11 @@ namespace Com.AimUI.TagCore.Tags
                   value = LogicTest(a, b, test);
                   isChange = false;
               }
-              if (value) tagDelegate();
+              if (value)
+              {
+                  tagDelegate();
+                  if (_break == 1) _break = 2;
+              }
           }
           else if ("else" == curTag)
           {
@@ -63,7 +69,11 @@ namespace Com.AimUI.TagCore.Tags
                   value = LogicTest(a, b, test);
                   isChange = false;
               }
-              if (!value) tagDelegate();
+              if (!value)
+              {
+                  tagDelegate();
+                  if (_break == 1) _break = 2;
+              }
           }
           else
           {
@@ -72,7 +82,11 @@ namespace Com.AimUI.TagCore.Tags
                   value = LogicTest(a, b, test);
                   isChange = false;
               }
-              if (value) tagDelegate();
+              if (value)
+              {
+                  tagDelegate();
+                  if (_break == 1) _break = 2;
+              }
           }
       }
 
@@ -90,6 +104,31 @@ namespace Com.AimUI.TagCore.Tags
           else if ("test" == paramName)
           {
               if (value != null) test = value.ToString();
+          }
+          else if("break"==paramName)
+          {
+              if(value!=null)
+              {
+                  if(value is bool)
+                  {
+                      bool _v = Convert.ToBoolean(value);
+                      _break =(byte) (_v ? 1 : 0);
+                  }
+                  else
+                  {
+                      bool _v = false;
+                      string s_v = Convert.ToString(value);
+                      if ("1" == s_v)
+                      {
+                          _v = true;
+                      }
+                      else if(string.IsNullOrEmpty(s_v)==false)
+                      {
+                          bool.TryParse(s_v, out _v);
+                      }
+                      _break = (byte)(_v ? 1 : 0);
+                  }
+              }
           }
       }
 

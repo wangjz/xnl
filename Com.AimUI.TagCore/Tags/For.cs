@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Data;
+using System.Reflection;
+using System.Collections;
 
 namespace Com.AimUI.TagCore.Tags
 {
@@ -25,6 +27,12 @@ namespace Com.AimUI.TagCore.Tags
         public int step = 1;
 
         private int pos = 0;
+
+        private IEnumerable<object> list;
+
+        private object item;
+
+        //private bool _break = false;
         public T tagContext
         {
             get;
@@ -37,7 +45,7 @@ namespace Com.AimUI.TagCore.Tags
         public void OnInit()
         {
             start = 0;
-            end = 0;
+            end = -1;
             split = ",";
             strs = null;
         }
@@ -50,7 +58,11 @@ namespace Com.AimUI.TagCore.Tags
                 if(string.IsNullOrEmpty(str)==false)
                 {
                     strs = str.Split(new string[] { split }, StringSplitOptions.RemoveEmptyEntries);
-                    if (end >= strs.Length) end = strs.Length-1;
+                    if(end==-1)
+                    {
+                        end = strs.Length - 1;
+                    }
+                    else if (end >= strs.Length) end = strs.Length-1;
                 }
                 else
                 {
@@ -61,15 +73,29 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnEnd()
         {
+
         }
 
         //子标签解析
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (step == 0) return;
+            
             if (tagDelegate != null)
             {
-                
+                if (list != null)
+                {
+                    pos = 1;
+                    i = 0;
+                    foreach (object _item in list)
+                    {
+                        item = _item;
+                        tagDelegate();
+                        pos += 1;
+                        i += 1;
+                    }
+                    return;
+                }
                 if (start > end)
                 {
                     if (step > 0) step = -step;
@@ -97,13 +123,28 @@ namespace Com.AimUI.TagCore.Tags
             {
                 end = Convert.ToInt32(value);
             }
-            else if (paramName == "str")
+            else if (paramName == "list")
             {
-                string v = Convert.ToString(value);
-                if (v != str)
+                if(value is string)
                 {
-                    str = v;
-                    isChange = true;
+                    string v = Convert.ToString(value);
+                    if (v != str)
+                    {
+                        str = v;
+                        isChange = true;
+                    }
+                    list = null;
+                    item = null;
+                }
+                else
+                {
+                    if(value!=list)
+                    {
+                        list = value as ICollection<object>;
+                        isChange = true;
+                    }
+                    str = null;
+                    strs = null;
                 }
             }
             else if (paramName == "split")
@@ -139,8 +180,20 @@ namespace Com.AimUI.TagCore.Tags
             {
                 return end;
             }
-            else if (paramName == "str")
+            else if (paramName == "item")
             {
+                if(item!=null)
+                {
+                    if(userData!=null && userData.Length>0)
+                    {
+                        return item.GetType().GetProperty(Convert.ToString(userData[0]),BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item,null);
+                    }
+                    else
+                    {
+                        return item;
+                    }
+                }
+
                 if (strs != null && i < strs.Length)
                 {
                     return strs[i];
@@ -166,19 +219,13 @@ namespace Com.AimUI.TagCore.Tags
         }
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "i" || paramName == "str" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
+            if (paramName == "i" || paramName == "item" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
             return false;
         }
 
         public string subTagNames
         {
             get { return null; }
-        }
-
-        public ParseMode parseMode
-        {
-            get;
-            set;
         }
     }
 }
