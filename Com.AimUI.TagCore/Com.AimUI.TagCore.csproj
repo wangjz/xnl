@@ -42,13 +42,14 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions\ResponseEndException.cs" />
     <Compile Include="Exceptions\TagParseException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IParser.cs" />
+    <Compile Include="Tags\Each.cs" />
     <Compile Include="Tags\Exp.cs" />
     <Compile Include="Tags\For.cs" />
     <Compile Include="Tags\If.cs" />

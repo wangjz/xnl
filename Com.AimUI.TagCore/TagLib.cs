@@ -136,6 +136,7 @@ namespace Com.AimUI.TagCore
             tagCache.Add("at:exp", new Exp<T>());
             tagCache.Add("at:inc", new Inc<T>());
             tagCache.Add("at:pre", new Pre<T>());
+            tagCache.Add("at:each", new Each<T>());
             if (tagLibs != null)
             {
                 foreach (TagLib<T> lib in tagLibs)

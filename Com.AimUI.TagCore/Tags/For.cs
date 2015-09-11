@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Data;
 using System.Reflection;
 using System.Collections;
 
@@ -28,8 +25,8 @@ namespace Com.AimUI.TagCore.Tags
 
         private int pos = 0;
 
-        private IEnumerable<object> list;
-
+        private object[] list;
+        
         private object item;
 
         //private bool _break = false;
@@ -67,6 +64,12 @@ namespace Com.AimUI.TagCore.Tags
                 else
                 {
                     strs = null;
+                    if(list==null)return ;
+                    if (end == -1)
+                    {
+                        end = list.Length - 1;
+                    }
+                    else if (end >= list.Length) end = list.Length - 1;
                 }
             }
         }
@@ -83,19 +86,6 @@ namespace Com.AimUI.TagCore.Tags
             
             if (tagDelegate != null)
             {
-                if (list != null)
-                {
-                    pos = 1;
-                    i = 0;
-                    foreach (object _item in list)
-                    {
-                        item = _item;
-                        tagDelegate();
-                        pos += 1;
-                        i += 1;
-                    }
-                    return;
-                }
                 if (start > end)
                 {
                     if (step > 0) step = -step;
@@ -107,6 +97,10 @@ namespace Com.AimUI.TagCore.Tags
                 pos = 1;
                 for (i = start; i <= end; i += step)
                 {
+                    if (list != null)
+                    {
+                        item = list[i];
+                    }
                     tagDelegate();
                     pos += 1;
                 }   
@@ -140,7 +134,22 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     if(value!=list)
                     {
-                        list = value as ICollection<object>;
+                        ICollection<object>  _list = value as ICollection<object>;
+
+                        if(_list!=null)
+                        {
+                            list = new object[_list.Count];
+                            int i=0;
+                            foreach(object obj in _list)
+                            {
+                                list[i] = obj;
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            list=null;
+                        }
                         isChange = true;
                     }
                     str = null;
@@ -179,6 +188,12 @@ namespace Com.AimUI.TagCore.Tags
             else if (paramName == "end")
             {
                 return end;
+            }
+            else if(paramName=="count")
+            {
+                if (strs != null) return strs.Length;
+                if (list != null) return list.Length;
+                return 0;
             }
             else if (paramName == "item")
             {

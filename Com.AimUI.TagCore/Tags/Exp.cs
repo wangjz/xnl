@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
-using System.Text;
 using System.Web;
 
 namespace Com.AimUI.TagCore.Tags
@@ -119,7 +118,7 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         case "lower":
                             if (userData == null || userData.Length < 1 || userData[0] == null) return null;
-                            return ToLower(userData[0].ToString());
+                            return userData[0].ToString().ToLower();
                     }
                     break;
                 
@@ -266,6 +265,40 @@ namespace Com.AimUI.TagCore.Tags
                             throw new ResponseEndException();
                     }
                     break;
+                case 'b':
+                    switch(paramName)
+                    {
+                        case "bit":
+                            if (userData == null || userData.Length < 2) return null;
+                            char bitAction = Convert.ToChar(userData[1]);
+                            int left = Convert.ToInt32(userData[0]);
+                            switch(bitAction)
+                            {
+                                case '&':
+                                    return left & Convert.ToInt32(userData[2]);
+                                case '|':
+                                    return left | Convert.ToInt32(userData[2]);
+                                case '^':
+                                    return left ^ Convert.ToInt32(userData[2]);
+                                case '~':
+                                    return ~left;
+                                case '<':  //左移
+                                    return left << Convert.ToInt32(userData[2]);
+                                case '>': //右移
+                                    return left >> Convert.ToInt32(userData[2]);
+                            }
+                            return null;
+                    }
+                    break;
+                case 'j':
+                    switch(paramName)
+                    {
+                        case "jsonencode":
+                            return TagContext.OnValuePreAction(userData[0],(byte)ValuePreAction.JSON_Serialize, (byte)':');
+                        case "jsondecode":
+                            return TagContext.OnValuePreAction(userData[0], (byte)ValuePreAction.JSON_Deserialize, (byte)';');
+                    }
+                    break;
             }
             if (paramName=="_")
             {
@@ -302,11 +335,6 @@ namespace Com.AimUI.TagCore.Tags
         public ITag<T> Create()
         {
             return new Exp<T>();
-        }
-
-        public static string ToLower(string input)
-        {
-            return input.ToLower();
         }
     }
 }

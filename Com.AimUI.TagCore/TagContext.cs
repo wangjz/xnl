@@ -21,6 +21,7 @@ namespace Com.AimUI.TagCore
     {
         NONE,
         JSON_Serialize, // :
+        JSON_Deserialize,
         XML_Serialize,
         USER_Defined
     }
@@ -58,7 +59,7 @@ namespace Com.AimUI.TagCore
             return null;
         }
 
-        public static object OnValuePreAction(object value, byte actionCode, byte charCode = 0)
+        public static object OnValuePreAction( object value, byte actionCode, byte charCode = 0)
         {
             if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode, charCode);
             return value;
