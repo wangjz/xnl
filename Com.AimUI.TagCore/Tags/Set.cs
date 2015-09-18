@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace Com.AimUI.TagCore.Tags
@@ -63,6 +64,21 @@ namespace Com.AimUI.TagCore.Tags
             if (paramName == "body") return body;
             object obj;
             attrs.TryGetValue(paramName, out obj);
+            if (obj != null && userData != null)
+            {
+                try
+                {
+                    string prop = Convert.ToString(userData[0]);
+                    if (string.IsNullOrEmpty(prop)) return null;
+                    return obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
+                }
+                catch (Exception)
+                {
+                    return null;
+                    //throw;
+                }
+            }
+            
             return obj;
         }
 

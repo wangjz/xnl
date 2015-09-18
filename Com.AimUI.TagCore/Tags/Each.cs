@@ -75,12 +75,20 @@ namespace Com.AimUI.TagCore.Tags
 
         public object GetAttribute(string paramName, object[] userData = null)
         {
-            if (userData != null && userData.Length ==1 && paramName == "item")
+            if (item!=null && userData != null && paramName == "item")
             {
                 if (item == null) return null;
-                string prop=Convert.ToString(userData[0]);
-                if(string.IsNullOrEmpty(prop))return null;
-                return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item, null);
+                try
+                {
+                    string prop = Convert.ToString(userData[0]);
+                    if (string.IsNullOrEmpty(prop)) return null;
+                    return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item, null);
+                }
+                catch (Exception)
+                {
+                    return null;
+                    //throw;
+                }
             }
             switch(paramName)
             {
