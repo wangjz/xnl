@@ -858,6 +858,28 @@ namespace Com.AimUI.TagEngine
 
         static object ParseAttribule(TagToken token, ITag<T> tagObj, TagStruct tagStruct, bool isDynamic, T tagContext, Dictionary<string, ITag<T>> tagsObj, object[] args = null)
         {
+            if (tagStruct == null)
+            {
+                if (string.IsNullOrEmpty(token.scope))
+                {
+                    return null;
+                }
+                else
+                {
+                    bool isOk;
+
+                    object s = ParseOutAttributeToken(token, tagContext, tagsObj, isDynamic, out isOk, args);
+
+                    if (isOk)
+                    {
+                        return s;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
             bool isGetSelf = (token.name == "this");
             if (isGetSelf  && (string.IsNullOrEmpty(token.scope) || token.scope == tagStruct.tagName || token.scope == tagObj.instanceName))
             {
