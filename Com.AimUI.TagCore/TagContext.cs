@@ -21,8 +21,7 @@ namespace Com.AimUI.TagCore
     {
         NONE,
         JSON_Serialize, // :
-        JSON_Deserialize,
-        XML_Serialize,
+        JSON_Deserialize, // ;
         USER_Defined
     }
 

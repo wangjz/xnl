@@ -214,6 +214,9 @@ namespace Com.AimUI.TagCore.Tags
                             {
                                 return null;
                             }
+                        case "int":
+                            if (userData == null || userData.Length ==0) return null;
+                            return Convert.ToInt32(userData[0]);
                     }
                     break;
                 case 'r':

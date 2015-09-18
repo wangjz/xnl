@@ -8,6 +8,7 @@ using Com.AimUI.TagCore.Exceptions;
 
 namespace Com.AimUI.TagCore
 {
+    public delegate ITag<T> TagConstructorDelegate<T>(string tagName) where T:TagContext;
     public class TagLib<T> where T:TagContext
     {
         public static IParser<T> tagParser { get; private set; }
@@ -21,11 +22,19 @@ namespace Com.AimUI.TagCore
 
         private static ITagCache<T> tagCache;
 
-        public TagLib(string _nameSpace, bool _isCache) 
+        private TagConstructorDelegate<T> tagConstructor;
+
+        public TagLib(string _nameSpace, bool _isCache,TagConstructorDelegate<T> _tagConstructor=null) 
         {
             nameSpace = _nameSpace;
             low_nameSpace = _nameSpace.ToLower();
             isCache = _isCache;
+            if (tagConstructor != null) tagConstructor = _tagConstructor;
+        }
+
+        public void SetTagConstruct(TagConstructorDelegate<T> _tagConstruct)
+        {
+            tagConstructor = _tagConstruct;
         }
 
         private  ITag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
@@ -35,7 +44,7 @@ namespace Com.AimUI.TagCore
                 libAssembly = Assembly.Load("Com.AimUI.Tag." + nameSpace);
             }
 
-            Type tagType = libAssembly.GetType("Com.AimUI.Tag." + nameSpace + "." + tagName, false, true);//得到类型
+            Type tagType = libAssembly.GetType("Com.AimUI.Tag." + nameSpace + "." + tagName, false, true);
 
             if (tagType == null)
             {
@@ -53,13 +62,36 @@ namespace Com.AimUI.TagCore
                 obj = tagCache[_n];
                 if (obj == null)
                 {
+                    if (tagConstructor != null)
+                    {
+                        obj = tagConstructor(tagName);
+                        if (obj != null)
+                        {
+                            tagCache[_n] = obj;
+                            return obj;
+                        }
+                    }
                     obj = GetTagInstanceFromAssembly(nameSpace, tagName);
-                    if (obj != null) tagCache[_n] = obj;
+                    if (obj != null)
+                    {
+                        tagCache[_n] = obj;
+                        return obj;
+                    }
+                    return null;
                 }
             }
             else
             {
+                if (tagConstructor != null)
+                {
+                    obj = tagConstructor(tagName);
+                    if (obj != null)
+                    {
+                        return obj;
+                    }
+                }
                 obj = GetTagInstanceFromAssembly(nameSpace, tagName);
+                return obj;
             }
             return obj;
         }

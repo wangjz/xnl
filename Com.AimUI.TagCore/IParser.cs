@@ -25,5 +25,8 @@ namespace Com.AimUI.TagCore
 
 
         List<TagToken> GetTagTokens(string contentStr);
+
+        //设置自定义返回值预处理符号
+        void SetValuePreActionChar(char valuePreActionChar);
     }
 }
