@@ -195,10 +195,23 @@ namespace Com.AimUI.TagCore.Tags
               switch (test)
               {
                   case "=":
-                      if (v1.Equals(v2)) return true;
+                      if (v1.GetType() == v2.GetType())
+                      {
+                          if (v1.Equals(v2)) return true;
+                      }
+                      else if(v1.ToString()==v2.ToString()){
+                          return true;
+                      }
                       break;
                   case "!=":
-                      if (!v1.Equals(v2)) return true;
+                      if (v1.GetType() == v2.GetType())
+                      {
+                          if (!v1.Equals(v2)) return true;
+                      }
+                      else if (v1.ToString() != v2.ToString())
+                      {
+                          return true;
+                      }
                       break;
                   case ">":
                   case "&gt;":
