@@ -40,7 +40,7 @@ namespace Com.AimUI.TagCore.Tags
       {
 
       }
-      //子标签解析
+      
       public void OnTag(OnTagDelegate tagDelegate=null)
       {
           if (_break == 2) return;
@@ -205,7 +205,7 @@ namespace Com.AimUI.TagCore.Tags
                       if (v2 == null) return true;
                       s = v1.ToString();
 
-                      if (double.TryParse(s, out v)) //number
+                      if (double.TryParse(s, out v)) 
                       {
                           if (v > Convert.ToDouble(v2)) return true;
                       }
@@ -222,7 +222,7 @@ namespace Com.AimUI.TagCore.Tags
                   case "&lt;":
                       if (v2 == null) return false;
                       s = v1.ToString();
-                      if (double.TryParse(s, out v)) //number
+                      if (double.TryParse(s, out v))
                       {
                           if (v < Convert.ToDouble(v2)) return true;
                       }
@@ -236,10 +236,10 @@ namespace Com.AimUI.TagCore.Tags
                       }
                       break;
                   case ">=":
-                  case "&gt;=": //>=
+                  case "&gt;=":
                       if (v2 == null) return true;
                       s = v1.ToString();
-                      if (double.TryParse(s, out v)) //number
+                      if (double.TryParse(s, out v))
                       {
                           if (v >= Convert.ToDouble(v2)) return true;
                       }
@@ -253,10 +253,10 @@ namespace Com.AimUI.TagCore.Tags
                       }
                       break;
                   case "<=":
-                  case "&lt;=":  //<=
+                  case "&lt;=":
                       if (v2 == null) return false;
                       s = v1.ToString();
-                      if (double.TryParse(s, out v)) //number
+                      if (double.TryParse(s, out v)) 
                       {
                           if (v <= Convert.ToDouble(v2)) return true;
                       }

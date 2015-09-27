@@ -34,15 +34,15 @@ namespace Com.AimUI.TagCore.Tags
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (tagDelegate == null) return;
-            if(list!=null)
+            if (list != null)
             {
                 i = 0;
                 pos = 1;
                 if (step <= 0) step = 1;
-                foreach(object _item in list)
+                foreach (object _item in list)
                 {
                     this.item = _item;
-                    if (step != 1 && i%step==0)
+                    if (step != 1 && i % step == 0)
                     {
                         tagDelegate();
                     }
@@ -62,10 +62,10 @@ namespace Com.AimUI.TagCore.Tags
 
         public void SetAttribute(string paramName, object value)
         {
-            switch(paramName)
+            switch (paramName)
             {
                 case "list":
-                    list=value as IEnumerable<object>;
+                    list = value as IEnumerable<object>;
                     break;
                 case "step":
                     step = Convert.ToInt32(value);
@@ -75,7 +75,7 @@ namespace Com.AimUI.TagCore.Tags
 
         public object GetAttribute(string paramName, object[] userData = null)
         {
-            if (item!=null && userData != null && paramName == "item")
+            if (item != null && userData != null && paramName == "item")
             {
                 if (item == null) return null;
                 try
@@ -87,10 +87,9 @@ namespace Com.AimUI.TagCore.Tags
                 catch (Exception)
                 {
                     return null;
-                    //throw;
                 }
             }
-            switch(paramName)
+            switch (paramName)
             {
                 case "item":
                     return item;

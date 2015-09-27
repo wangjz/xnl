@@ -34,7 +34,7 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnEnd()
         {
-            if(inx!=-1)
+            if (inx != -1)
             {
                 int len = buffer.Length - inx;
                 if (len > 0)
@@ -46,10 +46,10 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        //子标签解析
+
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
-            if(tagDelegate!=null)
+            if (tagDelegate != null)
             {
                 tagDelegate();
             }
@@ -59,7 +59,7 @@ namespace Com.AimUI.TagCore.Tags
             attrs[paramName] = value;
         }
 
-        public object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
+        public object GetAttribute(string paramName, object[] userData = null)
         {
             if (paramName == "body") return body;
             object obj;
@@ -75,14 +75,13 @@ namespace Com.AimUI.TagCore.Tags
                 catch (Exception)
                 {
                     return null;
-                    //throw;
                 }
             }
-            
+
             return obj;
         }
 
-        //创建 
+
         public ITag<T> Create()
         {
             return new Set<T>();

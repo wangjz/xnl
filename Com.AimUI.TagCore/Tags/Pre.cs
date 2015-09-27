@@ -29,12 +29,12 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnInit()
         {
-            
+
         }
 
         public void OnStart()
         {
-            
+
         }
 
         public void OnTag(OnTagDelegate tagDelegate = null)

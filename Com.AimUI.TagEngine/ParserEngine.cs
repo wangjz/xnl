@@ -704,7 +704,6 @@ namespace Com.AimUI.TagEngine
             }
             else
             {
-                //{@:site.name}
                 int inx = 0;
                 foreach (TagToken token in tokens)
                 {
@@ -1763,12 +1762,6 @@ namespace Com.AimUI.TagEngine
                     return TagContext.OnValuePreAction(tagObj.GetAttribute(token.name), (byte)token.action, token.actionCharCode);
                 }
             }
-        }
-
-        static ITag<T> GetTagObjByToken(TagToken token, T tagContext, Dictionary<string, ITag<T>> tagsObj, TagStruct tagStruct = null)
-        {
-            
-            return null;
         }
 
         static object GetTagSelf(TagToken token,ITag<T> tagObj, bool isDynamic)

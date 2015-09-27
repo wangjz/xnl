@@ -43,7 +43,7 @@ namespace Com.AimUI.TagCore
         public int length { get; set; }
 
         /// <summary>
-        /// 是否序列化输出
+        /// 值预处理行为
         /// </summary>
         public ValuePreAction action { get; set; }
 
