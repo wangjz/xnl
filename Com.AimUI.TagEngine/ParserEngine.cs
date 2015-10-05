@@ -165,7 +165,7 @@ namespace Com.AimUI.TagEngine
 
                             string isStatic = Convert.ToString(curStruct.tagParams["static"]);
 
-                            if (isDynamic && isStatic != null && ("1" == isStatic || "true" == isStatic.Trim()))
+                            if (isDynamic && isStatic != null && ("1" == isStatic || string.Compare("true", isStatic, true) == 0))
                             {
                                 curStruct.tagName = "inc2";
                                 index = strBuilder.Length;
@@ -318,6 +318,12 @@ namespace Com.AimUI.TagEngine
                                 ParseTagParams(tagContext, strBuilder, curStruct.tagParams, tagObj, instanceName, curStruct, tagsObj, isDynamic);
                             }
 
+
+                            if (IsNullOrWhiteSpace(curStruct.bodyContent))
+                            {
+                                goto TagNext;
+                            }
+
                             if (isDynamic)
                             {
                                 strBuilder.AppendLine("try{");
@@ -335,33 +341,34 @@ namespace Com.AimUI.TagEngine
                                 if (isDynamic)
                                 {
                                     strBuilder.AppendLine(instanceName + ".curTag = null;");
-                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
-                                    {
+                                    //if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
+                                    //{
                                         strBuilder.AppendLine("Com.AimUI.TagCore.OnTagDelegate " + instanceName + "_delegate=delegate (){");
                                         TagContext.SetItem(tagContext, "$__tagid", tagId);
                                         OnTagAction(tagObj, curStruct, tagsObj, isDynamic);
                                         strBuilder.AppendLine("};");
                                         strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
-                                    }
-                                    else
-                                    {
-                                        strBuilder.AppendLine(instanceName + ".OnTag(null);");
-                                    }
+                                    //}
+                                    //else
+                                    //{
+                                    //    strBuilder.AppendLine(instanceName + ".OnTag(null);");
+                                    //}
                                 }
                                 else
                                 {
-                                    if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
-                                    {
+                                    //if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
+                                    //{
+                                    TagStruct tmpSubTag = curStruct;
                                         tagObj.OnTag(delegate()
                                         {
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                            OnTagAction(tagObj, curStruct, tagsObj, isDynamic);
+                                            OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
                                         });
-                                    }
-                                    else
-                                    {
-                                        tagObj.OnTag(null);
-                                    }
+                                    //}
+                                    //else
+                                    //{
+                                    //    tagObj.OnTag(null);
+                                    //}
                                 }
                             }
                             else
@@ -375,7 +382,7 @@ namespace Com.AimUI.TagEngine
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
                                         tagObj.curTag = "";
-                                        if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
+                                        if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
                                         {
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
                                             OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
@@ -391,7 +398,7 @@ namespace Com.AimUI.TagEngine
                                         if (isDynamic)
                                         {
                                             strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
-                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
+                                            if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
                                             {
                                                 strBuilder.AppendLine("Com.AimUI.TagCore.OnTagDelegate " + instanceName + "_" + tagObj.curTag + "_delegate=delegate (){");
                                                 TagContext.SetItem(tagContext, "$__tagid", tagId);
@@ -406,7 +413,7 @@ namespace Com.AimUI.TagEngine
                                         }
                                         else
                                         {
-                                            if (string.IsNullOrEmpty(tmpSubTag.bodyContent.Trim()) == false)
+                                            if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
                                             {
                                                 //tmpSubTag  保存到context中
                                                 tagObj.OnTag(delegate()
@@ -494,7 +501,7 @@ namespace Com.AimUI.TagEngine
         static bool TestNestedTag(string content,out TagStruct outStruct)
         {
 
-            if (string.IsNullOrEmpty(content))
+            if (IsNullOrWhiteSpace(content))
             {
                 outStruct = null;
                 return false;
@@ -545,14 +552,15 @@ namespace Com.AimUI.TagEngine
                         else
                         {
 
-                            if (string.IsNullOrEmpty(t_subtag.bodyContent) == false) ParseAction(tagContext, tagObj, t_subtag.bodyContent, curStruct, tagsObj, isDynamic);
+                            if (IsNullOrWhiteSpace(t_subtag.bodyContent) == false) ParseAction(tagContext, tagObj, t_subtag.bodyContent, curStruct, tagsObj, isDynamic);
                         }
                     }
                 }
             }
             else
             {
-                if (string.IsNullOrEmpty(body)==false) ParseAction(tagContext, tagObj, body, curStruct,tagsObj,isDynamic);
+                //if (IsNullOrWhiteSpace(body) == false)
+                ParseAction(tagContext, tagObj, body, curStruct, tagsObj, isDynamic);
             }
         }
 
@@ -1782,6 +1790,22 @@ namespace Com.AimUI.TagEngine
                 }
                 return TagContext.OnValuePreAction(tagObj, (byte)token.action, token.actionCharCode);
             }
+        }
+
+        static bool IsNullOrWhiteSpace(string value)
+        {
+            if (value != null)
+            {
+                if (value.Length == 0) return true;
+                for (int i = 0; i < value.Length; i++)
+                {
+                    if (!char.IsWhiteSpace(value[i]))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
     }
 }

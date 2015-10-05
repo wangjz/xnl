@@ -9,8 +9,9 @@ namespace Com.AimUI.TagCore.Tags
     {
         Dictionary<string, object> attrs;
         string body;
-        int inx = -1;
         private StringBuilder buffer;
+        OnTagDelegate _tagDelegate;
+        object[] args;
         public T tagContext
         {
             get;
@@ -29,31 +30,40 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnStart()
         {
-            inx = buffer.Length;
+            
         }
 
         public void OnEnd()
         {
-            if (inx != -1)
-            {
-                int len = buffer.Length - inx;
-                if (len > 0)
-                {
-                    body = buffer.ToString(inx, len);
-                    buffer.Remove(inx, len);
-                    inx = -1;
-                }
-            }
+            
         }
 
 
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
-            if (tagDelegate != null)
-            {
-                tagDelegate();
-            }
+            body = null;
+            _tagDelegate = tagDelegate;
         }
+
+        private string GetBody()
+        {
+            if (_tagDelegate == null) return null;
+            if (body != null) return body;
+            int inx = buffer.Length;
+            _tagDelegate();
+            int len = buffer.Length - inx;
+            if (len > 0)
+            {
+                body = buffer.ToString(inx, len);
+                buffer.Remove(inx, len);
+            }
+            else
+            {
+                body = string.Empty;
+            }
+            return body;
+        }
+
         public void SetAttribute(string paramName, object value)
         {
             attrs[paramName] = value;
@@ -61,7 +71,26 @@ namespace Com.AimUI.TagCore.Tags
 
         public object GetAttribute(string paramName, object[] userData = null)
         {
-            if (paramName == "body") return body;
+            if (paramName == "body")
+            {
+                return GetBody();
+            }
+            else if (paramName == "call")
+            {
+                args = userData;
+                body = null;
+                return GetBody();
+            }
+            else if (paramName.StartsWith("arg") && args!=null)
+            {
+                int i = -1;
+                if (int.TryParse(paramName.Substring(3), out i))
+                {
+                    i = i - 1;
+                    if(i < args.Length)return args[i];
+                }
+            }
+
             object obj;
             attrs.TryGetValue(paramName, out obj);
             if (obj != null && userData != null)
