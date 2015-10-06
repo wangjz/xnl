@@ -113,5 +113,10 @@ namespace Com.AimUI.TagCore.Tags
         {
             return new Each<T>();
         }
+
+        public TagEvents events
+        {
+            get { return TagEvents.Tag; }
+        }
     }
 }

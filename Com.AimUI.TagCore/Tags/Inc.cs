@@ -75,5 +75,10 @@ namespace Com.AimUI.TagCore.Tags
         {
             return new Inc<T>();
         }
+
+        public TagEvents events
+        {
+            get { return TagEvents.Tag; }
+        }
     }
 }

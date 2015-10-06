@@ -128,5 +128,10 @@ namespace Com.AimUI.TagCore.Tags
                 return null;
             }
         }
+
+        public TagEvents events
+        {
+            get { return TagEvents.Init | TagEvents.Tag; }
+        }
     }
 }

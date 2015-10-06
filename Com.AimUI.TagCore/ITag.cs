@@ -3,8 +3,23 @@
 namespace Com.AimUI.TagCore
 {
     public delegate void OnTagDelegate();
+
+    [Flags]
+    public enum TagEvents:byte
+    {
+        None=0,
+        Init=1,
+        Start=2,
+        Tag=4,
+        End=8
+    }
+
     public interface ITag<T> where T:TagContext
     {
+        /// <summary>
+        /// 注册的事件
+        /// </summary>
+        TagEvents events { get; }
         string subTagNames { get; }
         /// 标签实例名
         /// </summary>
@@ -24,7 +39,7 @@ namespace Com.AimUI.TagCore
 
         void SetAttribute(string paramName, object value);
 
-        object GetAttribute(string paramName, object[] userData = null); //, bool byRef = false
+        object GetAttribute(string paramName, object[] userData = null);
 
         bool ExistAttribute(string paramName);
         ITag<T> Create();

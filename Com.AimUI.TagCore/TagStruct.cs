@@ -33,14 +33,15 @@ namespace Com.AimUI.TagCore
                 {
                     return allContent;
                 }
-                else if ( subTagStruct == null || subTagStruct.Count ==0 )
-                {
-                    return _bodyContent;
-                }
-                else
-                {
-                    return "";
-                }
+                return _bodyContent;
+                //else if ( subTagStruct == null || subTagStruct.Count ==0 )
+                //{
+                //    return _bodyContent;
+                //}
+                //else
+                //{
+                //    return "";
+                //}
             }
 
             set
@@ -64,5 +65,12 @@ namespace Com.AimUI.TagCore
         /// 对应的标签实例
         /// </summary>
         public object tagObj { get; set; }
+
+        /// <summary>
+        /// 0 未检测 1 有嵌套 2无嵌套
+        /// </summary>
+        public byte nested { get; set; }
+
+        public TagStruct nestedTag { get; set; }
     }
 }

@@ -63,5 +63,10 @@ namespace Com.AimUI.TagCore.Tags
         {
             return new Pre<T>();
         }
+
+        public TagEvents events
+        {
+            get { return TagEvents.None; }
+        }
     }
 }

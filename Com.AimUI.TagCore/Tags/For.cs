@@ -39,12 +39,16 @@ namespace Com.AimUI.TagCore.Tags
         public string instanceName { get; set; }
         public string curTag { get; set; }
 
-        public void OnInit()
+        public For()
         {
             start = 0;
             end = -1;
             split = ",";
             strs = null;
+        }
+        public void OnInit()
+        {
+            
         }
         public virtual void OnStart()
         {
@@ -241,6 +245,11 @@ namespace Com.AimUI.TagCore.Tags
         public string subTagNames
         {
             get { return null; }
+        }
+
+        public TagEvents events
+        {
+            get { return TagEvents.Start | TagEvents.Tag; }
         }
     }
 }

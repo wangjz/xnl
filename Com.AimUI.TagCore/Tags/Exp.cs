@@ -297,9 +297,9 @@ namespace Com.AimUI.TagCore.Tags
                     switch(paramName)
                     {
                         case "jsonencode":
-                            return TagContext.OnValuePreAction(userData[0],(byte)ValuePreAction.JSON_Serialize, (byte)':');
+                            return TagContext.OnValuePreAction(userData[0],ValuePreAction.JSON_Serialize, (byte)':');
                         case "jsondecode":
-                            return TagContext.OnValuePreAction(userData[0], (byte)ValuePreAction.JSON_Deserialize, (byte)';');
+                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Deserialize, (byte)';');
                     }
                     break;
             }
@@ -338,6 +338,11 @@ namespace Com.AimUI.TagCore.Tags
         public ITag<T> Create()
         {
             return new Exp<T>();
+        }
+
+        public TagEvents events
+        {
+            get { return TagEvents.None; }
         }
     }
 }

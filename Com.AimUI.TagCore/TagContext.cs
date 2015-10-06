@@ -8,7 +8,7 @@ namespace Com.AimUI.TagCore
     /// <summary>
     /// 解析模式  静态 动态
     /// </summary>
-    public enum ParseMode
+    public enum ParseMode:byte
     {
         Static,
         Dynamic,
@@ -17,15 +17,15 @@ namespace Com.AimUI.TagCore
     /// <summary>
     /// 值返回前处理方式
     /// </summary>
-    public enum ValuePreAction
+    public enum ValuePreAction:byte
     {
-        NONE,
-        JSON_Serialize, // :
-        JSON_Deserialize, // ;
-        USER_Defined
+        NONE=0,
+        JSON_Serialize=1, // :
+        JSON_Deserialize=2, // ;
+        USER_Defined=3
     }
 
-    public delegate object OnValuePreActionDelegate(object value, byte actionCode, byte charCode);
+    public delegate object OnValuePreActionDelegate(object value, ValuePreAction actionCode, byte charCode);
 
     public class TagContext
     {
@@ -58,7 +58,7 @@ namespace Com.AimUI.TagCore
             return null;
         }
 
-        public static object OnValuePreAction( object value, byte actionCode, byte charCode = 0)
+        public static object OnValuePreAction(object value, ValuePreAction actionCode, byte charCode = 0)
         {
             if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode, charCode);
             return value;
@@ -67,7 +67,7 @@ namespace Com.AimUI.TagCore
         //工作目录
         protected string workDirPath { get; set; }
 
-        protected static OnValuePreActionDelegate onValuePreActionDelegate {  get;  set; }
+        protected static OnValuePreActionDelegate onValuePreActionDelegate { get; set; }
 
         public static void SetValuePreActionDelegate(OnValuePreActionDelegate actionDelegate)
         {

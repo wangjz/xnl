@@ -22,13 +22,18 @@ namespace Com.AimUI.TagCore.Tags
 
       public string curTag { get; set; }
 
-      public void OnInit()
+      public If()
       {
           a = "";
           b = "";
           test = "=";
           value = true;
           isChange = false;
+      }
+
+      public void OnInit()
+      {
+         
       }
 
       public virtual void OnStart()
@@ -291,6 +296,11 @@ namespace Com.AimUI.TagCore.Tags
           {
           }
           return false;
+      }
+
+      public TagEvents events
+      {
+          get { return TagEvents.Tag; }
       }
    }
 }
