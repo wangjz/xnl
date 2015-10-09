@@ -66,6 +66,26 @@ namespace Com.AimUI.TagCore.Tags
 
         public void SetAttribute(string paramName, object value)
         {
+            if (paramName == "body" || paramName == "call" || paramName == "attrs")
+            {
+                return;
+            }
+            else if(paramName.StartsWith("arg"))
+            {
+                if (paramName == "args" && value is Array)
+                {
+                    args = value as object[];
+                }
+                else if (args!=null)
+                {
+                    int i=-1;
+                    if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < args.Length)
+                    {
+                        args[i] = value;
+                        return;
+                    }
+                }
+            }
             attrs[paramName] = value;
         }
 
@@ -81,10 +101,27 @@ namespace Com.AimUI.TagCore.Tags
                 body = null;
                 return GetBody();
             }
-            else if (paramName.StartsWith("arg") && args!=null)
+            else if (paramName == "attrs")
+            {
+                return attrs;
+            }
+            else if (paramName.StartsWith("arg"))
             {
                 int i = -1;
-                if (int.TryParse(paramName.Substring(3), out i))
+                if (paramName == "args")
+                {
+                    if (userData == null)
+                    {
+                        return args;
+                    }
+                    else if (args != null && int.TryParse(userData[0].ToString(), out i) && i>0 && (i-1) < args.Length)
+                    {
+                        return args[i];
+                    }
+                    return null;
+                }
+
+                if (int.TryParse(paramName.Substring(3), out i) && args != null && i > 0)
                 {
                     i = i - 1;
                     if(i < args.Length)return args[i];

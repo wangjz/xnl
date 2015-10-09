@@ -67,7 +67,7 @@ namespace Com.AimUI.TagParser
         internal static TagParams GetTagParams(string str)
         {
             if (string.IsNullOrEmpty(str)) return null;
-            if (str.Length < 8) return null;
+            if (str.Length < 4) return null;
             TagParams tagParams=null;
             string t_paramName=null;
             string t_paramValue;

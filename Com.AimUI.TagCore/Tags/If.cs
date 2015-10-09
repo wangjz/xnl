@@ -133,7 +133,7 @@ namespace Com.AimUI.TagCore.Tags
           }
       }
 
-      public object GetAttribute(string paramName, object[] userData = null)  //, bool byRef = false
+      public object GetAttribute(string paramName, object[] userData = null)
       {
           if ("a" == paramName)
           {
@@ -162,7 +162,7 @@ namespace Com.AimUI.TagCore.Tags
 
       public bool ExistAttribute(string paramName)
       {
-          if (paramName == "a" || paramName == "b" || paramName == "test") return true;
+          if (paramName == "a" || paramName == "b" || paramName == "test" || paramName=="value") return true;
           return false;
       }
 
