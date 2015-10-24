@@ -7,11 +7,11 @@ namespace Com.AimUI.TagCore.Tags
 {
     public class Set<T> : ITag<T> where T : TagContext
     {
-        Dictionary<string, object> attrs;
-        string body;
-        private StringBuilder buffer;
-        OnTagDelegate _tagDelegate;
-        object[] args;
+        protected Dictionary<string, object> attrs;
+        protected string body;
+        protected StringBuilder buffer;
+        protected OnTagDelegate _tagDelegate;
+        protected object[] args;
         public T tagContext
         {
             get;
@@ -22,24 +22,24 @@ namespace Com.AimUI.TagCore.Tags
 
         public string curTag { get; set; }
 
-        public void OnInit()
+        public virtual void OnInit()
         {
             attrs = new Dictionary<string, object>();
             buffer = tagContext.GetTagResponse().buffer;
         }
 
-        public void OnStart()
+        public virtual void OnStart()
         {
             
         }
 
-        public void OnEnd()
+        public virtual void OnEnd()
         {
             
         }
 
 
-        public void OnTag(OnTagDelegate tagDelegate = null)
+        public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
             body = null;
             _tagDelegate = tagDelegate;
@@ -64,7 +64,7 @@ namespace Com.AimUI.TagCore.Tags
             return body;
         }
 
-        public void SetAttribute(string paramName, object value)
+        public virtual void SetAttribute(string paramName, object value)
         {
             if (paramName == "body" || paramName == "call" || paramName == "attrs")
             {
@@ -89,7 +89,7 @@ namespace Com.AimUI.TagCore.Tags
             attrs[paramName] = value;
         }
 
-        public object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] userData = null)
         {
             if (paramName == "body")
             {
@@ -148,17 +148,17 @@ namespace Com.AimUI.TagCore.Tags
         }
 
 
-        public ITag<T> Create()
+        public virtual ITag<T> Create()
         {
             return new Set<T>();
         }
 
-        public bool ExistAttribute(string paramName)
+        public virtual bool ExistAttribute(string paramName)
         {
             return true;
         }
 
-        public string subTagNames
+        public virtual string subTagNames
         {
             get
             {
@@ -166,7 +166,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public TagEvents events
+        public virtual TagEvents events
         {
             get { return TagEvents.Init | TagEvents.Tag; }
         }

@@ -4,6 +4,7 @@ using System.Text;
 using Com.AimUI.TagCore.Exceptions;
 using System.Collections;
 using Com.AimUI.TagCore;
+using Com.AimUI.TagCore.Tags;
 
 namespace Com.AimUI.TagEngine
 {
@@ -148,48 +149,6 @@ namespace Com.AimUI.TagEngine
                     }
                     else if (isTagName)
                     {
-                        if (curStruct.tagName == "inc" && curStruct.nameSpace == "at" && curStruct.tagParams!=null)
-                        {
-                            //include tag
-                            string ref_ns = curStruct.nameSpace;
-                            string ref_tagName = curStruct.tagName;
-                            string include = tagContext.GetInclude(curStruct.tagParams["src"], ref ref_ns, ref ref_tagName);
-                            if ("at" != ref_ns) curStruct.nameSpace = ref_ns;
-                            if ("inc" != ref_tagName) curStruct.tagName = ref_tagName;
-
-                            if (string.IsNullOrEmpty(include) == false)
-                            {
-                                curStruct.bodyContent = include;
-                                curStruct.subTagStruct = null;
-                            }
-
-                            string isStatic = Convert.ToString(curStruct.tagParams["static"]);
-
-                            if (isDynamic && isStatic != null && ("1" == isStatic || string.Compare("true", isStatic, true) == 0))
-                            {
-                                curStruct.tagName = "inc2";
-                                index = strBuilder.Length;
-                                TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
-                                Parse(null, tagContext);
-                                int len = strBuilder.Length - index;
-                                if (len > 0)
-                                {
-                                    include = strBuilder.ToString(index, len);
-                                    strBuilder.Remove(index, len);
-
-                                    strBuilder.Append("\nbuffer.Append(@\"");
-                                    strBuilder.Append(include.Replace("\"", "\"\""));
-                                    strBuilder.AppendLine("\");");
-                                }
-                                goto TagNext;
-                            }
-                        }
-                        else if (isNested && isDynamic == false && curStruct.tagName == "inc2" && curStruct.nameSpace == "at")
-                        {
-                            curStruct.tagName = "inc";
-                        }
-
                         if (curStruct.nameSpace == "at" && curStruct.tagName == "pre")
                         {
                             if (isDynamic)
@@ -211,10 +170,73 @@ namespace Com.AimUI.TagEngine
 
                         try
                         {
+                            bool isNestedInc = curStruct.tagName.EndsWith("$nested__inc$");
+                            
+                            if (isNestedInc)
+                            {
+                                curStruct.tagName = curStruct.tagName.Substring(0, curStruct.tagName.Length - 13);
+                            }
 
                             fullTagName = curStruct.nameSpace + ":" + curStruct.tagName;
 
                             isTagNew = GetTagInstance(curStruct.nameSpace, curStruct.tagName, tagsObj, out tagObj);
+
+                            bool isIncludeTag = (isNestedInc == false && tagObj is IInclude);
+
+                            if (isIncludeTag)
+                            {
+                                string incSrc = (curStruct.tagParams == null ? null : Convert.ToString(curStruct.tagParams["src"]));
+
+                                if (IsNullOrWhiteSpace(incSrc) == false)
+                                {
+                                    string include = ((IInclude)tagObj).GetTagBody(incSrc);
+
+                                    if (IsNullOrWhiteSpace(include) == false)
+                                    {
+                                        curStruct.bodyContent = include;
+                                        curStruct.subTagStruct = null;
+                                    }
+                                }
+
+                                
+
+                                if (IsNullOrWhiteSpace(curStruct.bodyContent)) goto TagNext;
+
+                                bool isStatic = false;
+                                if (curStruct.tagParams != null)
+                                {
+                                    string static_s = Convert.ToString(curStruct.tagParams["static"]);
+                                    isStatic = ("1" == static_s || string.Compare("true", static_s, true) == 0);
+                                }
+                                
+
+                                if (isDynamic && isStatic)
+                                {
+                                    curStruct.tagName = curStruct.tagName + "$nested__inc$";
+                                    index = strBuilder.Length;
+                                    TagContext.SetItem(tagContext, "$__tagid", tagId);
+                                    TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
+                                    Parse(null, tagContext);
+                                    int len = strBuilder.Length - index;
+                                    if (len > 0)
+                                    {
+                                        incSrc = strBuilder.ToString(index, len);
+                                        strBuilder.Remove(index, len);
+
+                                        strBuilder.Append("\nbuffer.Append(@\"");
+                                        strBuilder.Append(incSrc.Replace("\"", "\"\""));
+                                        strBuilder.AppendLine("\");");
+                                        curStruct.bodyContent = incSrc;
+                                        curStruct.subTagStruct = null;
+                                    }
+                                    else if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
+                                    {
+                                        curStruct.bodyContent = "";
+                                        curStruct.subTagStruct = null;
+                                    }
+                                    goto TagNext;
+                                }
+                            }
 
                             instanceName = curStruct.instanceName;
 
@@ -341,8 +363,6 @@ namespace Com.AimUI.TagEngine
                                 if (isDynamic)
                                 {
                                     strBuilder.AppendLine(instanceName + ".curTag = null;");
-                                    //if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
-                                    //{
                                     if ((tagObj.events & TagEvents.Tag) == TagEvents.Tag)
                                     {
                                         strBuilder.AppendLine("Com.AimUI.TagCore.OnTagDelegate " + instanceName + "_delegate=delegate (){");
@@ -351,17 +371,9 @@ namespace Com.AimUI.TagEngine
                                         strBuilder.AppendLine("};");
                                         strBuilder.AppendLine(instanceName + ".OnTag(" + instanceName + "_delegate);");
                                     }
-                                        
-                                    //}
-                                    //else
-                                    //{
-                                    //    strBuilder.AppendLine(instanceName + ".OnTag(null);");
-                                    //}
                                 }
                                 else
                                 {
-                                    //if (string.IsNullOrEmpty(curStruct.bodyContent.Trim()) == false)
-                                    //{
                                     if ((tagObj.events & TagEvents.Tag) == TagEvents.Tag)
                                     {
                                         TagStruct tmpSubTag = curStruct;
@@ -371,11 +383,6 @@ namespace Com.AimUI.TagEngine
                                             OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
                                         });
                                     }
-                                    //}
-                                    //else
-                                    //{
-                                    //    tagObj.OnTag(null);
-                                    //}
                                 }
                             }
                             else

@@ -53,6 +53,7 @@
     <Compile Include="Tags\Exp.cs" />
     <Compile Include="Tags\For.cs" />
     <Compile Include="Tags\If.cs" />
+    <Compile Include="Tags\IInclude.cs" />
     <Compile Include="Tags\Pre.cs" />
     <Compile Include="Tags\Inc.cs" />
     <Compile Include="Tags\Set.cs" />
