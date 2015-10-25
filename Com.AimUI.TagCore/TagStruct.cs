@@ -29,19 +29,11 @@ namespace Com.AimUI.TagCore
         {
             get
             {
-                if (tagName == null) //string.IsNullOrEmpty(_bodyContent) && 
+                if (tagName == null)
                 {
                     return allContent;
                 }
                 return _bodyContent;
-                //else if ( subTagStruct == null || subTagStruct.Count ==0 )
-                //{
-                //    return _bodyContent;
-                //}
-                //else
-                //{
-                //    return "";
-                //}
             }
 
             set
@@ -67,7 +59,7 @@ namespace Com.AimUI.TagCore
         public object tagObj { get; set; }
 
         /// <summary>
-        /// 0 未检测 1 有嵌套 2无嵌套
+        /// 0 未检测 1 有嵌套 -1无嵌套
         /// </summary>
         public byte nested { get; set; }
 

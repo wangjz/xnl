@@ -42,30 +42,11 @@ namespace Com.AimUI.TagCore
             return response;
         }
 
-        public virtual string GetInclude(string src, ref string tagNamespace,ref string tagName, Encoding encoding = null)
-        {
-            if (string.IsNullOrEmpty(src)) return null;
-            if(src.IndexOf(":\\")!=-1)
-            {
-                if (encoding == null) encoding = Encoding.UTF8;
-                return System.IO.File.ReadAllText(src, encoding);
-            }
-            if(workDirPath!=null)
-            {
-                if (encoding == null) encoding = Encoding.UTF8;
-                return System.IO.File.ReadAllText(workDirPath+src, encoding);
-            }
-            return null;
-        }
-
         public static object OnValuePreAction(object value, ValuePreAction actionCode, byte charCode = 0)
         {
             if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode, charCode);
             return value;
         }
-
-        //工作目录
-        protected string workDirPath { get; set; }
 
         protected static OnValuePreActionDelegate onValuePreActionDelegate { get; set; }
 

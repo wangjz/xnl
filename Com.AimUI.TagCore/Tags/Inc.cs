@@ -13,7 +13,9 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual string GetTagBody(string src)
         {
-            return null;
+            if (string.IsNullOrEmpty(src)) return null;
+            if (src.EndsWith(".ascx") == false) return null;
+            return System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + src);
         }
 
         public override void OnTag(OnTagDelegate tagDelegate = null)
