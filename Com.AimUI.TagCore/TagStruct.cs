@@ -61,7 +61,7 @@ namespace Com.AimUI.TagCore
         /// <summary>
         /// 0 未检测 1 有嵌套 -1无嵌套
         /// </summary>
-        public byte nested { get; set; }
+        public sbyte nested { get; set; }
 
         public TagStruct nestedTag { get; set; }
     }
