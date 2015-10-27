@@ -575,7 +575,6 @@ namespace Com.AimUI.TagEngine
                 isHasNested = (curStruct.nested>0);
                 if (isHasNested)
                 {
-                    curStruct.nested += 1;
                     t_newTag = curStruct.nestedTag;
                 }
             }

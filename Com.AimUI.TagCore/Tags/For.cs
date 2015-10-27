@@ -205,7 +205,11 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     if(userData!=null && userData.Length>0)
                     {
-                        return item.GetType().GetProperty(Convert.ToString(userData[0]),BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item,null);
+                        string prop = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(prop)) return null;
+                        IDictionary<string, object> colls = item as IDictionary<string, object>;
+                        if (colls != null) return colls[prop];
+                        return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item, null);
                     }
                     else
                     {

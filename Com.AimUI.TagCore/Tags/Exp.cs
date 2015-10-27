@@ -89,6 +89,12 @@ namespace Com.AimUI.TagCore.Tags
                                         return _arr[inx];
                                     }
                                 }
+                                else
+                                {
+                                    if (string.IsNullOrEmpty(_name)) return null;
+                                    IDictionary<string, object> colls = obj as IDictionary<string, object>;
+                                    if (colls != null) return colls[_name];
+                                }
                                 return obj.GetType().GetProperty(_name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
                             }
                             catch (Exception)

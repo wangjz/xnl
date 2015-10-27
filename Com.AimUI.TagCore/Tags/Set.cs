@@ -136,6 +136,8 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     string prop = Convert.ToString(userData[0]);
                     if (string.IsNullOrEmpty(prop)) return null;
+                    IDictionary<string, object> colls = obj as IDictionary<string, object>;
+                    if (colls != null) return colls[prop];
                     return obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
                 }
                 catch (Exception)

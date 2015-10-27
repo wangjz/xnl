@@ -82,6 +82,8 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     string prop = Convert.ToString(userData[0]);
                     if (string.IsNullOrEmpty(prop)) return null;
+                    IDictionary<string, object> colls = item as IDictionary<string, object>;
+                    if (colls != null) return colls[prop];
                     return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item, null);
                 }
                 catch (Exception)

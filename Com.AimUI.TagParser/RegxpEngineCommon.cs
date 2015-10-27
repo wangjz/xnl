@@ -443,13 +443,17 @@ namespace Com.AimUI.TagParser
                             //解析参数
                             if (string.IsNullOrEmpty(_args.Trim()) == false)
                             {
-                                string[] s_arr = _args.Split(',');
-                                tagToken.args = new List<TagToken>(s_arr.Length);
+
+                                List<string> arg_list = GetArgList(_args);
+                                
+                                //string[] s_arr = _args.Split(',');
+
+                                tagToken.args = new List<TagToken>(arg_list.Count);
                                 string _s;
                                 TagToken _token;
-                                for (var i = 0; i < s_arr.Length; i++)
+                                for (var i = 0; i < arg_list.Count; i++)
                                 {
-                                    _s = s_arr[i].Trim();
+                                    _s = arg_list[i].Trim();
                                     if (_s.Length > 1 && Regex.IsMatch(_s, RegexStr_TokenBody)) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
                                     {
                                         if (_s.StartsWith("@"))
@@ -593,10 +597,11 @@ namespace Com.AimUI.TagParser
                 }
 
                 //split match_args
-                string[] e_arr = match_args.Split(',');
+                //string[] e_arr = match_args.Split(',');
+                List<string> e_arr = GetArgList(match_args);
                 string e_s;
                 TagToken e_token;
-                for (var i = 0; i < e_arr.Length; i++)
+                for (var i = 0; i < e_arr.Count; i++)
                 {
                     e_s = e_arr[i].Trim();
                     if (e_s.Length>1 && Regex.IsMatch(e_s, RegexStr_TokenBody )) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
@@ -770,6 +775,73 @@ namespace Com.AimUI.TagParser
             }
 
             return null;
+        }
+
+        internal static List<string> GetArgList(string _args)
+        {
+            List<string> arg_list = new List<string>();
+            if (_args.IndexOf(',') == -1)
+            {
+                arg_list.Add(_args);
+            }
+            else if (_args.IndexOf('\'') == -1 && _args.IndexOf('"') == -1)
+            {
+                arg_list.AddRange(_args.Split(','));
+            }
+            else
+            {
+                char prevChar = _args[0];
+                int markPos = 0;
+                int pairNum = 0;
+                if (prevChar == ',')
+                {
+                    markPos = 1;
+                    arg_list.Add("");
+                }
+                else if (prevChar == '\'' || prevChar == '"')
+                {
+                    pairNum = 1;
+
+                }
+                char curChar = prevChar;
+                
+                for (int c = 1; c < _args.Length; c++)
+                {
+                    curChar = _args[c];
+                    if (curChar == '\'' || curChar == '"')
+                    {
+                        if (prevChar == curChar)
+                        {
+                            pairNum += 1;
+                            if (c == _args.Length - 1)
+                            {
+                                arg_list.Add(_args.Substring(markPos, _args.Length - markPos));
+                                markPos = _args.Length;
+                            }
+                        }
+                        else if (prevChar == ',' || prevChar == ' ')
+                        {
+                            prevChar = curChar;
+                            pairNum += 1;
+                        }
+                    }
+                    else if (curChar == ',')
+                    {
+                        if (pairNum == 0 || pairNum == 2)
+                        {
+                            prevChar = curChar;
+                            pairNum = 0;
+                            arg_list.Add(_args.Substring(markPos, c - markPos));
+                            markPos = c + 1;
+                        }
+                    }
+                }
+                if (markPos < _args.Length)
+                {
+                    arg_list.AddRange(_args.Substring(markPos, _args.Length - markPos).Split(','));
+                }
+            }
+            return arg_list;
         }
     }
 }
