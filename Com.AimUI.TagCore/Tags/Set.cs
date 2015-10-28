@@ -101,6 +101,15 @@ namespace Com.AimUI.TagCore.Tags
                 body = null;
                 return GetBody();
             }
+            else if(paramName=="set")
+            {
+                if (userData != null && userData.Length ==2)
+                {
+                    string key = Convert.ToString(userData[0]);
+                    if(string.IsNullOrEmpty(key)==false)attrs[key] = userData[1];
+                }
+                return null;
+            }
             else if (paramName == "attrs")
             {
                 return attrs;

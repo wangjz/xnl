@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections;
 using System.Text.RegularExpressions;
-using System.IO;
-using System.Web;
-using System.Data;
 using Com.AimUI.TagCore;
 namespace Com.AimUI.TagParser
 {
