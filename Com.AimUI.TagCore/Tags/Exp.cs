@@ -11,7 +11,7 @@ namespace Com.AimUI.TagCore.Tags
     public class Exp<T> : ITag<T> where T : TagContext
     {
         DataTable dt;
-        static readonly char[] chars = {'"','\''};
+        static readonly char[] chars = { '"', '\'' };
         public string subTagNames
         {
             get { return null; }
@@ -37,12 +37,12 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnInit()
         {
-            
+
         }
 
         public void OnStart()
         {
-            
+
         }
 
         public void OnTag(OnTagDelegate tagDelegate = null)
@@ -52,12 +52,12 @@ namespace Com.AimUI.TagCore.Tags
 
         public void OnEnd()
         {
-            
+
         }
 
         public void SetAttribute(string paramName, object value)
         {
-            
+
         }
 
         public object GetAttribute(string paramName, object[] userData = null)
@@ -78,14 +78,14 @@ namespace Com.AimUI.TagCore.Tags
                             try
                             {
                                 object obj = userData[0];
-                                
-                                if(obj is Array)
+
+                                if (obj is Array)
                                 {
                                     int inx;
                                     if (int.TryParse(_name, out inx))
                                     {
-                                        object [] _arr = obj as object[];
-                                        if(_arr==null)return null;
+                                        object[] _arr = obj as object[];
+                                        if (_arr == null) return null;
                                         return _arr[inx];
                                     }
                                 }
@@ -101,7 +101,7 @@ namespace Com.AimUI.TagCore.Tags
                             {
                                 return null;
                             }
-                            
+
                     }
                     break;
                 case 'p':
@@ -127,9 +127,9 @@ namespace Com.AimUI.TagCore.Tags
                             return userData[0].ToString().ToLower();
                     }
                     break;
-                
+
                 case 'i':
-                    switch(paramName)
+                    switch (paramName)
                     {
                         case "indexof":
                             if (userData == null || userData.Length < 2 || userData[0] == null) return null;
@@ -138,14 +138,14 @@ namespace Com.AimUI.TagCore.Tags
                         case "iif":
                             if (userData == null || userData.Length < 3) return null;
                             if (dt == null) dt = new DataTable();
-                            if (userData.Length>3)
+                            if (userData.Length > 3)
                             {
-                                string str="";
-                                for(int i=0;i<=userData.Length-3;i++)
+                                string str = "";
+                                for (int i = 0; i <= userData.Length - 3; i++)
                                 {
-                                    if(userData[i]==null)
+                                    if (userData[i] == null)
                                     {
-                                        str +=  "null";
+                                        str += "null";
                                     }
                                     else
                                     {
@@ -163,7 +163,7 @@ namespace Com.AimUI.TagCore.Tags
                                         }
                                         str += _s;
                                     }
-                                   
+
                                 }
                                 userData[0] = str;
                             }
@@ -171,10 +171,10 @@ namespace Com.AimUI.TagCore.Tags
                             try
                             {
                                 string exp_s = Convert.ToString(userData[0]);
-                                string left_s= Convert.ToString(userData[userData.Length-2]);
-                                string right_s =Convert.ToString(userData[userData.Length-1]);
+                                string left_s = Convert.ToString(userData[userData.Length - 2]);
+                                string right_s = Convert.ToString(userData[userData.Length - 1]);
 
-                                if (exp_s.IndexOfAny(chars)!=-1)
+                                if (exp_s.IndexOfAny(chars) != -1)
                                 {
                                     if (!((exp_s.StartsWith("'") && exp_s.EndsWith("'")) || (exp_s.StartsWith("\"") && exp_s.EndsWith("\""))))
                                     {
@@ -202,10 +202,10 @@ namespace Com.AimUI.TagCore.Tags
                         case "isnull":
                         case "isempty":
                             if (userData == null || userData.Length < 2) return null;
-                            if (userData.Length>2)
+                            if (userData.Length > 2)
                             {
-                                string str="";
-                                for(int i=0;i<=userData.Length-2;i++)
+                                string str = "";
+                                for (int i = 0; i <= userData.Length - 2; i++)
                                 {
                                     if (userData[i] != null) str += userData[i];
                                 }
@@ -213,7 +213,7 @@ namespace Com.AimUI.TagCore.Tags
                             }
                             try
                             {
-                                if ("isnull" == paramName) return (userData[0] == null ? userData[userData.Length-1] : userData[0]);
+                                if ("isnull" == paramName) return (userData[0] == null ? userData[userData.Length - 1] : userData[0]);
                                 return string.IsNullOrEmpty(Convert.ToString(userData[0])) ? userData[userData.Length - 1] : userData[0];
                             }
                             catch (Exception)
@@ -221,7 +221,7 @@ namespace Com.AimUI.TagCore.Tags
                                 return null;
                             }
                         case "int":
-                            if (userData == null || userData.Length ==0) return null;
+                            if (userData == null || userData.Length == 0) return null;
                             return Convert.ToInt32(userData[0]);
                     }
                     break;
@@ -241,7 +241,7 @@ namespace Com.AimUI.TagCore.Tags
                             if (string.IsNullOrEmpty(src)) return src;
                             int repeat = 1;
                             int.TryParse(Convert.ToString(userData[1]), out repeat);
-                            string to=src;
+                            string to = src;
                             for (int i = 0; i < repeat; i++)
                             {
                                 to += src;
@@ -250,7 +250,7 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     break;
                 case 'n':
-                    switch(paramName)
+                    switch (paramName)
                     {
                         case "now":
                             return DateTime.Now;
@@ -268,20 +268,20 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     break;
                 case 'e':
-                    switch(paramName)
+                    switch (paramName)
                     {
                         case "end":
                             throw new ResponseEndException();
                     }
                     break;
                 case 'b':
-                    switch(paramName)
+                    switch (paramName)
                     {
                         case "bit":
                             if (userData == null || userData.Length < 2) return null;
                             char bitAction = Convert.ToChar(userData[1]);
                             int left = Convert.ToInt32(userData[0]);
-                            switch(bitAction)
+                            switch (bitAction)
                             {
                                 case '&':
                                     return left & Convert.ToInt32(userData[2]);
@@ -300,23 +300,23 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     break;
                 case 'j':
-                    switch(paramName)
+                    switch (paramName)
                     {
                         case "jsonencode":
-                            return TagContext.OnValuePreAction(userData[0],ValuePreAction.JSON_Serialize, (byte)':');
+                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Serialize, (byte)':');
                         case "jsondecode":
                             return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Deserialize, (byte)';');
                     }
                     break;
             }
-            if (paramName=="_")
+            if (paramName == "_")
             {
                 try
                 {
                     if (dt == null) dt = new DataTable();
                     if (userData.Length < 2)
                     {
-                        return dt.Compute(userData[0].ToString(),"");
+                        return dt.Compute(userData[0].ToString(), "");
                     }
                     else
                     {

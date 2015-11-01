@@ -8,7 +8,7 @@ using Com.AimUI.TagCore.Tags;
 
 namespace Com.AimUI.TagEngine
 {
-    public class ParserEngine<T> where T:TagContext
+    public class ParserEngine<T> where T : TagContext
     {
         public static IParser<T> tagParser { get; private set; }
 
@@ -20,7 +20,7 @@ namespace Com.AimUI.TagEngine
 
         public static string ParseToString(string templateStr, T tagContext, ParseMode parseMode = ParseMode.Static)
         {
-            Parse(templateStr,tagContext,parseMode);
+            Parse(templateStr, tagContext, parseMode);
             return tagContext.GetTagResponse().buffer.ToString();
         }
 
@@ -50,14 +50,12 @@ namespace Com.AimUI.TagEngine
                 return;
             }
 
-
             TagResponse response = tagContext.GetTagResponse();
             StringBuilder strBuilder = response.buffer;
             bool isDynamic = (parseMode == ParseMode.Dynamic);
 
             try
             {
-
                 Dictionary<string, ITag<T>> tagsObj = null;
                 Dictionary<string, ITag<T>> nameTags = null;  //命名标签对象
 
@@ -68,7 +66,6 @@ namespace Com.AimUI.TagEngine
                     tagsObj = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__tags");
                     nameTags = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__nameTags");
                     tagId = (int)TagContext.GetItem(tagContext, "$__tagid");
-
                 }
                 else
                 {
@@ -172,7 +169,7 @@ namespace Com.AimUI.TagEngine
                         try
                         {
                             bool isNestedInc = (isNested && curStruct.tagName.EndsWith("$inc$"));
-                            
+
                             if (isNestedInc)
                             {
                                 curStruct.tagName = curStruct.tagName.Substring(0, curStruct.tagName.Length - 5);
@@ -208,7 +205,7 @@ namespace Com.AimUI.TagEngine
                                     }
                                 }
 
-                                
+
 
                                 if (IsNullOrWhiteSpace(curStruct.bodyContent)) goto TagNext;
 
@@ -218,7 +215,7 @@ namespace Com.AimUI.TagEngine
                                     string static_s = Convert.ToString(curStruct.tagParams["static"]);
                                     isStatic = ("1" == static_s || string.Compare("true", static_s, true) == 0);
                                 }
-                                
+
 
                                 if (isDynamic && isStatic)
                                 {
@@ -238,7 +235,7 @@ namespace Com.AimUI.TagEngine
                                         strBuilder.Append("\nbuffer.Append(@\"");
                                         strBuilder.Append(incSrc.Replace("\"", "\"\""));
                                         strBuilder.AppendLine("\");");
-                                       // curStruct.bodyContent = incSrc;
+                                        // curStruct.bodyContent = incSrc;
                                         //curStruct.subTagStruct = null;
                                     }
                                     //else if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
@@ -539,7 +536,7 @@ namespace Com.AimUI.TagEngine
             }
         }
 
-        static bool TestNestedTag(string content,out TagStruct outStruct)
+        static bool TestNestedTag(string content, out TagStruct outStruct)
         {
 
             if (IsNullOrWhiteSpace(content))
@@ -549,7 +546,7 @@ namespace Com.AimUI.TagEngine
             }
             outStruct = tagParser.GetTagStruct(content);
             //判断是否有嵌套
-            if (outStruct != null && (outStruct.tagName!=null || outStruct.subTagStruct!=null))
+            if (outStruct != null && (outStruct.tagName != null || outStruct.subTagStruct != null))
             {
                 return true;
             }
@@ -557,23 +554,23 @@ namespace Com.AimUI.TagEngine
         }
 
 
-        static void OnTagAction(ITag<T> tagObj,TagStruct curStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
+        static void OnTagAction(ITag<T> tagObj, TagStruct curStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             T tagContext = tagObj.tagContext;
             string body = curStruct.bodyContent;
             //检测是否有其它tag
             //如果有其它tag，递归解析
-            TagStruct t_newTag=null;
+            TagStruct t_newTag = null;
             bool isHasNested = false;
-            if(curStruct.nested==0)
+            if (curStruct.nested == 0)
             {
                 isHasNested = TestNestedTag(body, out t_newTag);
-                curStruct.nested = (sbyte)(isHasNested ?  1 : -1);
+                curStruct.nested = (sbyte)(isHasNested ? 1 : -1);
                 if (isHasNested) curStruct.nestedTag = t_newTag;
             }
             else
             {
-                isHasNested = (curStruct.nested>0);
+                isHasNested = (curStruct.nested > 0);
                 if (isHasNested)
                 {
                     t_newTag = curStruct.nestedTag;
@@ -586,7 +583,7 @@ namespace Com.AimUI.TagEngine
                 {
                     TagContext.SetItem(tagContext, "$__nestedTag", t_newTag);
 
-                    Parse(null, tagContext,isDynamic?ParseMode.Dynamic:ParseMode.Static);
+                    Parse(null, tagContext, isDynamic ? ParseMode.Dynamic : ParseMode.Static);
 
                 }
                 else
@@ -600,7 +597,7 @@ namespace Com.AimUI.TagEngine
                         t_subtag.parent = t_newTag;
                         if (t_subtag.tagName != null) //完全嵌套
                         {
-                            
+
                             TagContext.SetItem(tagContext, "$__nestedTag", t_subtag);
                             Parse(null, tagContext, isDynamic ? ParseMode.Dynamic : ParseMode.Static);
                         }
@@ -620,12 +617,12 @@ namespace Com.AimUI.TagEngine
         }
 
 
-        static void ParseAction(T tagContext, ITag<T> tagObj, string body, TagStruct tagStruct,Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
+        static void ParseAction(T tagContext, ITag<T> tagObj, string body, TagStruct tagStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             if (string.IsNullOrEmpty(body)) return;
             StringBuilder strBuilder = tagContext.GetTagResponse().buffer;
             List<TagToken> tokens = tagParser.GetTagTokens(body);
-            
+
             if (tokens != null)
             {
                 ParseTokens(tagContext, tagObj, tokens, body, tagStruct, strBuilder, tagsObj, isDynamic);
@@ -635,7 +632,7 @@ namespace Com.AimUI.TagEngine
                 if (isDynamic)
                 {
                     strBuilder.Append("\nbuffer.Append(@\"");
-                    strBuilder.Append(body.Replace("\"","\"\""));
+                    strBuilder.Append(body.Replace("\"", "\"\""));
                     strBuilder.AppendLine("\");");
                 }
                 else
@@ -646,7 +643,7 @@ namespace Com.AimUI.TagEngine
         }
 
 
-        static void ParseTokens(T tagContext, ITag<T> tagObj, List<TagToken> tokens,string body, TagStruct tagStruct,StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
+        static void ParseTokens(T tagContext, ITag<T> tagObj, List<TagToken> tokens, string body, TagStruct tagStruct, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             if (tokens != null)
             {
@@ -686,7 +683,7 @@ namespace Com.AimUI.TagEngine
                     {
                         //表达式
                         object result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic, tagStruct, tagObj);
-                        if(isDynamic)
+                        if (isDynamic)
                         {
                             strBuilder.AppendLine("\nbuffer.Append(" + result + ");");
                         }
@@ -694,12 +691,12 @@ namespace Com.AimUI.TagEngine
                         {
                             strBuilder.Append(result);
                         }
-                        
+
                     }
                     else
                     {
                         object ret = null;
-                        if(token.args==null)
+                        if (token.args == null)
                         {
                             ret = ParseAttribule(token, tagObj, tagStruct, isDynamic, tagContext, tagsObj);
                         }
@@ -707,7 +704,7 @@ namespace Com.AimUI.TagEngine
                         {
                             ret = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic, tagStruct, tagObj);
                         }
-                        
+
                         if (isDynamic)
                         {
                             strBuilder.AppendLine("\nbuffer.Append(" + ret + ");");
@@ -748,13 +745,13 @@ namespace Com.AimUI.TagEngine
             }
         }
 
-        static void OnNoTagAction(T tagContext, string body, Dictionary<string, ITag<T>> tagsObj,bool isDynamic)
+        static void OnNoTagAction(T tagContext, string body, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             StringBuilder strBuilder = tagContext.GetTagResponse().buffer;
             List<TagToken> tokens = tagParser.GetTagTokens(body);
             if (tokens == null)
             {
-                if(isDynamic)
+                if (isDynamic)
                 {
                     strBuilder.Append("\nbuffer.Append(@\"");
                     strBuilder.Append(body.Replace("\"", "\"\""));
@@ -786,11 +783,11 @@ namespace Com.AimUI.TagEngine
                     }
                     inx = token.index + token.length;
 
-                    switch(token.type)
+                    switch (token.type)
                     {
                         case TagTokenType.Express:
-                            object result = ParseTagToken(token, strBuilder,tagsObj, tagContext, isDynamic);
-                            if(isDynamic)
+                            object result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic);
+                            if (isDynamic)
                             {
                                 strBuilder.Append("\nbuffer.Append(" + result + ");");
                             }
@@ -800,7 +797,7 @@ namespace Com.AimUI.TagEngine
                             }
                             break;
                         case TagTokenType.Attribute:
-                            if(token.args==null)
+                            if (token.args == null)
                             {
                                 if (string.IsNullOrEmpty(token.scope))
                                 {
@@ -871,7 +868,7 @@ namespace Com.AimUI.TagEngine
                         strBuilder.Append(body.Substring(inx));
                     }
                 }
-            } 
+            }
         }
 
         static bool GetTagInstance(string nameSpace, string tagName, Dictionary<string, ITag<T>> tagsObj, out ITag<T> tagObj)
@@ -943,7 +940,7 @@ namespace Com.AimUI.TagEngine
                 }
             }
             bool isGetSelf = (token.name == "this");
-            if (isGetSelf  && (string.IsNullOrEmpty(token.scope) || token.scope == tagStruct.tagName || token.scope == tagObj.instanceName))
+            if (isGetSelf && (string.IsNullOrEmpty(token.scope) || token.scope == tagStruct.tagName || token.scope == tagObj.instanceName))
             {
                 return GetTagSelf(token, tagObj, isDynamic);
             }
@@ -985,7 +982,7 @@ namespace Com.AimUI.TagEngine
                 }
                 args_str += "}";
             }
-            
+
 
             if (isHas)
             {
@@ -1018,7 +1015,7 @@ namespace Com.AimUI.TagEngine
                         return obj;
                     }
                     return TagContext.OnValuePreAction(obj, token.action, token.actionCharCode);
-                    
+
                 }
             }
             else
@@ -1044,14 +1041,14 @@ namespace Com.AimUI.TagEngine
                         {
                             isHas = true;
                         }
-                        
+
                         if (isHas) break;
                     }
                     parentTag = parentTag.parent;
                 }
                 if (isHas)
                 {
-                    if(isGetSelf)
+                    if (isGetSelf)
                     {
                         return GetTagSelf(token, parentObj, isDynamic);
                     }
@@ -1080,7 +1077,7 @@ namespace Com.AimUI.TagEngine
                         {
                             return parentObj.GetAttribute(token.name, args);
                         }
-                        return TagContext.OnValuePreAction(parentObj.GetAttribute(token.name,args), token.action, token.actionCharCode);
+                        return TagContext.OnValuePreAction(parentObj.GetAttribute(token.name, args), token.action, token.actionCharCode);
                     }
                 }
                 else
@@ -1108,7 +1105,7 @@ namespace Com.AimUI.TagEngine
             }
         }
 
-        static void ParseTagParams(T tagContext,StringBuilder strBuilder,TagParams tagParams, ITag<T> tagObj,string instanceName, TagStruct curStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
+        static void ParseTagParams(T tagContext, StringBuilder strBuilder, TagParams tagParams, ITag<T> tagObj, string instanceName, TagStruct curStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             string k;
             string v;
@@ -1126,14 +1123,14 @@ namespace Com.AimUI.TagEngine
 
                 object k_result = k;
                 object v_result = v;
-                if(k_tokens != null)
+                if (k_tokens != null)
                 {
                     if (k_tokens.Count == 1 && k_tokens[0].length == k.Length)
                     {
                         token = k_tokens[0];
                         if (token.type == TagTokenType.Attribute)
                         {
-                            if(token.args==null)
+                            if (token.args == null)
                             {
                                 k_result = ParseAttribule(token, tagObj, curStruct, isDynamic, tagContext, tagsObj);
                             }
@@ -1164,7 +1161,7 @@ namespace Com.AimUI.TagEngine
                         token = v_tokens[0];
                         if (token.type == TagTokenType.Attribute)
                         {
-                            if (token.args==null)
+                            if (token.args == null)
                             {
                                 v_result = ParseAttribule(token, tagObj, curStruct, isDynamic, tagContext, tagsObj);
                             }
@@ -1181,9 +1178,9 @@ namespace Com.AimUI.TagEngine
                     else
                     {
                         int inx = strBuilder.Length;
-                        
+
                         ParseTokens(tagContext, tagObj, v_tokens, v, curStruct, strBuilder, tagsObj, isDynamic);
-                        int len = strBuilder.Length-inx;
+                        int len = strBuilder.Length - inx;
                         v_result = strBuilder.ToString(inx, len);
                         strBuilder.Remove(inx, len);
                     }
@@ -1194,7 +1191,7 @@ namespace Com.AimUI.TagEngine
                 {
                     if (isDynamic)
                     {
-                        if(v_tokens==null)
+                        if (v_tokens == null)
                         {
                             strBuilder.AppendLine(instanceName + ".SetAttribute(\"" + k_result.ToString() + "\",@\"" + (v_result ?? "").ToString().Replace("\"", "\"\"") + "\");");
                         }
@@ -1212,20 +1209,20 @@ namespace Com.AimUI.TagEngine
 
                 if (isDynamic)
                 {
-                    if(k_tokens == null || (k_tokens.Count == 1 && k_tokens[0].length == k.Length))
+                    if (k_tokens == null || (k_tokens.Count == 1 && k_tokens[0].length == k.Length))
                     {
                         string _inx = instanceName + "_v_inx_" + i;
                         strBuilder.AppendLine("int " + _inx + " = buffer.Length;");
                         strBuilder.AppendLine(v_result.ToString());
                         strBuilder.AppendLine(instanceName + ".SetAttribute(\"" + k_result.ToString() + "\",buffer.ToString(" + _inx + ",buffer.Length-" + _inx + "));");
-                        strBuilder.AppendLine("buffer.Remove(" + _inx + ",buffer.Length-"+_inx+");");
+                        strBuilder.AppendLine("buffer.Remove(" + _inx + ",buffer.Length-" + _inx + ");");
                     }
                     else if (v_tokens == null || (v_tokens.Count == 1 && v_tokens[0].length == v.Length))
                     {
                         string _inx = instanceName + "_k_inx_" + i;
                         strBuilder.AppendLine("int " + _inx + " = buffer.Length;");
                         strBuilder.AppendLine(k_result.ToString());
-                        if(v_tokens==null)
+                        if (v_tokens == null)
                         {
                             strBuilder.AppendLine(instanceName + ".SetAttribute(buffer.ToString(" + _inx + ",buffer.Length-" + _inx + "),@\"" + v_result.ToString().Replace("\"", "\"\"") + "\");");
                         }
@@ -1242,7 +1239,7 @@ namespace Com.AimUI.TagEngine
                         string k_name = instanceName + "_k_name_" + i;
                         strBuilder.AppendLine("int " + _inx + " = buffer.Length;");
                         strBuilder.AppendLine(k_result.ToString());
-                        strBuilder.AppendLine("string  " + k_name + " = buffer.ToString(" + _inx + ",buffer.Length-"+_inx+");");
+                        strBuilder.AppendLine("string  " + k_name + " = buffer.ToString(" + _inx + ",buffer.Length-" + _inx + ");");
                         strBuilder.AppendLine("buffer.Remove(" + _inx + ",buffer.Length-" + _inx + ");");
 
                         _inx = instanceName + "_v_inx_" + i;
@@ -1274,7 +1271,7 @@ namespace Com.AimUI.TagEngine
                 var local_args = tokens[i].args;
                 if (local_args == null || local_args.Count == 0)
                 {
-                   _count += 1;
+                    _count += 1;
                 }
                 else if (tokens[i].type != TagTokenType.Common)
                 {
@@ -1288,7 +1285,7 @@ namespace Com.AimUI.TagEngine
                         {
                             _count += 1;
                         }
-                        else if(local_args[j].type== TagTokenType.Common)
+                        else if (local_args[j].type == TagTokenType.Common)
                         {
                             _count += GetArgsCount(local_args[j].args);
                         }
@@ -1306,10 +1303,10 @@ namespace Com.AimUI.TagEngine
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        static object ParseOutAttributeToken(TagToken token, T tagContext, Dictionary<string, ITag<T>> tagsObj, bool isDynamic, out bool isOk, object[] args=null)
+        static object ParseOutAttributeToken(TagToken token, T tagContext, Dictionary<string, ITag<T>> tagsObj, bool isDynamic, out bool isOk, object[] args = null)
         {
             isOk = false;
-            if(string.IsNullOrEmpty(token.scope))
+            if (string.IsNullOrEmpty(token.scope))
             {
                 if (isDynamic)
                 {
@@ -1373,7 +1370,7 @@ namespace Com.AimUI.TagEngine
                 i_name = kv.Key.Substring(_inx2 + 1);
                 if (scopeInx != -1) //按名称查找
                 {
-                    if(ns == t_ns && (name == i_name))
+                    if (ns == t_ns && (name == i_name))
                     {
                         isOk = true;
                     }
@@ -1391,7 +1388,7 @@ namespace Com.AimUI.TagEngine
                     }
                     if (isDynamic)
                     {
-                        if (args_str!=null)
+                        if (args_str != null)
                         {
                             if (token.action == ValuePreAction.NONE)
                             {
@@ -1407,7 +1404,7 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
-                        if(token.action == ValuePreAction.NONE)
+                        if (token.action == ValuePreAction.NONE)
                         {
                             return kv.Value.GetAttribute(token.name, args);
                         }
@@ -1420,7 +1417,7 @@ namespace Com.AimUI.TagEngine
             {
                 _inx1 = kv.Key.IndexOf(':');
                 t_ns = kv.Key.Substring(0, _inx1);
-                t_name = kv.Key.Substring(_inx1+1);
+                t_name = kv.Key.Substring(_inx1 + 1);
                 if (scopeInx != -1) //按名称查找
                 {
                     if (ns == t_ns && (name == t_name))
@@ -1493,7 +1490,7 @@ namespace Com.AimUI.TagEngine
                 InitExpressTagObj(ns, tagName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj);
             }
 
-            if (token.args != null && token.args.Count > 0 && (token.args.Count == 1 && token.args[0].type == TagTokenType.Common && token.args[0].value==string.Empty && token.args[0].args==null) == false)
+            if (token.args != null && token.args.Count > 0 && (token.args.Count == 1 && token.args[0].type == TagTokenType.Common && token.args[0].value == string.Empty && token.args[0].args == null) == false)
             {
                 Stack<IEnumerator<TagToken>> tokens = new Stack<IEnumerator<TagToken>>();
                 Stack<TagToken> prevTokens = new Stack<TagToken>();
@@ -1545,7 +1542,7 @@ namespace Com.AimUI.TagEngine
 
                                 if (curToken.name == "this")
                                 {
-                                    if(isDynamic)
+                                    if (isDynamic)
                                     {
                                         if (curToken.action == ValuePreAction.NONE)
                                         {
@@ -1590,7 +1587,7 @@ namespace Com.AimUI.TagEngine
                                         args.Push(TagContext.OnValuePreAction(t_tagObj.GetAttribute(curToken.name), curToken.action, curToken.actionCharCode));
                                     }
                                 }
-                                
+
                             }
                             else
                             {
@@ -1629,13 +1626,13 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
-                        if(prevTokens.Count>0) prevToken = prevTokens.Pop();
+                        if (prevTokens.Count > 0) prevToken = prevTokens.Pop();
                         if (prevToken != null)
                         {
                             //出栈
                             if (prevToken.args != null)
                             {
-                                
+
                                 var count = prevToken.args.Count;
                                 ArrayList t_args = new ArrayList(count);
                                 for (var i = 0; i < count; i++)
@@ -1740,7 +1737,7 @@ namespace Com.AimUI.TagEngine
                             {
                                 tmp_count = GetArgsCount(local_args);
                             }
-                            
+
                             local_str = "";
 
                             for (int j = 0; j < tmp_count; j++)
@@ -1809,7 +1806,7 @@ namespace Com.AimUI.TagEngine
                 {
                     return ParseAttribule(token, tagObj, tagStruct, isDynamic, tagContext, tagsObj);
                 }
-                
+
                 if (token.name == "this")
                 {
                     return GetTagSelf(token, tagObj, isDynamic);
@@ -1821,13 +1818,13 @@ namespace Com.AimUI.TagEngine
                 }
                 else
                 {
-                    if(token.action == ValuePreAction.NONE) return tagObj.GetAttribute(token.name);
+                    if (token.action == ValuePreAction.NONE) return tagObj.GetAttribute(token.name);
                     return TagContext.OnValuePreAction(tagObj.GetAttribute(token.name), token.action, token.actionCharCode);
                 }
             }
         }
 
-        static object GetTagSelf(TagToken token,ITag<T> tagObj, bool isDynamic)
+        static object GetTagSelf(TagToken token, ITag<T> tagObj, bool isDynamic)
         {
             if (isDynamic)
             {

@@ -14,7 +14,7 @@ namespace Com.AimUI.TagCore
 
         private string _name;
         //名称
-        public string name 
+        public string name
         {
             get
             {
@@ -22,7 +22,7 @@ namespace Com.AimUI.TagCore
             }
             set
             {
-                if(value!=null)
+                if (value != null)
                 {
                     _name = value.ToLower();
                 }

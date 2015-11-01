@@ -4,11 +4,11 @@ using System.Text.RegularExpressions;
 using Com.AimUI.TagCore;
 namespace Com.AimUI.TagParser
 {
-    public class RegxpEngineCommon<T> where T:TagContext
+    public class RegxpEngineCommon<T> where T : TagContext
     {
         internal static string TagRegNames;
         internal const RegexOptions Tag_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);//|RegexOptions.Compiled
-        
+
         internal const string RegexStr_TagNotes = "<\\!--\\#.*?\\#-->";  //匹配 aim 标签注释
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
@@ -25,10 +25,8 @@ namespace Com.AimUI.TagParser
 
         internal static string RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$";
 
-        
-        
         private static string ValuePreActionChars = ":;";
-       
+
         /// <summary>
         /// 清除注释标签
         /// </summary>
@@ -63,8 +61,8 @@ namespace Com.AimUI.TagParser
         {
             if (string.IsNullOrEmpty(str)) return null;
             if (str.Length < 4) return null;
-            TagParams tagParams=null;
-            string t_paramName=null;
+            TagParams tagParams = null;
+            string t_paramName = null;
             string t_paramValue;
             MatchCollection paramColle = Regex.Matches(str, RegexStr_TagInnerTagParams, Tag_RegexOptions);
             if (paramColle.Count > 0)
@@ -77,10 +75,10 @@ namespace Com.AimUI.TagParser
                     tagParams.Add(t_paramName, t_paramValue);
                 }
             }
-            
+
             return tagParams;
         }
-        
+
         internal static void UpdateTagConfig()
         {
             Regex.CacheSize = 30;
@@ -89,9 +87,9 @@ namespace Com.AimUI.TagParser
             RegexStr_SubTagName2GroupAll = RegexTemplate_SubTagName2GroupAll.Replace("AT", "[_a-zA-Z0-9\\.]");
         }
 
-        
 
-        internal static MatchCollection MatchSubTagsGroupAllByName(string contentStr,  string tagName, string tagObjName)
+
+        internal static MatchCollection MatchSubTagsGroupAllByName(string contentStr, string tagName, string tagObjName)
         {
             string regStr = GetSubTagRegStr(tagName, tagObjName);
             return Regex.Matches(contentStr, regStr, Tag_RegexOptions);
@@ -108,7 +106,7 @@ namespace Com.AimUI.TagParser
                 regStr = RegexTemplate_SubTagName2GroupAll.Replace("AT", tagName.Replace(".", "\\."));
             }
 
-            if (string.IsNullOrEmpty(tagObjName)||tagObjName.StartsWith("t__"))
+            if (string.IsNullOrEmpty(tagObjName) || tagObjName.StartsWith("t__"))
             {
                 regStr = regStr.Replace(@"\#NAME|", "");
             }
@@ -128,7 +126,7 @@ namespace Com.AimUI.TagParser
             string tagParamStr = tagGroupAllMatch.Groups[4].Value;  //标签属性
             string tagContentStr = tagGroupAllMatch.Groups[5].Value;  //标签内容
             TagParams tagParams = RegxpEngineCommon<T>.GetTagParams(tagParamStr);
-            
+
             TagStruct tagStruct = new TagStruct();
             tagStruct.nameSpace = _nameSpace;
             tagStruct.tagName = _tagName;
@@ -155,7 +153,7 @@ namespace Com.AimUI.TagParser
             string tagParamStr = subTagGroupAllMatch.Groups[3].Value;  //标签属性
             string tagContentStr = subTagGroupAllMatch.Groups[4].Value;  //标签内容
             TagParams tagParams = RegxpEngineCommon<T>.GetTagParams(tagParamStr);
-            
+
             TagStruct tagStruct = new TagStruct();
             tagStruct.tagName = _tagName;
             tagStruct.instanceName = _tagInstanceName;
@@ -174,7 +172,7 @@ namespace Com.AimUI.TagParser
             int curIndex = 0;
             if (matchs.Count > 0)
             {
-                List<TagStruct> list = new List<TagStruct>(matchs.Count*2+1);
+                List<TagStruct> list = new List<TagStruct>(matchs.Count * 2 + 1);
                 TagStruct tagStruct;
                 foreach (Match match in matchs)
                 {
@@ -184,7 +182,7 @@ namespace Com.AimUI.TagParser
                         tagStruct.allContent = contentStr.Substring(curIndex, match.Index - curIndex);
                         list.Add(tagStruct);
                     }
-                    tagStruct = CreateSubTagStruct(match);                
+                    tagStruct = CreateSubTagStruct(match);
                     list.Add(tagStruct);
                     curIndex = match.Index + match.Length;
                 }
@@ -199,7 +197,7 @@ namespace Com.AimUI.TagParser
             }
             return null;
         }
-       
+
         internal static TagStruct GetTagStruct(string contentStr)
         {
             if (string.IsNullOrEmpty(contentStr)) return null;
@@ -213,7 +211,7 @@ namespace Com.AimUI.TagParser
                 Match tmpMatch = matchs[0];
                 if (counts == 1 && tmpMatch.Index == 0 && tmpMatch.Length == contentStr.Length)
                 {
-                    tagStruct=CreateTagStruct(tmpMatch);
+                    tagStruct = CreateTagStruct(tmpMatch);
                 }
                 else
                 {
@@ -232,7 +230,7 @@ namespace Com.AimUI.TagParser
                         tagStruct.subTagStruct.Add(CreateTagStruct(tmpMatch));
                         index = tmpMatch.Index + tmpMatch.Length;
                     }
-                    if(index<contentStr.Length)
+                    if (index < contentStr.Length)
                     {
                         var tmpStruct = new TagStruct();
                         tmpStruct.allContent = contentStr.Substring(index, contentStr.Length - index);
@@ -254,12 +252,12 @@ namespace Com.AimUI.TagParser
             TagToken token = null;
             string tokenValue = null;
             ValuePreAction valuePreAction = ValuePreAction.NONE;
-            foreach(Match match in matchs)
+            foreach (Match match in matchs)
             {
-                
+
                 tokenValue = match.Groups[2].Value;
                 char act_char = tokenValue[0];
-                if(act_char == 58 )
+                if (act_char == 58)
                 {
                     valuePreAction = ValuePreAction.JSON_Serialize;
                     tokenValue = tokenValue.Remove(0, 1);
@@ -292,7 +290,7 @@ namespace Com.AimUI.TagParser
                         token.type = TagTokenType.Express;
                         break;
                 }
-                if(valuePreAction!= ValuePreAction.NONE)token.actionCharCode = (byte)act_char;
+                if (valuePreAction != ValuePreAction.NONE) token.actionCharCode = (byte)act_char;
                 token.value = match.Value;
                 token.action = valuePreAction;
                 token.index = match.Index;
@@ -349,11 +347,11 @@ namespace Com.AimUI.TagParser
                 MatchCollection tokenMatchs;
                 Dictionary<string, TagToken> nestedExp = null;
                 Random ra = new Random();
-                int random = ra.Next(10000,90000);
+                int random = ra.Next(10000, 90000);
                 while (true)
                 {
                     //匹配嵌套表达式  @"[@$]([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)"
-                    tokenMatchs = Regex.Matches(match_args,RegexStr_NestedToken, Tag_RegexOptions);
+                    tokenMatchs = Regex.Matches(match_args, RegexStr_NestedToken, Tag_RegexOptions);
                     if (tokenMatchs.Count > 0)
                     {
                         //嵌套表达式
@@ -378,7 +376,7 @@ namespace Com.AimUI.TagParser
                             char act_char = m.Value[1];
                             if (act_char == 58 || act_char == 59 || (act_char > 32 && act_char < 48))
                             {
-                                if(act_char==58)
+                                if (act_char == 58)
                                 {
                                     tagToken.action = ValuePreAction.JSON_Serialize;
                                 }
@@ -398,8 +396,8 @@ namespace Com.AimUI.TagParser
                             {
                                 tagToken.value = m.Value.Substring(1);
                             }
-                            
-                            
+
+
                             tagToken.name = names;
                             if (tagToken.type == TagTokenType.Attribute)
                             {
@@ -440,7 +438,7 @@ namespace Com.AimUI.TagParser
                             {
 
                                 List<string> arg_list = GetArgList(_args);
-                                
+
                                 //string[] s_arr = _args.Split(',');
 
                                 tagToken.args = new List<TagToken>(arg_list.Count);
@@ -470,7 +468,7 @@ namespace Com.AimUI.TagParser
                                         {
                                             _s = _s.Substring(1, _s.Length - 2);
                                         }
-                            
+
                                         if (_s.IndexOf("~Exp~") != -1)
                                         {
                                             MatchCollection matchs = Regex.Matches(_s, "~Exp~[\\d]{5}");
@@ -536,7 +534,7 @@ namespace Com.AimUI.TagParser
                                         {
                                             _token.value = _s.Substring(1);
                                         }
-       
+
                                         if (_token.type == TagTokenType.Express)
                                         {
                                             inx = _token.value.LastIndexOf(':');
@@ -599,7 +597,7 @@ namespace Com.AimUI.TagParser
                 for (var i = 0; i < e_arr.Count; i++)
                 {
                     e_s = e_arr[i].Trim();
-                    if (e_s.Length>1 && Regex.IsMatch(e_s, RegexStr_TokenBody )) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
+                    if (e_s.Length > 1 && Regex.IsMatch(e_s, RegexStr_TokenBody)) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
                     {
                         if (e_s.StartsWith("@"))
                         {
@@ -621,10 +619,10 @@ namespace Com.AimUI.TagParser
                             e_s = e_s.Substring(1, e_s.Length - 2);
                         }
 
-                        if(e_s.IndexOf("~Exp~")!=-1)
+                        if (e_s.IndexOf("~Exp~") != -1)
                         {
                             MatchCollection matchs = Regex.Matches(e_s, "~Exp~[\\d]{5}");
-                            if (matchs.Count>0)
+                            if (matchs.Count > 0)
                             {
                                 if (e_s.Length == 10)
                                 {
@@ -634,8 +632,8 @@ namespace Com.AimUI.TagParser
                                 }
                                 e_token = new TagToken() { type = TagTokenType.Common };
                                 e_token.args = new List<TagToken>(matchs.Count);
-                                int _index=0;
-                                foreach(Match match in matchs)
+                                int _index = 0;
+                                foreach (Match match in matchs)
                                 {
                                     if (match.Index > _index)
                                     {
@@ -650,13 +648,13 @@ namespace Com.AimUI.TagParser
                                     {
                                     }
                                 }
-                                if(e_s.Length>_index)
+                                if (e_s.Length > _index)
                                 {
                                     e_token.args.Add(new TagToken() { type = TagTokenType.Common, value = e_s.Substring(_index) });
                                 }
                                 t_args.Add(e_token);
                                 continue;
-                            } 
+                            }
                         }
                         e_token = new TagToken() { type = TagTokenType.Common, value = e_s };
                     }
@@ -799,7 +797,7 @@ namespace Com.AimUI.TagParser
 
                 }
                 char curChar = prevChar;
-                
+
                 for (int c = 1; c < _args.Length; c++)
                 {
                     curChar = _args[c];

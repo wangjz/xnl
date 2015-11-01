@@ -2,7 +2,7 @@
 
 namespace Com.AimUI.TagCore
 {
-    public class TagParams:Dictionary<string,string>
+    public class TagParams : Dictionary<string, string>
     {
         public new string this[string key]
         {
@@ -14,7 +14,7 @@ namespace Com.AimUI.TagCore
             }
             set
             {
-                this[key]  = value;
+                this[key] = value;
             }
         }
     }

@@ -30,12 +30,12 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual void OnStart()
         {
-            
+
         }
 
         public virtual void OnEnd()
         {
-            
+
         }
 
 
@@ -70,15 +70,15 @@ namespace Com.AimUI.TagCore.Tags
             {
                 return;
             }
-            else if(paramName.StartsWith("arg"))
+            else if (paramName.StartsWith("arg"))
             {
                 if (paramName == "args" && value is Array)
                 {
                     args = value as object[];
                 }
-                else if (args!=null)
+                else if (args != null)
                 {
-                    int i=-1;
+                    int i = -1;
                     if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < args.Length)
                     {
                         args[i] = value;
@@ -101,12 +101,12 @@ namespace Com.AimUI.TagCore.Tags
                 body = null;
                 return GetBody();
             }
-            else if(paramName=="set")
+            else if (paramName == "set")
             {
-                if (userData != null && userData.Length ==2)
+                if (userData != null && userData.Length == 2)
                 {
                     string key = Convert.ToString(userData[0]);
-                    if(string.IsNullOrEmpty(key)==false)attrs[key.ToLower()] = userData[1];
+                    if (string.IsNullOrEmpty(key) == false) attrs[key.ToLower()] = userData[1];
                 }
                 return null;
             }
@@ -123,7 +123,7 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         return args;
                     }
-                    else if (args != null && int.TryParse(userData[0].ToString(), out i) && i>0 && (i-1) < args.Length)
+                    else if (args != null && int.TryParse(userData[0].ToString(), out i) && i > 0 && (i - 1) < args.Length)
                     {
                         return args[i];
                     }
@@ -133,7 +133,7 @@ namespace Com.AimUI.TagCore.Tags
                 if (int.TryParse(paramName.Substring(3), out i) && args != null && i > 0)
                 {
                     i = i - 1;
-                    if(i < args.Length)return args[i];
+                    if (i < args.Length) return args[i];
                 }
             }
 

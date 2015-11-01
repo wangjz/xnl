@@ -21,7 +21,7 @@ namespace Com.AimUI.TagCore
         /// <summary>
         /// 标签实例名
         /// </summary>
-        public string instanceName 
+        public string instanceName
         {
             get
             {
@@ -62,7 +62,7 @@ namespace Com.AimUI.TagCore
             {
                 _bodyContent = value;
             }
-         }
+        }
 
         public string allContent { get; set; }
         /// <summary>

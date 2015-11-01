@@ -33,12 +33,10 @@ namespace Com.AimUI.TagParser
         {
             return RegxpEngineCommon<T>.GetTagTokens(contentStr);
         }
-        #endregion
-
-
         public void SetValuePreActionChar(char valuePreActionChar)
         {
             RegxpEngineCommon<T>.SetValuePreActionChar(valuePreActionChar);
         }
+        #endregion
     }
 }

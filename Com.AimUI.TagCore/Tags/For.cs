@@ -26,7 +26,7 @@ namespace Com.AimUI.TagCore.Tags
         private int pos = 0;
 
         private object[] list;
-        
+
         private object item;
 
         //private bool _break = false;
@@ -48,27 +48,27 @@ namespace Com.AimUI.TagCore.Tags
         }
         public void OnInit()
         {
-            
+
         }
         public virtual void OnStart()
         {
             i = 0;
-            if(isChange)
+            if (isChange)
             {
                 isChange = false;
-                if(string.IsNullOrEmpty(str)==false)
+                if (string.IsNullOrEmpty(str) == false)
                 {
                     strs = str.Split(new string[] { split }, StringSplitOptions.RemoveEmptyEntries);
-                    if(end==-1)
+                    if (end == -1)
                     {
                         end = strs.Length - 1;
                     }
-                    else if (end >= strs.Length) end = strs.Length-1;
+                    else if (end >= strs.Length) end = strs.Length - 1;
                 }
                 else
                 {
                     strs = null;
-                    if(list==null)return ;
+                    if (list == null) return;
                     if (end == -1)
                     {
                         end = list.Length - 1;
@@ -87,7 +87,7 @@ namespace Com.AimUI.TagCore.Tags
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (step == 0) return;
-            
+
             if (tagDelegate != null)
             {
                 if (start > end)
@@ -107,7 +107,7 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     tagDelegate();
                     pos += 1;
-                }   
+                }
             }
         }
 
@@ -123,7 +123,7 @@ namespace Com.AimUI.TagCore.Tags
             }
             else if (paramName == "list")
             {
-                if(value is string)
+                if (value is string)
                 {
                     string v = Convert.ToString(value);
                     if (v != str)
@@ -136,15 +136,15 @@ namespace Com.AimUI.TagCore.Tags
                 }
                 else
                 {
-                    if(value!=list)
+                    if (value != list)
                     {
-                        ICollection<object>  _list = value as ICollection<object>;
+                        ICollection<object> _list = value as ICollection<object>;
 
-                        if(_list!=null)
+                        if (_list != null)
                         {
                             list = new object[_list.Count];
-                            int i=0;
-                            foreach(object obj in _list)
+                            int i = 0;
+                            foreach (object obj in _list)
                             {
                                 list[i] = obj;
                                 i++;
@@ -152,7 +152,7 @@ namespace Com.AimUI.TagCore.Tags
                         }
                         else
                         {
-                            list=null;
+                            list = null;
                         }
                         isChange = true;
                     }
@@ -169,7 +169,7 @@ namespace Com.AimUI.TagCore.Tags
                     isChange = true;
                 }
             }
-            else if(paramName == "step")
+            else if (paramName == "step")
             {
                 step = Convert.ToInt32(value);
             }
@@ -193,7 +193,7 @@ namespace Com.AimUI.TagCore.Tags
             {
                 return end;
             }
-            else if(paramName=="count")
+            else if (paramName == "count")
             {
                 if (strs != null) return strs.Length;
                 if (list != null) return list.Length;
@@ -201,9 +201,9 @@ namespace Com.AimUI.TagCore.Tags
             }
             else if (paramName == "item")
             {
-                if(item!=null)
+                if (item != null)
                 {
-                    if(userData!=null && userData.Length>0)
+                    if (userData != null && userData.Length > 0)
                     {
                         string prop = Convert.ToString(userData[0]);
                         if (string.IsNullOrEmpty(prop)) return null;
@@ -221,7 +221,7 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     return strs[i];
                 }
-                return  "";
+                return "";
             }
             else if (paramName == "split")
             {

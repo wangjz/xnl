@@ -2,7 +2,7 @@
 
 namespace Com.AimUI.TagCore
 {
-    
+
     /// <summary>
     /// 标签出错处理方式索引
     /// </summary>

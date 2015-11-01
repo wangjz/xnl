@@ -2,9 +2,9 @@
 
 namespace Com.AimUI.TagCore
 {
-    public class ITagCache<T> : Dictionary<string, ITag<T>> where T:TagContext
+    public class ITagCache<T> : Dictionary<string, ITag<T>> where T : TagContext
     {
-        public  ITagCache()
+        public ITagCache()
         {
         }
         public new ITag<T> this[string Key]

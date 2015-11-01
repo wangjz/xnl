@@ -29,11 +29,11 @@ namespace Com.AimUI.TagCore
         private string _tagName = "exp";
         public string tagName
         {
-            get 
+            get
             {
                 return _tagName;
             }
-            set 
+            set
             {
                 if (string.IsNullOrEmpty(value))
                 {

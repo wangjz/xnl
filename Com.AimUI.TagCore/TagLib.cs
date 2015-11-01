@@ -6,23 +6,23 @@ using Com.AimUI.TagCore.Exceptions;
 
 namespace Com.AimUI.TagCore
 {
-    public delegate ITag<T> TagConstructorDelegate<T>(string tagName) where T:TagContext;
-    public class TagLib<T> where T:TagContext
+    public delegate ITag<T> TagConstructorDelegate<T>(string tagName) where T : TagContext;
+    public class TagLib<T> where T : TagContext
     {
         public static IParser<T> tagParser { get; private set; }
 
-        private  Assembly libAssembly;
+        private Assembly libAssembly;
         private string low_nameSpace;
 
         public string nameSpace { get; private set; }
-        
+
         public bool isCache { get; private set; }
 
         private static ITagCache<T> tagCache;
 
         private TagConstructorDelegate<T> tagConstructor;
 
-        public TagLib(string _nameSpace, bool _isCache,TagConstructorDelegate<T> _tagConstructor=null) 
+        public TagLib(string _nameSpace, bool _isCache, TagConstructorDelegate<T> _tagConstructor = null)
         {
             nameSpace = _nameSpace;
             low_nameSpace = _nameSpace.ToLower();
@@ -35,7 +35,7 @@ namespace Com.AimUI.TagCore
             tagConstructor = _tagConstruct;
         }
 
-        private  ITag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
+        private ITag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
         {
             if (libAssembly == null)
             {
@@ -48,7 +48,7 @@ namespace Com.AimUI.TagCore
             {
                 return null;
             }
-            return  (ITag<T>)Activator.CreateInstance(tagType);
+            return (ITag<T>)Activator.CreateInstance(tagType);
         }
 
         public ITag<T> GetTagInstance(string tagName)
@@ -93,10 +93,10 @@ namespace Com.AimUI.TagCore
                 return obj;
             }
         }
-       
+
         private static string tagNameSpacesStr = "at";
         private static Dictionary<string, TagLib<T>> tagLibColls = new Dictionary<string, TagLib<T>>();
-        
+
         private static void UpdateTagNameSpacesStr()
         {
             string str = "at";
@@ -136,7 +136,7 @@ namespace Com.AimUI.TagCore
             {
                 tagLibColls.Add(tagNameSpace, tagLib);
             }
-            
+
             UpdateTagNameSpacesStr();
         }
         /// <summary>
@@ -149,14 +149,14 @@ namespace Com.AimUI.TagCore
             if (tagLibColls.ContainsKey(tagNameSpace))
             {
                 TagLib<T> tagLib = tagLibColls[tagNameSpace];
-          
+
                 tagLibColls.Remove(tagNameSpace);
             }
             UpdateTagNameSpacesStr();
         }
 
-       
-        public static void Initialize(IParser<T> parser,List<TagLib<T>> tagLibs = null)
+
+        public static void Initialize(IParser<T> parser, List<TagLib<T>> tagLibs = null)
         {
             tagParser = parser;
             if (tagCache == null) tagCache = new ITagCache<T>();
@@ -204,15 +204,15 @@ namespace Com.AimUI.TagCore
         }
 
         //扩展标签
-        public static bool SetTagExtend(string nameSpace,string tagName, ITag<T> destTag)
+        public static bool SetTagExtend(string nameSpace, string tagName, ITag<T> destTag)
         {
-            if (destTag==null)
+            if (destTag == null)
             {
                 return false;
             }
             tagCache[nameSpace.ToLower() + ":" + tagName.ToLower()] = destTag;
             return true;
         }
-        
+
     }
 }

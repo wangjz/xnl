@@ -5,16 +5,16 @@ namespace Com.AimUI.TagCore
     public delegate void OnTagDelegate();
 
     [Flags]
-    public enum TagEvents:byte
+    public enum TagEvents : byte
     {
-        None=0,
-        Init=1,
-        Start=2,
-        Tag=4,
-        End=8
+        None = 0,
+        Init = 1,
+        Start = 2,
+        Tag = 4,
+        End = 8
     }
 
-    public interface ITag<T> where T:TagContext
+    public interface ITag<T> where T : TagContext
     {
         /// <summary>
         /// 注册的事件
@@ -33,7 +33,7 @@ namespace Com.AimUI.TagCore
 
         void OnStart();
 
-        void OnTag(OnTagDelegate tagDelegate=null);
+        void OnTag(OnTagDelegate tagDelegate = null);
 
         void OnEnd();
 

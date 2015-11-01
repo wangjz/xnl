@@ -5,7 +5,7 @@ namespace Com.AimUI.TagCore
     /// <summary>
     /// 解析模式  静态 动态
     /// </summary>
-    public enum ParseMode:byte
+    public enum ParseMode : byte
     {
         Static,
         Dynamic,
@@ -14,19 +14,19 @@ namespace Com.AimUI.TagCore
     /// <summary>
     /// 值返回前处理方式
     /// </summary>
-    public enum ValuePreAction:byte
+    public enum ValuePreAction : byte
     {
-        NONE=0,
-        JSON_Serialize=1, // :
-        JSON_Deserialize=2, // ;
-        USER_Defined=3
+        NONE = 0,
+        JSON_Serialize = 1, // :
+        JSON_Deserialize = 2, // ;
+        USER_Defined = 3
     }
 
     public delegate object OnValuePreActionDelegate(object value, ValuePreAction actionCode, byte charCode);
 
     public class TagContext
     {
-       
+
         public TagContext()
         {
             response = new TagResponse();
@@ -54,8 +54,8 @@ namespace Com.AimUI.TagCore
         /// <summary>
         /// 自定义项集合
         /// </summary>
-        protected Dictionary<string, object> items { get;set; }
-        
+        protected Dictionary<string, object> items { get; set; }
+
         public static void SetItem(TagContext tagContext, string itemName, object itemValue)
         {
             if (tagContext.items == null) tagContext.items = new Dictionary<string, object>();
@@ -79,6 +79,5 @@ namespace Com.AimUI.TagCore
             tagContext.items.TryGetValue(itemName, out obj);
             return obj;
         }
-        
     }
 }

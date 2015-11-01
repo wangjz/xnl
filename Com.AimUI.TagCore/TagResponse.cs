@@ -3,7 +3,7 @@ using Com.AimUI.TagCore.Exceptions;
 
 namespace Com.AimUI.TagCore
 {
-    public class TagResponse 
+    public class TagResponse
     {
         public StringBuilder buffer { get; protected set; }
         public TagResponse()
