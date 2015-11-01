@@ -16,10 +16,34 @@ namespace Com.AimUI.TagCore
         /// 标签名
         /// </summary>
         public string tagName { get; set; }
+
+        private string _instanceName;
         /// <summary>
         /// 标签实例名
         /// </summary>
-        public string instanceName { get; set; }
+        public string instanceName 
+        {
+            get
+            {
+                return _instanceName;
+            }
+            set
+            {
+                if (value != null && value.Length > 0)
+                {
+                    char c = value[0];
+                    if (c > 47 && c < 58)
+                    {
+                        _instanceName = "_" + value;
+                    }
+                    else _instanceName = value;
+                }
+                else
+                {
+                    _instanceName = value;
+                }
+            }
+        }
         /// <summary>
         /// 标签内容
         /// </summary>

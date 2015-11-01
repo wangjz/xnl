@@ -66,17 +66,18 @@ namespace Com.AimUI.TagCore
                         if (obj != null)
                         {
                             tagCache[_n] = obj;
-                            return obj;
+                            return obj.Create();
                         }
                     }
                     obj = GetTagInstanceFromAssembly(nameSpace, tagName);
                     if (obj != null)
                     {
                         tagCache[_n] = obj;
-                        return obj;
+                        return obj.Create();
                     }
                     return null;
                 }
+                else return obj.Create();
             }
             else
             {
@@ -91,7 +92,6 @@ namespace Com.AimUI.TagCore
                 obj = GetTagInstanceFromAssembly(nameSpace, tagName);
                 return obj;
             }
-            return obj;
         }
        
         private static string tagNameSpacesStr = "at";
@@ -189,14 +189,18 @@ namespace Com.AimUI.TagCore
         public static ITag<T> GetTagInstance(string nameSpace, string tagName)
         {
             ITag<T> obj = tagCache[nameSpace + ":" + tagName];
-            if(obj==null)
+            if (obj == null)
             {
                 TagLib<T> tagLib = TagLib<T>.GetTagLib(nameSpace);
-                if (tagLib == null) return null;
+                if (tagLib == null) throw new TagParseException("未找到标签库:" + nameSpace);
                 obj = tagLib.GetTagInstance(tagName);
+                if (obj == null) throw new TagParseException("未找到标签" + nameSpace + ":" + tagName + "的实现");
+                return obj;
             }
-            if (obj == null) throw (new TagParseException("未找到标签" + nameSpace + ":" + tagName + "的实现"));
-            return obj;
+            else
+            {
+                return obj.Create();
+            }
         }
 
         //扩展标签
