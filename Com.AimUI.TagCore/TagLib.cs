@@ -156,7 +156,7 @@ namespace Com.AimUI.TagCore
         }
 
 
-        public static void Initialize(IParser<T> parser, List<TagLib<T>> tagLibs = null)
+        public static void Initialize(List<TagLib<T>> tagLibs = null, IParser<T> parser = null)
         {
             tagParser = parser;
             if (tagCache == null) tagCache = new ITagCache<T>();
@@ -179,6 +179,7 @@ namespace Com.AimUI.TagCore
                 tagParser.Initialize();
             }
         }
+
         public static TagLib<T> GetTagLib(string tagNameSpace)
         {
             TagLib<T> tagLib;
