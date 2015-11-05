@@ -254,6 +254,8 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         case "now":
                             return DateTime.Now;
+                        case "null":
+                            return null;
                     }
                     break;
                 case 's':
