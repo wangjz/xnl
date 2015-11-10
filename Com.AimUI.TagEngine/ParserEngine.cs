@@ -188,65 +188,6 @@ namespace Com.AimUI.TagEngine
                                 isTagNew = GetTagInstance(curStruct.nameSpace, curStruct.tagName, tagsObj, out tagObj);
                             }
 
-                            bool isIncludeTag = (isNestedInc == false && tagObj is IInclude);
-
-                            if (isIncludeTag)
-                            {
-                                string incSrc = (curStruct.tagParams == null ? null : Convert.ToString(curStruct.tagParams["src"]));
-
-                                if (IsNullOrWhiteSpace(incSrc) == false)
-                                {
-                                    string include = (tagObj as IInclude).GetTagBody(incSrc);
-
-                                    if (IsNullOrWhiteSpace(include) == false)
-                                    {
-                                        curStruct.bodyContent = include;
-                                        curStruct.subTagStruct = null;
-                                    }
-                                }
-
-
-
-                                if (IsNullOrWhiteSpace(curStruct.bodyContent)) goto TagNext;
-
-                                bool isStatic = false;
-                                if (curStruct.tagParams != null)
-                                {
-                                    string static_s = Convert.ToString(curStruct.tagParams["static"]);
-                                    isStatic = ("1" == static_s || string.Compare("true", static_s, true) == 0);
-                                }
-
-
-                                if (isDynamic && isStatic)
-                                {
-                                    curStruct.tagName = curStruct.tagName + "$inc$";
-                                    curStruct.nameSpace = curStruct.nameSpace + (isTagNew ? "$new$" : "");
-                                    curStruct.tagObj = tagObj;
-                                    index = strBuilder.Length;
-                                    TagContext.SetItem(tagContext, "$__tagid", tagId);
-                                    TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
-                                    Parse(null, tagContext);
-                                    int len = strBuilder.Length - index;
-                                    if (len > 0)
-                                    {
-                                        incSrc = strBuilder.ToString(index, len);
-                                        strBuilder.Remove(index, len);
-
-                                        strBuilder.Append("\nbuffer.Append(@\"");
-                                        strBuilder.Append(incSrc.Replace("\"", "\"\""));
-                                        strBuilder.AppendLine("\");");
-                                        // curStruct.bodyContent = incSrc;
-                                        //curStruct.subTagStruct = null;
-                                    }
-                                    //else if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
-                                    //{
-                                    //    curStruct.bodyContent = "";
-                                    //    curStruct.subTagStruct = null;
-                                    //}
-                                    goto TagNext;
-                                }
-                            }
-
                             instanceName = curStruct.instanceName;
 
                             if (isTagNew)
@@ -327,7 +268,14 @@ namespace Com.AimUI.TagEngine
                                         strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\");");
                                         strBuilder.AppendLine("\t" + instanceName + ".tagContext = tagContext;");
                                         strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
-                                        if ((newTagObj.events & TagEvents.Init) == TagEvents.Init) strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
+                                        if ((newTagObj.events & TagEvents.Init) == TagEvents.Init)
+                                        {
+                                            strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
+                                        }
+                                        else
+                                        {
+                                            strBuilder.AppendLine("\t}");
+                                        }
                                     }
                                     tagObj = newTagObj;
                                 }
@@ -340,7 +288,14 @@ namespace Com.AimUI.TagEngine
                                     strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\");");
                                     strBuilder.AppendLine("\t" + instanceName + ".tagContext = tagContext;");
                                     strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
-                                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init) strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
+                                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                                    {
+                                        strBuilder.AppendLine("\t" + instanceName + ".OnInit();\n}");
+                                    }
+                                    else
+                                    {
+                                        strBuilder.AppendLine("\t}");
+                                    }
                                 }
                             }
                             curStruct.tagObj = tagObj;
@@ -349,6 +304,73 @@ namespace Com.AimUI.TagEngine
                                 ParseTagParams(tagContext, strBuilder, curStruct.tagParams, tagObj, instanceName, curStruct, tagsObj, isDynamic);
                             }
 
+                            bool isIncludeTag = (isNestedInc == false && tagObj is IInclude);
+
+                            if (isIncludeTag)
+                            {
+                                string incSrc = (curStruct.tagParams == null ? null : Convert.ToString(curStruct.tagParams["src"]));
+
+                                if (IsNullOrWhiteSpace(incSrc) == false)
+                                {
+                                    string include = (tagObj as IInclude).GetTagBody(incSrc);
+
+                                    if (IsNullOrWhiteSpace(include) == false)
+                                    {
+                                        curStruct.bodyContent = include;
+                                        if (IsNullOrWhiteSpace(tagObj.subTagNames) == false)
+                                        {
+                                            curStruct.subTagStruct = tagParser.GetTagStruct("<" + fullTagName + ">" + include + "</" + fullTagName + ">").subTagStruct;
+                                            if (curStruct.subTagStruct != null)
+                                            {
+                                                subTagCount = curStruct.subTagStruct.Count;
+                                                if (subTagCount > 0) isNoSubTag = false;
+                                            }
+                                        }
+                                        else curStruct.subTagStruct = null;
+                                    }
+                                }
+
+
+
+                                if (IsNullOrWhiteSpace(curStruct.bodyContent)) goto TagNext;
+
+                                bool isStatic = false;
+                                if (curStruct.tagParams != null)
+                                {
+                                    string static_s = Convert.ToString(curStruct.tagParams["static"]);
+                                    isStatic = ("1" == static_s || string.Compare("true", static_s, true) == 0);
+                                }
+
+
+                                if (isDynamic && isStatic)
+                                {
+                                    curStruct.tagName = curStruct.tagName + "$inc$";
+                                    curStruct.nameSpace = curStruct.nameSpace + (isTagNew ? "$new$" : "");
+                                    curStruct.tagObj = tagObj;
+                                    index = strBuilder.Length;
+                                    TagContext.SetItem(tagContext, "$__tagid", tagId);
+                                    TagContext.SetItem(tagContext, "$__nestedTag", curStruct);
+                                    Parse(null, tagContext);
+                                    int len = strBuilder.Length - index;
+                                    if (len > 0)
+                                    {
+                                        incSrc = strBuilder.ToString(index, len);
+                                        strBuilder.Remove(index, len);
+
+                                        strBuilder.Append("\nbuffer.Append(@\"");
+                                        strBuilder.Append(incSrc.Replace("\"", "\"\""));
+                                        strBuilder.AppendLine("\");");
+                                        // curStruct.bodyContent = incSrc;
+                                        //curStruct.subTagStruct = null;
+                                    }
+                                    //else if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
+                                    //{
+                                    //    curStruct.bodyContent = "";
+                                    //    curStruct.subTagStruct = null;
+                                    //}
+                                    goto TagNext;
+                                }
+                            }
 
                             if ((curStruct.subTagStruct == null || curStruct.subTagStruct.Count == 0) && IsNullOrWhiteSpace(curStruct.bodyContent))
                             {

@@ -119,8 +119,8 @@ namespace Com.AimUI.TagParser
 
         internal static TagStruct CreateTagStruct(Match tagGroupAllMatch)
         {
-            string _nameSpace = tagGroupAllMatch.Groups[1].Value;
-            string _tagName = tagGroupAllMatch.Groups[2].Value;
+            string _nameSpace = tagGroupAllMatch.Groups[1].Value.ToLower();
+            string _tagName = tagGroupAllMatch.Groups[2].Value.ToLower();
             string _tagInstanceName = tagGroupAllMatch.Groups[3].Value.Trim();//.ToLower();
             if (_tagInstanceName.StartsWith("#")) _tagInstanceName = _tagInstanceName.Substring(1);
             string tagParamStr = tagGroupAllMatch.Groups[4].Value;  //标签属性

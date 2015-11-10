@@ -25,7 +25,7 @@ namespace Com.AimUI.TagCore.Tags
 
         private int pos = 0;
 
-        private object[] list;
+        private IList<object> list;
 
         private object item;
 
@@ -71,9 +71,9 @@ namespace Com.AimUI.TagCore.Tags
                     if (list == null) return;
                     if (end == -1)
                     {
-                        end = list.Length - 1;
+                        end = list.Count - 1;
                     }
-                    else if (end >= list.Length) end = list.Length - 1;
+                    else if (end >= list.Count) end = list.Count - 1;
                 }
             }
         }
@@ -138,21 +138,16 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     if (value != list)
                     {
-                        ICollection<object> _list = value as ICollection<object>;
-
-                        if (_list != null)
+                        list = value as IList<object>;
+                        if (list == null)
                         {
-                            list = new object[_list.Count];
-                            int i = 0;
-                            foreach (object obj in _list)
+                            ICollection<object> coll = value as ICollection<object>;
+                            if (coll != null)
                             {
-                                list[i] = obj;
-                                i++;
+                                object[] objs = new object[coll.Count];
+                                coll.CopyTo(objs, 0);
+                                list = objs;
                             }
-                        }
-                        else
-                        {
-                            list = null;
                         }
                         isChange = true;
                     }
@@ -196,7 +191,7 @@ namespace Com.AimUI.TagCore.Tags
             else if (paramName == "count")
             {
                 if (strs != null) return strs.Length;
-                if (list != null) return list.Length;
+                if (list != null) return list.Count;
                 return 0;
             }
             else if (paramName == "item")
@@ -242,7 +237,7 @@ namespace Com.AimUI.TagCore.Tags
         }
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "i" || paramName == "item" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
+            if (paramName == "i" || paramName == "item" || paramName == "count" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
             return false;
         }
 
