@@ -33,8 +33,24 @@ namespace Com.AimUI.TagCore
             }
         }
 
+        private string _scope;
         //域名称  标签所在实例名称  或 标签名称
-        public virtual string scope { get; set; }
+        public virtual string scope 
+        {
+            get
+            {
+                return _scope;
+            }
+            set
+            {
+                char c = value[0];
+                if (c > 47 && c < 58)
+                {
+                    _scope = "_" + value;
+                }
+                else _scope = value;
+            }
+        }
         //在内容中的位置
         public int index { get; set; }
         //在内容中的长度

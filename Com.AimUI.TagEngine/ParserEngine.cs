@@ -1787,7 +1787,7 @@ namespace Com.AimUI.TagEngine
                                     }
                                     else
                                     {
-                                        local_str += (local_str.Length > 0 ? "+" : "") + "Convert.ToString(" + args_v + ")";
+                                        local_str += (local_str.Length > 0 ? "+" : "") + "System.Convert.ToString(" + args_v + ")";
                                     }
                                 }
                                 else

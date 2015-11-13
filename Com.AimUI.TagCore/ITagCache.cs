@@ -12,7 +12,7 @@ namespace Com.AimUI.TagCore
             get
             {
                 ITag<T> ret;
-                if (this.TryGetValue(Key, out ret)) //查找标签缓存
+                if (base.TryGetValue(Key, out ret)) //查找标签缓存
                 {
                     return ret;
                 }
@@ -24,13 +24,13 @@ namespace Com.AimUI.TagCore
             set
             {
                 ITag<T> ret;
-                if (this.TryGetValue(Key, out ret))
+                if (base.TryGetValue(Key, out ret))
                 {
-                    this[Key] = value;
+                    base[Key] = value;
                 }
                 else
                 {
-                    this.Add(Key, value);
+                    base.Add(Key, value);
                 }
             }
 
