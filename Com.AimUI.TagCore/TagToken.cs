@@ -43,12 +43,15 @@ namespace Com.AimUI.TagCore
             }
             set
             {
-                char c = value[0];
-                if (c > 47 && c < 58)
+                if (string.IsNullOrEmpty(value)==false)
                 {
-                    _scope = "_" + value;
+                    char c = value[0];
+                    if (c > 47 && c < 58)
+                    {
+                        _scope = "_" + value;
+                    }
+                    else _scope = value;
                 }
-                else _scope = value;
             }
         }
         //在内容中的位置

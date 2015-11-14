@@ -19,8 +19,6 @@ namespace Com.AimUI.TagCore.Tags
 
         private bool isChange = false;
 
-        private string[] strs;
-
         public int step = 1;
 
         private int pos = 0;
@@ -44,7 +42,6 @@ namespace Com.AimUI.TagCore.Tags
             start = 0;
             end = -1;
             split = ",";
-            strs = null;
         }
         public void OnInit()
         {
@@ -56,25 +53,16 @@ namespace Com.AimUI.TagCore.Tags
             if (isChange)
             {
                 isChange = false;
-                if (string.IsNullOrEmpty(str) == false)
+                if (str != null)
                 {
-                    strs = str.Split(new string[] { split }, StringSplitOptions.RemoveEmptyEntries);
-                    if (end == -1)
-                    {
-                        end = strs.Length - 1;
-                    }
-                    else if (end >= strs.Length) end = strs.Length - 1;
+                    list = str.Split(new string[] { split }, StringSplitOptions.RemoveEmptyEntries);
                 }
-                else
+                if (list == null) return;
+                if (end == -1)
                 {
-                    strs = null;
-                    if (list == null) return;
-                    if (end == -1)
-                    {
-                        end = list.Count - 1;
-                    }
-                    else if (end >= list.Count) end = list.Count - 1;
+                    end = list.Count - 1;
                 }
+                else if (end >= list.Count) end = list.Count - 1;
             }
         }
 
@@ -132,10 +120,10 @@ namespace Com.AimUI.TagCore.Tags
                         isChange = true;
                     }
                     list = null;
-                    item = null;
                 }
                 else
                 {
+                    str = null;
                     if (value != list)
                     {
                         list = value as IList<object>;
@@ -151,8 +139,6 @@ namespace Com.AimUI.TagCore.Tags
                         }
                         isChange = true;
                     }
-                    str = null;
-                    strs = null;
                 }
             }
             else if (paramName == "split")
@@ -190,7 +176,6 @@ namespace Com.AimUI.TagCore.Tags
             }
             else if (paramName == "count")
             {
-                if (strs != null) return strs.Length;
                 if (list != null) return list.Count;
                 return 0;
             }
@@ -211,12 +196,11 @@ namespace Com.AimUI.TagCore.Tags
                         return item;
                     }
                 }
-
-                if (strs != null && i < strs.Length)
-                {
-                    return strs[i];
-                }
                 return "";
+            }
+            else if (paramName == "list")
+            {
+                return list;
             }
             else if (paramName == "split")
             {
@@ -237,7 +221,7 @@ namespace Com.AimUI.TagCore.Tags
         }
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "i" || paramName == "item" || paramName == "count" || paramName == "pos" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
+            if (paramName == "i" || paramName == "item" || paramName == "count" || paramName == "pos" || paramName == "list" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
             return false;
         }
 

@@ -135,9 +135,14 @@ namespace Com.AimUI.TagParser
             tagStruct.tagParams = tagParams;
             tagStruct.bodyContent = tagContentStr;
             tagStruct.allContent = tagGroupAllMatch.Value;
+            string subTagName = null;
+            try
+            {
+                ITag<T> tagObj = TagLib<T>.GetTagInstance(_nameSpace, _tagName, false);
+                subTagName = tagObj.subTagNames;
+            }
+            catch { }
 
-            ITag<T> tagObj = TagLib<T>.GetTagInstance(_nameSpace, _tagName);
-            string subTagName = tagObj.subTagNames;
             if (string.IsNullOrEmpty(subTagName) == false)
             {
                 tagStruct.subTagStruct = GetSubTagStructs(tagContentStr, subTagName, _tagInstanceName);

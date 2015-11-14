@@ -94,6 +94,8 @@ namespace Com.AimUI.TagCore.Tags
             {
                 case "item":
                     return item;
+                case "list":
+                    return list;
                 case "i":
                     return i;
                 case "pos":

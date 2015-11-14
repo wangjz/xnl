@@ -51,7 +51,7 @@ namespace Com.AimUI.TagCore
             return (ITag<T>)Activator.CreateInstance(tagType);
         }
 
-        public ITag<T> GetTagInstance(string tagName)
+        public ITag<T> GetTagInstance(string tagName, bool isCreateNew = true)
         {
             ITag<T> obj;
             if (isCache)
@@ -66,18 +66,18 @@ namespace Com.AimUI.TagCore
                         if (obj != null)
                         {
                             tagCache[_n] = obj;
-                            return obj.Create();
+                            return isCreateNew ? obj.Create() : obj;
                         }
                     }
                     obj = GetTagInstanceFromAssembly(nameSpace, tagName);
                     if (obj != null)
                     {
                         tagCache[_n] = obj;
-                        return obj.Create();
+                        return isCreateNew ? obj.Create() : obj;
                     }
                     return null;
                 }
-                else return obj.Create();
+                else return isCreateNew ? obj.Create() : obj;
             }
             else
             {
@@ -165,8 +165,8 @@ namespace Com.AimUI.TagCore
             tagCache.Add("at:for", new For<T>());
             tagCache.Add("at:exp", new Exp<T>());
             tagCache.Add("at:inc", new Inc<T>());
-            tagCache.Add("at:pre", new Pre<T>());
             tagCache.Add("at:each", new Each<T>());
+            tagCache.Add("at:pre", new Pre<T>());
             if (tagLibs != null)
             {
                 foreach (TagLib<T> lib in tagLibs)
@@ -187,14 +187,14 @@ namespace Com.AimUI.TagCore
             return tagLib;
         }
 
-        public static ITag<T> GetTagInstance(string nameSpace, string tagName)
+        public static ITag<T> GetTagInstance(string nameSpace, string tagName, bool isCreateNew = true)
         {
             ITag<T> obj = tagCache[nameSpace + ":" + tagName];
             if (obj == null)
             {
                 TagLib<T> tagLib = TagLib<T>.GetTagLib(nameSpace);
                 if (tagLib == null) throw new TagParseException("未找到标签库:" + nameSpace);
-                obj = tagLib.GetTagInstance(tagName);
+                obj = tagLib.GetTagInstance(tagName, isCreateNew);
                 if (obj == null) throw new TagParseException("未找到标签" + nameSpace + ":" + tagName + "的实现");
                 return obj;
             }
