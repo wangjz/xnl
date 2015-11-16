@@ -23,7 +23,7 @@ namespace Com.AimUI.TagCore.Tags
 
         private int pos = 0;
 
-        private IList<object> list;
+        private IList list;
 
         private object item;
 
@@ -126,10 +126,10 @@ namespace Com.AimUI.TagCore.Tags
                     str = null;
                     if (value != list)
                     {
-                        list = value as IList<object>;
+                        list = value as IList;
                         if (list == null)
                         {
-                            ICollection<object> coll = value as ICollection<object>;
+                            ICollection coll = value as ICollection;
                             if (coll != null)
                             {
                                 object[] objs = new object[coll.Count];
