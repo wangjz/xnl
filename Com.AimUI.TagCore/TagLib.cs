@@ -48,7 +48,7 @@ namespace Com.AimUI.TagCore
             {
                 return null;
             }
-            return (ITag<T>)Activator.CreateInstance(tagType);
+            return Activator.CreateInstance(tagType) as ITag<T>;
         }
 
         public ITag<T> GetTagInstance(string tagName, bool isCreateNew = true)
