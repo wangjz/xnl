@@ -7,7 +7,7 @@ namespace Com.AimUI.TagCore.Tags
 {
     public class Set<T> : ITag<T> where T : TagContext
     {
-        protected Dictionary<string, object> attrs;
+        protected IDictionary<string, object> attrs;
         protected string body;
         protected StringBuilder buffer;
         protected OnTagDelegate _tagDelegate;
@@ -66,55 +66,59 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual void SetAttribute(string paramName, object value)
         {
-            if (paramName == "body" || paramName == "call" || paramName == "attrs")
+            switch (paramName)
             {
-                return;
-            }
-            else if (paramName.StartsWith("arg"))
-            {
-                if (paramName == "args" && value is Array)
-                {
-                    args = value as object[];
-                }
-                else if (args != null)
-                {
-                    int i = -1;
-                    if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < args.Length)
+                case "body":
+                    body = value as string;
+                    return;
+                case "call":
+                    return;
+                case "attrs":
+                    attrs = value as IDictionary<string, object>;
+                    return;
+                default:
+                    if (paramName.StartsWith("arg"))
                     {
-                        args[i] = value;
-                        return;
+                        if (paramName == "args" && value is Array)
+                        {
+                            args = value as object[];
+                        }
+                        else if (args != null)
+                        {
+                            int i = -1;
+                            if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < args.Length)
+                            {
+                                args[i] = value;
+                                return;
+                            }
+                        }
                     }
-                }
+                    attrs[paramName] = value;
+                    return;
             }
-            attrs[paramName] = value;
         }
 
         public virtual object GetAttribute(string paramName, object[] userData = null)
         {
-            if (paramName == "body")
+            switch (paramName)
             {
-                return GetBody();
+                case "body":
+                    return GetBody();
+                case "call":
+                    args = userData;
+                    body = null;
+                    return GetBody();
+                case "set":
+                    if (userData != null && userData.Length == 2)
+                    {
+                        string key = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(key) == false) attrs[key.ToLower()] = userData[1];
+                    }
+                    return null;
+                case "attrs":
+                    return attrs;
             }
-            else if (paramName == "call")
-            {
-                args = userData;
-                body = null;
-                return GetBody();
-            }
-            else if (paramName == "set")
-            {
-                if (userData != null && userData.Length == 2)
-                {
-                    string key = Convert.ToString(userData[0]);
-                    if (string.IsNullOrEmpty(key) == false) attrs[key.ToLower()] = userData[1];
-                }
-                return null;
-            }
-            else if (paramName == "attrs")
-            {
-                return attrs;
-            }
-            else if (paramName.StartsWith("arg"))
+            if (paramName.StartsWith("arg"))
             {
                 int i = -1;
                 if (paramName == "args")

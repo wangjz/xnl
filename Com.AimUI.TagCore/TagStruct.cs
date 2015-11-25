@@ -25,7 +25,7 @@ namespace Com.AimUI.TagCore
         {
             get
             {
-                return _instanceName;
+                return _instanceName ?? "";
             }
             set
             {

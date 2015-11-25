@@ -194,9 +194,15 @@ namespace Com.AimUI.TagEngine
                             {
                                 if (IsNullOrWhiteSpace(instanceName))
                                 {
-                                    instanceName = "t__" + tagId;
-                                    curStruct.instanceName = "";// instanceName;
-                                    tagId += 1;
+                                    if (isNestedInc == false)
+                                    {
+                                        instanceName = "t__" + tagId;
+                                        tagId += 1;
+                                    }
+                                    else
+                                    {
+                                        instanceName = "t__" + (tagId - 1);
+                                    }
                                 }
                                 else
                                 {
@@ -209,7 +215,6 @@ namespace Com.AimUI.TagEngine
                                     nameTags[fullInsName] = tagObj;
                                     nameTags[instanceName] = tagObj;
                                 }
-                                //tagId += 1;
                                 tagObj.tagContext = tagContext;
                                 tagObj.instanceName = instanceName;
                                 if (isDynamic)
@@ -356,18 +361,12 @@ namespace Com.AimUI.TagEngine
                                     {
                                         incSrc = strBuilder.ToString(index, len);
                                         strBuilder.Remove(index, len);
-
+                                        string incBody = incSrc.Replace("\"", "\"\"");
                                         strBuilder.Append("\nbuffer.Append(@\"");
-                                        strBuilder.Append(incSrc.Replace("\"", "\"\""));
+                                        strBuilder.Append(incBody);
                                         strBuilder.AppendLine("\");");
-                                        // curStruct.bodyContent = incSrc;
-                                        //curStruct.subTagStruct = null;
+                                        strBuilder.AppendLine(instanceName + ".SetAttribute(\"#body\",@\"" + incBody + "\");");
                                     }
-                                    //else if (IsNullOrWhiteSpace(curStruct.bodyContent) == false)
-                                    //{
-                                    //    curStruct.bodyContent = "";
-                                    //    curStruct.subTagStruct = null;
-                                    //}
                                     goto TagNext;
                                 }
                             }

@@ -71,7 +71,6 @@ namespace Com.AimUI.TagCore.Tags
 
         }
 
-        //子标签解析
         public void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (step == 0) return;
@@ -101,114 +100,99 @@ namespace Com.AimUI.TagCore.Tags
 
         public void SetAttribute(string paramName, object value)
         {
-            if (paramName == "start")
+            switch (paramName)
             {
-                start = Convert.ToInt32(value);
-            }
-            else if (paramName == "end")
-            {
-                end = Convert.ToInt32(value);
-            }
-            else if (paramName == "list")
-            {
-                if (value is string)
-                {
-                    string v = Convert.ToString(value);
-                    if (v != str)
+                case "start":
+                    start = Convert.ToInt32(value);
+                    return;
+                case "end":
+                    end = Convert.ToInt32(value);
+                    return;
+                case "list":
+                    if (value is string)
                     {
-                        str = v;
-                        isChange = true;
-                    }
-                    list = null;
-                }
-                else
-                {
-                    str = null;
-                    if (value != list)
-                    {
-                        list = value as IList;
-                        if (list == null)
+                        string v = Convert.ToString(value);
+                        if (v != str)
                         {
-                            ICollection coll = value as ICollection;
-                            if (coll != null)
-                            {
-                                object[] objs = new object[coll.Count];
-                                coll.CopyTo(objs, 0);
-                                list = objs;
-                            }
+                            str = v;
+                            isChange = true;
                         }
+                        list = null;
+                    }
+                    else
+                    {
+                        str = null;
+                        if (value != list)
+                        {
+                            list = value as IList;
+                            if (list == null)
+                            {
+                                ICollection coll = value as ICollection;
+                                if (coll != null)
+                                {
+                                    object[] objs = new object[coll.Count];
+                                    coll.CopyTo(objs, 0);
+                                    list = objs;
+                                }
+                            }
+                            isChange = true;
+                        }
+                    }
+                    return;
+                case "split":
+                    string v2 = Convert.ToString(value);
+                    if (v2 != split)
+                    {
+                        split = v2;
                         isChange = true;
                     }
-                }
-            }
-            else if (paramName == "split")
-            {
-                string v = Convert.ToString(value);
-                if (v != split)
-                {
-                    split = v;
-                    isChange = true;
-                }
-            }
-            else if (paramName == "step")
-            {
-                step = Convert.ToInt32(value);
+                    return;
+                case "step":
+                    step = Convert.ToInt32(value);
+                    return;
             }
         }
 
         public object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
         {
-            if (paramName == "i")
+            switch (paramName)
             {
-                return i;
+                case "i":
+                    return i;
+                case "item":
+                    if (userData == null) return item;
+                    break;
+                case "pos":
+                    return pos;
+                case "start":
+                    return start;
+                case "end":
+                    return end;
+                case "count":
+                    if (list != null) return list.Count;
+                    return 0;
+                case "list":
+                    return list;
+                case "split":
+                    return split;
+                case "step":
+                    return step;
             }
-            else if (paramName == "pos")
+            if (item != null)
             {
-                return pos;
-            }
-            else if (paramName == "start")
-            {
-                return start;
-            }
-            else if (paramName == "end")
-            {
-                return end;
-            }
-            else if (paramName == "count")
-            {
-                if (list != null) return list.Count;
-                return 0;
-            }
-            else if (paramName == "item")
-            {
-                if (item != null)
+                if (paramName == "item" && (userData == null || userData.Length == 0)) return null;
+                try
                 {
-                    if (userData != null && userData.Length > 0)
-                    {
-                        string prop = Convert.ToString(userData[0]);
-                        if (string.IsNullOrEmpty(prop)) return null;
-                        IDictionary<string, object> colls = item as IDictionary<string, object>;
-                        if (colls != null) return colls[prop];
-                        return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(item, null);
-                    }
-                    else
-                    {
-                        return item;
-                    }
+                    string prop = (paramName == "item" ? Convert.ToString(userData[0]) : paramName);
+                    if (string.IsNullOrEmpty(prop)) return null;
+                    IDictionary<string, object> colls = item as IDictionary<string, object>;
+                    if (colls != null) return colls[prop];
+                    return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(item, null);
                 }
-                return "";
-            }
-            else if (paramName == "list")
-            {
-                return list;
-            }
-            else if (paramName == "split")
-            {
-                return split;
-            }
-            else if (paramName == "step")
-            {
-                return step;
+                catch (Exception)
+                {
+                    return null;
+                }
             }
             return null;
         }
@@ -221,8 +205,7 @@ namespace Com.AimUI.TagCore.Tags
         }
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "i" || paramName == "item" || paramName == "count" || paramName == "pos" || paramName == "list" || paramName == "start" || paramName == "end" || paramName == "split" || paramName == "step") return true;
-            return false;
+            return true;
         }
 
         public string subTagNames

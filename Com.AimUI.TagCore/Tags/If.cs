@@ -94,62 +94,56 @@ namespace Com.AimUI.TagCore.Tags
         public void SetAttribute(string paramName, object value)
         {
             isChange = true;
-            if ("a" == paramName)
+            switch (paramName)
             {
-                a = (value ?? "");
-            }
-            else if ("b" == paramName)
-            {
-                b = (value ?? "");
-            }
-            else if ("test" == paramName)
-            {
-                if (value != null) test = value.ToString();
-            }
-            else if ("break" == paramName)
-            {
-                if (value != null)
-                {
-                    if (value is bool)
+                case "a":
+                    a = (value ?? "");
+                    return;
+                case "b":
+                    b = (value ?? "");
+                    return;
+                case "test":
+                    if (value != null) test = value.ToString();
+                    return;
+                case "break":
+                    if (value != null)
                     {
-                        bool _v = Convert.ToBoolean(value);
-                        _break = (byte)(_v ? 1 : 0);
-                    }
-                    else
-                    {
-                        bool _v = false;
-                        string s_v = Convert.ToString(value);
-                        if ("1" == s_v)
+                        if (value is bool)
                         {
-                            _v = true;
+                            bool _v = Convert.ToBoolean(value);
+                            _break = (byte)(_v ? 1 : 0);
                         }
-                        else if (string.IsNullOrEmpty(s_v) == false)
+                        else
                         {
-                            bool.TryParse(s_v, out _v);
+                            bool _v = false;
+                            string s_v = Convert.ToString(value);
+                            if ("1" == s_v)
+                            {
+                                _v = true;
+                            }
+                            else if (string.IsNullOrEmpty(s_v) == false)
+                            {
+                                bool.TryParse(s_v, out _v);
+                            }
+                            _break = (byte)(_v ? 1 : 0);
                         }
-                        _break = (byte)(_v ? 1 : 0);
                     }
-                }
+                    return;
             }
         }
 
         public object GetAttribute(string paramName, object[] userData = null)
         {
-            if ("a" == paramName)
+            switch (paramName)
             {
-                return a;
-            }
-            else if ("b" == paramName)
-            {
-                return b;
-            }
-            else if ("test" == paramName)
-            {
-                return test;
-            }
-            else if ("value" == paramName)
-            {
-                return value;
+                case "a":
+                    return a;
+                case "b":
+                    return b;
+                case "test":
+                    return test;
+                case "value":
+                    return value;
             }
             return null;
         }

@@ -34,5 +34,15 @@ namespace Com.AimUI.TagCore.Tags
                 }
             }
         }
+
+        public override object GetAttribute(string paramName, object[] userData = null)
+        {
+            if (paramName == "body")
+            {
+                object bodyObj;
+                if (attrs.TryGetValue("#body", out bodyObj)) return bodyObj;
+            }
+            return base.GetAttribute(paramName, userData);
+        }
     }
 }

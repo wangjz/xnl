@@ -65,21 +65,35 @@ namespace Com.AimUI.TagCore.Tags
             {
                 case "list":
                     list = value as IEnumerable<object>;
-                    break;
+                    return;
                 case "step":
                     step = Convert.ToInt32(value);
-                    break;
+                    return;
             }
         }
 
         public object GetAttribute(string paramName, object[] userData = null)
         {
-            if (item != null && userData != null && paramName == "item")
+            switch (paramName)
             {
-                if (item == null) return null;
+                case "item":
+                    if (userData == null) return item;
+                    break;
+                case "list":
+                    return list;
+                case "i":
+                    return i;
+                case "pos":
+                    return pos;
+                case "step":
+                    return step;           
+            }
+            if (item != null)
+            {
+                if (paramName == "item" && (userData == null)) return null;
                 try
                 {
-                    string prop = Convert.ToString(userData[0]);
+                    string prop = (paramName == "item" ? Convert.ToString(userData[0]) : paramName);
                     if (string.IsNullOrEmpty(prop)) return null;
                     IDictionary<string, object> colls = item as IDictionary<string, object>;
                     if (colls != null) return colls[prop];
@@ -90,26 +104,12 @@ namespace Com.AimUI.TagCore.Tags
                     return null;
                 }
             }
-            switch (paramName)
-            {
-                case "item":
-                    return item;
-                case "list":
-                    return list;
-                case "i":
-                    return i;
-                case "pos":
-                    return pos;
-                case "step":
-                    return step;
-            }
             return null;
         }
 
         public bool ExistAttribute(string paramName)
         {
-            if (paramName == "i" || paramName == "item" || paramName == "pos" || paramName == "step") return true;
-            return false;
+            return true;
         }
 
         public ITag<T> Create()
