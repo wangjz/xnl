@@ -186,7 +186,18 @@ namespace Com.AimUI.TagCore.Tags
                     string prop = (paramName == "item" ? Convert.ToString(userData[0]) : paramName);
                     if (string.IsNullOrEmpty(prop)) return null;
                     IDictionary<string, object> colls = item as IDictionary<string, object>;
-                    if (colls != null) return colls[prop];
+                    if (colls != null)
+                    {
+                        object outObj;
+                        if (colls.TryGetValue(prop, out outObj)) return outObj;
+                        foreach (string key in colls.Keys)
+                        {
+                            if (string.Compare(key, prop, true) == 0)
+                            {
+                                return colls[key];
+                            }
+                        }
+                    }
                     return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(item, null);
                 }
                 catch (Exception)

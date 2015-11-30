@@ -93,7 +93,18 @@ namespace Com.AimUI.TagCore.Tags
                                 {
                                     if (string.IsNullOrEmpty(_name)) return null;
                                     IDictionary<string, object> colls = obj as IDictionary<string, object>;
-                                    if (colls != null) return colls[_name];
+                                    if (colls != null)
+                                    {
+                                        object outObj;
+                                        if (colls.TryGetValue(_name, out outObj)) return outObj;
+                                        foreach (string key in colls.Keys)
+                                        {
+                                            if (string.Compare(key, _name, true) == 0)
+                                            {
+                                                return colls[key];
+                                            }
+                                        }
+                                    }
                                 }
                                 return obj.GetType().GetProperty(_name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
                             }
