@@ -21,7 +21,7 @@ namespace Com.AimUI.TagParser
 
         internal static string RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}";
 
-        internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\(([^\(\)]*?)\)";
+        internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)";
 
         internal static string RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$";
 
@@ -47,7 +47,7 @@ namespace Com.AimUI.TagParser
                 {
                     ValuePreActionChars += valuePreActionChar;
                     RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}".Replace("[:;]", "[" + ValuePreActionChars + "]");
-                    RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\(([^\(\)]*?)\)".Replace("[:;]", "[" + ValuePreActionChars + "]");
+                    RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)".Replace("[:;]", "[" + ValuePreActionChars + "]");
                     RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$".Replace("[:;]", "[" + ValuePreActionChars + "]");
                 }
             }

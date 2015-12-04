@@ -190,11 +190,11 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         object outObj;
                         if (colls.TryGetValue(prop, out outObj)) return outObj;
-                        foreach (string key in colls.Keys)
+                        foreach (KeyValuePair<string, object> kv in colls)
                         {
-                            if (string.Compare(key, prop, true) == 0)
+                            if (string.Compare(kv.Key, prop, true) == 0)
                             {
-                                return colls[key];
+                                return kv.Value;
                             }
                         }
                     }

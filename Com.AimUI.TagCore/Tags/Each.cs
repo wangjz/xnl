@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -6,11 +7,12 @@ namespace Com.AimUI.TagCore.Tags
 {
     public class Each<T> : ITag<T> where T : TagContext
     {
-        public IEnumerable<object> list;
+        public IEnumerable list;
         public object item;
         public int step;
         public int pos;
         public int i;
+        public int count;
         public string subTagNames
         {
             get { return null; }
@@ -52,6 +54,7 @@ namespace Com.AimUI.TagCore.Tags
                     i++;
                     pos++;
                 }
+                count = pos;
             }
         }
 
@@ -64,7 +67,25 @@ namespace Com.AimUI.TagCore.Tags
             switch (paramName)
             {
                 case "list":
-                    list = value as IEnumerable<object>;
+                    IList _list = value as IList;
+                    if (_list == null)
+                    {
+                        ICollection coll = value as ICollection;
+                        if (coll == null)
+                        {
+                            this.list = value as IEnumerable;
+                        }
+                        else
+                        {
+                            count = coll.Count;
+                            this.list = coll;
+                        }
+                    }
+                    else
+                    {
+                        count = _list.Count;
+                        this.list = _list;
+                    }
                     return;
                 case "step":
                     step = Convert.ToInt32(value);
@@ -86,7 +107,16 @@ namespace Com.AimUI.TagCore.Tags
                 case "pos":
                     return pos;
                 case "step":
-                    return step;           
+                    return step;  
+                case "count":
+                    if (count == 0 && list != null)
+                    {
+                        foreach (object o in list)
+                        {
+                            count++;
+                        }
+                    }
+                    return count;
             }
             if (item != null)
             {
@@ -100,11 +130,11 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         object outObj;
                         if (colls.TryGetValue(prop, out outObj)) return outObj;
-                        foreach (string key in colls.Keys)
+                        foreach (KeyValuePair<string, object> kv in colls)
                         {
-                            if (string.Compare(key, prop, true) == 0)
+                            if (string.Compare(kv.Key, prop, true) == 0)
                             {
-                                return colls[key];
+                                return kv.Value;
                             }
                         }
                     }

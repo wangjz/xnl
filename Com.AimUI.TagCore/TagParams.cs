@@ -1,9 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Com.AimUI.TagCore
 {
     public class TagParams : Dictionary<string, string>
     {
+        public TagParams()
+            : base(StringComparer.OrdinalIgnoreCase)
+        {
+
+        }
         public new string this[string key]
         {
             get

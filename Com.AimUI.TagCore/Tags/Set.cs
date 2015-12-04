@@ -24,7 +24,7 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual void OnInit()
         {
-            attrs = new Dictionary<string, object>();
+            attrs = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             buffer = tagContext.GetTagResponse().buffer;
         }
 
@@ -150,7 +150,20 @@ namespace Com.AimUI.TagCore.Tags
                     string prop = Convert.ToString(userData[0]);
                     if (string.IsNullOrEmpty(prop)) return null;
                     IDictionary<string, object> colls = obj as IDictionary<string, object>;
-                    if (colls != null) return colls[prop];
+                    if (colls != null)
+                    {
+                        if (colls.TryGetValue(prop, out obj))
+                        {
+                            return obj;
+                        }
+                        foreach (KeyValuePair<string, object> kv in colls)
+                        {
+                            if (string.Compare(kv.Key, prop, true) == 0)
+                            {
+                                return kv.Value;
+                            }
+                        }
+                    }
                     return obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
                 }
                 catch (Exception)
