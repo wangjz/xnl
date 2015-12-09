@@ -66,6 +66,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TagParams.cs" />
     <Compile Include="TagStruct.cs" />
+    <Compile Include="Tags\TagBase.cs" />
     <Compile Include="TagToken.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
