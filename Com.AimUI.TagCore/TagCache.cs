@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Com.AimUI.TagCore
 {
-    public class ITagCache<T> : Dictionary<string, ITag<T>> where T : TagContext
+    public class TagCache<T> : Dictionary<string, ITag<T>> where T : TagContext
     {
-        public ITagCache()
+        public TagCache()
+            : base(StringComparer.OrdinalIgnoreCase)
         {
         }
         public new ITag<T> this[string Key]

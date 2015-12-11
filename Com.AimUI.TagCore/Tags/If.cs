@@ -129,6 +129,7 @@ namespace Com.AimUI.TagCore.Tags
                         }
                     }
                     return;
+                    
             }
         }
 
@@ -141,9 +142,36 @@ namespace Com.AimUI.TagCore.Tags
                 case "b":
                     return b;
                 case "test":
-                    return test;
+                    if (userData == null) return test;
+                    if (userData.Length > 2) test = userData[2].ToString();
+                    bool _b = LogicTest(userData[0], userData.Length > 1 ? userData[1] : null, test);
+                    if (userData.Length <= 3) return _b;
+                    if (_b)
+                    {
+                        return userData[3];
+                    }
+                    else
+                    {
+                        if (userData.Length > 4) return userData[4];
+                    }
+                    return null;
                 case "value":
                     return value;
+                case "iif":
+                    if (userData == null || userData.Length < 2) return null;
+                    if (userData[0] is bool)
+                    {
+                        _b = (bool)userData[0];
+                        if (_b)
+                        {
+                            return userData[1];
+                        }
+                        else
+                        {
+                            if (userData.Length > 2) return userData[2];
+                        }
+                    }
+                    return null;
             }
             return null;
         }

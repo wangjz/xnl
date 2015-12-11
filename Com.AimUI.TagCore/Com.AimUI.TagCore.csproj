@@ -54,10 +54,11 @@
     <Compile Include="Tags\For.cs" />
     <Compile Include="Tags\If.cs" />
     <Compile Include="Tags\IInclude.cs" />
+    <Compile Include="Tags\ListTag.cs" />
     <Compile Include="Tags\Pre.cs" />
     <Compile Include="Tags\Inc.cs" />
     <Compile Include="Tags\Set.cs" />
-    <Compile Include="ITagCache.cs" />
+    <Compile Include="TagCache.cs" />
     <Compile Include="TagExpression.cs" />
     <Compile Include="TagLib.cs" />
     <Compile Include="TagResponse.cs" />

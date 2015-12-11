@@ -112,7 +112,7 @@ namespace Com.AimUI.TagCore.Tags
                     if (userData != null && userData.Length == 2)
                     {
                         string key = Convert.ToString(userData[0]);
-                        if (string.IsNullOrEmpty(key) == false) attrs[key.ToLower()] = userData[1];
+                        if (string.IsNullOrEmpty(key) == false) attrs[key] = userData[1];
                     }
                     return null;
                 case "attrs":

@@ -138,7 +138,6 @@ namespace Com.AimUI.TagCore.Tags
                             return userData[0].ToString().ToLower();
                     }
                     break;
-
                 case 'i':
                     switch (paramName)
                     {
@@ -280,6 +279,20 @@ namespace Com.AimUI.TagCore.Tags
                             return null;
                     }
                     break;
+                case 't':
+                    switch (paramName)
+                    {
+                        case "true":
+                            return true;
+                    }
+                    return null;
+                case 'f':
+                    switch (paramName)
+                    {
+                        case "false":
+                            return false;
+                    }
+                    return null;
                 case 'e':
                     switch (paramName)
                     {

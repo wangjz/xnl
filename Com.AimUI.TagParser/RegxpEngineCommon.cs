@@ -9,17 +9,17 @@ namespace Com.AimUI.TagParser
         internal static string TagRegNames;
         internal const RegexOptions Tag_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);//|RegexOptions.Compiled
 
-        internal const string RegexStr_TagNotes = "<\\!--\\#.*?\\#-->";  //匹配 aim 标签注释
+        internal const string RegexStr_TagNotes = "<\\!--\\#.*?\\#-->[ \\t\\r]*\\n{0,1}";  //匹配 aim 标签注释
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
         internal static string RegexStr_TagGroupAll;
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>[ \t\r]*\n{0,1}";
 
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>[ \t\r]*\n{0,1}";
 
-        internal static string RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}";
+        internal static string RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}[ \t\r]*\n{0,1}";
 
         internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)";
 
@@ -46,7 +46,7 @@ namespace Com.AimUI.TagParser
                 if (ValuePreActionChars.IndexOf(valuePreActionChar) == -1)
                 {
                     ValuePreActionChars += valuePreActionChar;
-                    RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}".Replace("[:;]", "[" + ValuePreActionChars + "]");
+                    RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}[ \t\r]*\n{0,1}".Replace("[:;]", "[" + ValuePreActionChars + "]");
                     RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)".Replace("[:;]", "[" + ValuePreActionChars + "]");
                     RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$".Replace("[:;]", "[" + ValuePreActionChars + "]");
                 }
@@ -579,7 +579,7 @@ namespace Com.AimUI.TagParser
                                 }
                             }
                             //名称 参数
-                            if (nestedExp == null) nestedExp = new Dictionary<string, TagToken>();
+                            if (nestedExp == null) nestedExp = new Dictionary<string, TagToken>(StringComparer.OrdinalIgnoreCase);
 
                             string key = "~Exp~" + random.ToString();
                             random += 1;

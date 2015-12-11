@@ -18,7 +18,7 @@ namespace Com.AimUI.TagCore
 
         public bool isCache { get; private set; }
 
-        private static ITagCache<T> tagCache;
+        private static TagCache<T> tagCache;
 
         private TagConstructorDelegate<T> tagConstructor;
 
@@ -156,12 +156,13 @@ namespace Com.AimUI.TagCore
         }
 
 
-        public static void Initialize(List<TagLib<T>> tagLibs = null, IParser<T> parser = null)
+        public static void Initialize(IList<TagLib<T>> tagLibs = null, IParser<T> parser = null)
         {
             tagParser = parser;
-            if (tagCache == null) tagCache = new ITagCache<T>();
+            if (tagCache == null) tagCache = new TagCache<T>();
             tagCache.Add("at:if", new If<T>());
             tagCache.Add("at:set", new Set<T>());
+            tagCache.Add("at:list", new ListTag<T>());
             tagCache.Add("at:for", new For<T>());
             tagCache.Add("at:exp", new Exp<T>());
             tagCache.Add("at:inc", new Inc<T>());

@@ -56,9 +56,8 @@ namespace Com.AimUI.TagEngine
 
             try
             {
-                Dictionary<string, ITag<T>> tagsObj = null;
+                Dictionary<string, ITag<T>> tagsObj = null;//首次声明标签对象 && 匿名
                 Dictionary<string, ITag<T>> nameTags = null;  //命名标签对象
-
                 int tagId = 0;
                 int index = strBuilder.Length;
                 if (isNested)
@@ -79,9 +78,9 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
-                        tagsObj = new Dictionary<string, ITag<T>>();
+                        tagsObj = new Dictionary<string, ITag<T>>(StringComparer.OrdinalIgnoreCase);
 
-                        nameTags = new Dictionary<string, ITag<T>>();
+                        nameTags = new Dictionary<string, ITag<T>>(StringComparer.OrdinalIgnoreCase);
 
                         TagContext.SetItem(tagContext, "$__tags", tagsObj);
 
@@ -211,12 +210,17 @@ namespace Com.AimUI.TagEngine
                                     {
                                         throw new TagParseException("tag " + fullTagName + "#" + instanceName + ":命名冲突");
                                     }
+                                    tagObj.tagContext = tagContext;
+                                    tagObj.instanceName = instanceName;
+                                    tagObj = tagObj.Create();
                                     var fullInsName = fullTagName + "_" + instanceName;
                                     nameTags[fullInsName] = tagObj;
                                     nameTags[instanceName] = tagObj;
+                                    nameTags[fullTagName] = tagObj;
                                 }
                                 tagObj.tagContext = tagContext;
                                 tagObj.instanceName = instanceName;
+
                                 if (isDynamic)
                                 {
                                     strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + instanceName + "= null;\n");
@@ -249,7 +253,7 @@ namespace Com.AimUI.TagEngine
                                     if (isDynamic)
                                     {
                                         strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + instanceName + "=null;\n");
-                                        strBuilder.AppendLine("\n" + instanceName + " = " + tagObj.instanceName + ".Create();");
+                                        strBuilder.AppendLine("\n" + instanceName + " = (" + tagObj.instanceName + "!=null?" + tagObj.instanceName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\"));");
                                         strBuilder.AppendLine(instanceName + ".tagContext = tagContext;");
                                         strBuilder.AppendLine(instanceName + ".instanceName = \"" + instanceName + "\";");
                                         if ((newTagObj.events & TagEvents.Init) == TagEvents.Init) strBuilder.AppendLine(instanceName + ".OnInit();");
@@ -287,10 +291,33 @@ namespace Com.AimUI.TagEngine
                             }
                             else if (IsNullOrWhiteSpace(instanceName))
                             {
-                                instanceName = tagObj.instanceName;
+                                string oldInsName = tagObj.instanceName;
+                                instanceName = oldInsName;
+                                if (instanceName.StartsWith("t__") == false)
+                                {
+                                    //isTagNew = true;
+                                    instanceName = "t__" + tagId;
+                                    tagId += 1;
+                                    tagObj.instanceName = instanceName;
+                                    if (isDynamic)
+                                    {
+                                        strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + instanceName + "= null;\n");
+                                    }
+                                    else
+                                    {
+                                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
+                                    }
+                                }
                                 if (isDynamic)
                                 {
-                                    strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\");");
+                                    if (oldInsName != instanceName)
+                                    {
+                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = (" + oldInsName + "!=null?" + oldInsName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\"));");
+                                    }
+                                    else
+                                    {
+                                        strBuilder.AppendLine("if(" + instanceName + "==null)\n{\t" + instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + curStruct.nameSpace + "\",\"" + curStruct.tagName + "\");");
+                                    }
                                     strBuilder.AppendLine("\t" + instanceName + ".tagContext = tagContext;");
                                     strBuilder.AppendLine("\t" + instanceName + ".instanceName = \"" + instanceName + "\";");
                                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
@@ -915,36 +942,56 @@ namespace Com.AimUI.TagEngine
         static bool InitExpressTagObj(string nameSpace, string tagName, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, out ITag<T> tagObj)
         {
             bool isNew = GetTagInstance(nameSpace, tagName, tagsObj, out tagObj);
-
+            string expVarName = "t__" + nameSpace + "_" + tagName;
             if (isNew)
             {
                 tagObj.tagContext = tagContext;
-                tagObj.instanceName = "exp_" + nameSpace + "_" + tagName;
+                tagObj.instanceName = expVarName;
                 if (isDynamic)
                 {
-                    strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + tagObj.instanceName + "= null;\n");
-                    strBuilder.AppendLine(tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
-                    strBuilder.AppendLine(tagObj.instanceName + ".tagContext = tagContext;");
-                    strBuilder.AppendLine(tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";");
-                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init) strBuilder.AppendLine(tagObj.instanceName + ".OnInit();");
+                    strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + expVarName + "= null;\n");
+                    strBuilder.AppendLine(expVarName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
+                    strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
+                    strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
+                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init) strBuilder.AppendLine(expVarName + ".OnInit();");
                 }
                 else
                 {
                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
                 }
             }
-            else if (isDynamic)
+            else
             {
-                strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
-                strBuilder.AppendLine(tagObj.instanceName + ".tagContext = tagContext;");
-                strBuilder.AppendLine(tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";");
-                if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                string instanceName = tagObj.instanceName;
+                if (instanceName.StartsWith("t__") == false)
                 {
-                    strBuilder.AppendLine(tagObj.instanceName + ".OnInit();\n}");
-                }
-                else
-                {
-                    strBuilder.AppendLine("}");
+                    tagObj.instanceName = expVarName;
+                    if (isDynamic)
+                    {
+                        strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + expVarName + "= null;\n");
+                        if (instanceName != expVarName)
+                        {
+                            strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + expVarName + " = (" + instanceName + "!=null?" + instanceName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
+                        }
+                        else
+                        {
+                            strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + expVarName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
+                        }
+                        strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
+                        strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
+                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                        {
+                            strBuilder.AppendLine(expVarName + ".OnInit();\n}");
+                        }
+                        else
+                        {
+                            strBuilder.AppendLine("}");
+                        }
+                    }
+                    else
+                    {
+                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
+                    }
                 }
             }
             return isNew;
@@ -1237,7 +1284,7 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
-                        tagObj.SetAttribute(k_result.ToString(), v_result ?? "");
+                        if (k_result != null) tagObj.SetAttribute(k_result.ToString(), v_result ?? "");
                     }
                     continue;
                 }
@@ -1333,6 +1380,21 @@ namespace Com.AimUI.TagEngine
             }
             return _count;
         }
+
+        static ITag<T> FindTag(Dictionary<string, ITag<T>> tags,string tagOrInstanceName,string fullTagName=null)
+        {
+            if (tags == null) return null;
+            ITag<T> tag;
+            if (IsNullOrWhiteSpace(fullTagName) == false)
+            {
+                if (tags.TryGetValue(fullTagName + "_" + tagOrInstanceName, out tag)) return tag;
+            }
+            else
+            {
+                if (tags.TryGetValue(tagOrInstanceName, out tag)) return tag;
+            }
+            return null;
+        }
         /// <summary>
         /// 处理标 不明 属性访问
         /// </summary>
@@ -1354,150 +1416,74 @@ namespace Com.AimUI.TagEngine
             }
             bool isGetSelf = (token.name == "this");
             Dictionary<string, ITag<T>> nameTags = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__nameTags");
-            int scopeInx = token.scope.IndexOf(':');
-            string ns = null;
             string name = token.scope;
-
-            string t_ns = null;
-            string t_name = null;
+            int scopeInx = name.IndexOf(':');
+            ITag<T> tag;
             if (scopeInx != -1)
             {
-                ns = token.scope.Substring(0, scopeInx);
                 name = token.scope.Substring(scopeInx + 1);
-            }
-            string args_str = null;
-            if (isDynamic && args != null && args.Length > 0)
-            {
-                int _count = args.Length;
-                args_str = "new object[] { ";
-                for (var i = 0; i < _count; i++)
+                tag = FindTag(nameTags, name, token.scope);
+                if (tag == null)
                 {
-                    string str = args[i].ToString();
-                    args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
+                    tag = FindTag(tagsObj, name);
                 }
-                args_str += "}";
             }
-            /*
-            ITag<T> tagObj;
-            isOk = nameTags.TryGetValue(name, out tagObj);
+            else
+            {
+                tag = FindTag(nameTags, name);
+                if (tag == null)
+                {
+                    tag = FindTag(tagsObj, "at:" + name);
+                }
+            }
+            isOk = tag != null;
+            
             if (isOk)
             {
+                string args_str = null;
+                if (isDynamic && args != null && args.Length > 0)
+                {
+                    int _count = args.Length;
+                    args_str = "new object[] { ";
+                    for (var i = 0; i < _count; i++)
+                    {
+                        string str = args[i].ToString();
+                        args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
+                    }
+                    args_str += "}";
+                }
+
+                if (isGetSelf)
+                {
+                    return GetTagSelf(token, tag, isDynamic);
+                }
+
                 if (isDynamic)
                 {
-                    return tagObj.instanceName + ".GetAttribute(\"" + token.name + "\")";
+                    if (args_str != null)
+                    {
+                        if (token.action == ValuePreAction.NONE)
+                        {
+                            return tag.instanceName + ".GetAttribute(\"" + token.name + "\"," + args_str + ")";
+                        }
+                        return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + tag.instanceName + ".GetAttribute(\"" + token.name + "\"," + args_str + "),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
+                    }
+                    if (token.action == ValuePreAction.NONE)
+                    {
+                        return tag.instanceName + ".GetAttribute(\"" + token.name + "\")";
+                    }
+                    return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + tag.instanceName + ".GetAttribute(\"" + token.name + "\"),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
                 }
                 else
                 {
-                    return tagObj.GetAttribute(token.name);
-                }
-            }
-            */
-
-            int _inx1 = -1;
-            int _inx2 = -1;
-            string i_name = null;
-            foreach (KeyValuePair<string, ITag<T>> kv in nameTags)
-            {
-                _inx1 = kv.Key.IndexOf(':');
-                t_ns = kv.Key.Substring(0, _inx1);
-                _inx2 = kv.Key.IndexOf('_');
-                //t_name = kv.Key.Substring(_inx1+1, _inx2-_inx1-1);
-                i_name = kv.Key.Substring(_inx2 + 1);
-                if (scopeInx != -1) //按名称查找
-                {
-                    if (ns == t_ns && (name == i_name))
+                    if (token.action == ValuePreAction.NONE)
                     {
-                        isOk = true;
+                        return tag.GetAttribute(token.name, args);
                     }
-                }
-                else if (name == i_name)
-                {
-                    isOk = true;
-                }
-
-                if (isOk)
-                {
-                    if (isGetSelf)
-                    {
-                        return GetTagSelf(token, kv.Value, isDynamic);
-                    }
-                    if (isDynamic)
-                    {
-                        if (args_str != null)
-                        {
-                            if (token.action == ValuePreAction.NONE)
-                            {
-                                return i_name + ".GetAttribute(\"" + token.name + "\"," + args_str + ")";
-                            }
-                            return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + i_name + ".GetAttribute(\"" + token.name + "\"," + args_str + "),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
-                        }
-                        if (token.action == ValuePreAction.NONE)
-                        {
-                            return i_name + ".GetAttribute(\"" + token.name + "\")";
-                        }
-                        return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + i_name + ".GetAttribute(\"" + token.name + "\"),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
-                    }
-                    else
-                    {
-                        if (token.action == ValuePreAction.NONE)
-                        {
-                            return kv.Value.GetAttribute(token.name, args);
-                        }
-                        return TagContext.OnValuePreAction(kv.Value.GetAttribute(token.name, args), token.action, token.actionCharCode);
-                    }
+                    return TagContext.OnValuePreAction(tag.GetAttribute(token.name, args), token.action, token.actionCharCode);
                 }
             }
 
-            foreach (KeyValuePair<string, ITag<T>> kv in tagsObj)
-            {
-                _inx1 = kv.Key.IndexOf(':');
-                t_ns = kv.Key.Substring(0, _inx1);
-                t_name = kv.Key.Substring(_inx1 + 1);
-                if (scopeInx != -1) //按名称查找
-                {
-                    if (ns == t_ns && (name == t_name))
-                    {
-                        isOk = true;
-                    }
-                }
-                else if (name == t_name)
-                {
-                    isOk = true;
-                }
-
-                if (isOk)
-                {
-                    if (isGetSelf)
-                    {
-                        return GetTagSelf(token, kv.Value, isDynamic);
-                    }
-
-                    if (isDynamic)
-                    {
-                        if (args_str != null)
-                        {
-                            if (token.action == ValuePreAction.NONE)
-                            {
-                                return kv.Value.instanceName + ".GetAttribute(\"" + token.name + "\"," + args_str + ")";
-                            }
-                            return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + kv.Value.instanceName + ".GetAttribute(\"" + token.name + "\"," + args_str + "),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
-                        }
-                        if (token.action == ValuePreAction.NONE)
-                        {
-                            return kv.Value.instanceName + ".GetAttribute(\"" + token.name + "\")";
-                        }
-                        return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + kv.Value.instanceName + ".GetAttribute(\"" + token.name + "\"),Com.AimUI.TagCore.ValuePreAction." + token.action + "," + token.actionCharCode + ")";
-                    }
-                    else
-                    {
-                        if (token.action == ValuePreAction.NONE)
-                        {
-                            return kv.Value.GetAttribute(token.name, args);
-                        }
-                        return TagContext.OnValuePreAction(kv.Value.GetAttribute(token.name, args), token.action, token.actionCharCode);
-                    }
-                }
-            }
 
             if (isDynamic)
             {
