@@ -216,7 +216,7 @@ namespace Com.AimUI.TagEngine
                                     var fullInsName = fullTagName + "_" + instanceName;
                                     nameTags[fullInsName] = tagObj;
                                     nameTags[instanceName] = tagObj;
-                                    nameTags[fullTagName] = tagObj;
+                                    //nameTags[fullTagName] = tagObj;
                                 }
                                 tagObj.tagContext = tagContext;
                                 tagObj.instanceName = instanceName;
