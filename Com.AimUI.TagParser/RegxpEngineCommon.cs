@@ -19,7 +19,7 @@ namespace Com.AimUI.TagParser
         internal static string RegexStr_SubTagName2GroupAll;
         internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>(?:\r\n|)";
 
-        private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)[;]{0,1}}(?:(?<=;})\r\n|)";
+        private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?);{0,1}}(?:(?<=;})\r\n|)";
         internal static string RegexStr_TagToken = RegexStr_TagToken_Template;
 
         internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)";
