@@ -9,7 +9,7 @@ namespace Com.AimUI.TagParser
         internal static string TagRegNames;
         internal const RegexOptions Tag_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);//|RegexOptions.Compiled
 
-        internal const string RegexStr_TagNotes = @"<\!--\#.*?\#-->[ \t]*(?:\r\n|)";  //匹配 aim 标签注释
+        internal const string RegexStr_TagNotes = @"<\!--\#.*?\#-->(?:\r\n|)";  //匹配 aim 标签注释
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
@@ -17,9 +17,10 @@ namespace Com.AimUI.TagParser
         internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>(?:\r\n|)";
 
         internal static string RegexStr_SubTagName2GroupAll;
-        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>[ \t]*(?:\r\n|)";
+        internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>(?:\r\n|)";
 
-        internal static string RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}";
+        private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)[;]{0,1}}(?:(?<=;})\r\n|)";
+        internal static string RegexStr_TagToken = RegexStr_TagToken_Template;
 
         internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)";
 
@@ -46,7 +47,7 @@ namespace Com.AimUI.TagParser
                 if (ValuePreActionChars.IndexOf(valuePreActionChar) == -1)
                 {
                     ValuePreActionChars += valuePreActionChar;
-                    RegexStr_TagToken = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?)}".Replace("[:;]", "[" + ValuePreActionChars + "]");
+                    RegexStr_TagToken = RegexStr_TagToken_Template.Replace("[:;]", "[" + ValuePreActionChars + "]");
                     RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)".Replace("[:;]", "[" + ValuePreActionChars + "]");
                     RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$".Replace("[:;]", "[" + ValuePreActionChars + "]");
                 }
