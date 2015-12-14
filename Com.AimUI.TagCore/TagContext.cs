@@ -79,5 +79,10 @@ namespace Com.AimUI.TagCore
             tagContext.items.TryGetValue(itemName, out obj);
             return obj;
         }
+
+        public static string ToString(object obj)
+        {
+            return obj == null ? "" : obj.ToString();
+        }
     }
 }

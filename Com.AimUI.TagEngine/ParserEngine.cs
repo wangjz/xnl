@@ -1543,7 +1543,7 @@ namespace Com.AimUI.TagEngine
                             else
                             {
                                 //prevToken = curToken;
-                                //prevTokens.Push(curToken);
+                                prevTokens.Push(curToken);
                                 tokens.Push(curTokens);
                                 curTokens = curToken.args.GetEnumerator();
                                 continue;
@@ -1713,6 +1713,23 @@ namespace Com.AimUI.TagEngine
                                 else if (prevToken.type == TagTokenType.Attribute)
                                 {
                                     args.Push(ParseAttribule(prevToken, t_tagObj, tagStruct, isDynamic, tagContext, tagsObj, t_args.ToArray()));
+                                }
+                                else if (prevToken.type == TagTokenType.Common)
+                                {
+                                    string args_str = "";
+                                    for (var i = 0; i < count; i++)
+                                    {
+                                        string str = t_args[i].ToString();
+                                        if (isDynamic)
+                                        {
+                                            args_str += (i > 0 ? "+" : "") + (string.IsNullOrEmpty(str) ? "\"\"" : (str.IndexOf(".GetAttribute(") != -1 ? "Com.AimUI.TagCore.TagContext.ToString(" + str + ")" : str));
+                                        }
+                                        else
+                                        {
+                                            args_str += str ?? "";
+                                        }
+                                    }
+                                    args.Push(args_str);
                                 }
                             }
                             prevToken = null;
