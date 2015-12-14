@@ -1719,7 +1719,7 @@ namespace Com.AimUI.TagEngine
                                     string args_str = "";
                                     for (var i = 0; i < count; i++)
                                     {
-                                        string str = t_args[i].ToString();
+                                        string str = (t_args[i] ?? "").ToString();
                                         if (isDynamic)
                                         {
                                             args_str += (i > 0 ? "+" : "") + (string.IsNullOrEmpty(str) ? "\"\"" : (str.IndexOf(".GetAttribute(") != -1 ? "Com.AimUI.TagCore.TagContext.ToString(" + str + ")" : str));
