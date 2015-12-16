@@ -40,7 +40,7 @@ namespace Com.AimUI.TagCore.Tags
             if (paramName == "body")
             {
                 object bodyObj;
-                if (attrs.TryGetValue("#body", out bodyObj)) return bodyObj;
+                if (sets.TryGetValue("#body", out bodyObj)) return bodyObj;
             }
             return base.GetAttribute(paramName, userData);
         }

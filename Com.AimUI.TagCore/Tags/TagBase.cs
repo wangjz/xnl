@@ -65,7 +65,7 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual ITag<T> Create()
         {
-           return Activator.CreateInstance(this.GetType()) as TagBase<T>;
+            return Activator.CreateInstance(this.GetType()) as TagBase<T>;
         }
 
         public virtual TagEvents events

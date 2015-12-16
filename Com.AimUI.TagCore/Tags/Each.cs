@@ -13,7 +13,7 @@ namespace Com.AimUI.TagCore.Tags
         public int pos;
         public int i;
         public int count;
-        public string subTagNames
+        public virtual string subTagNames
         {
             get { return null; }
         }
@@ -24,15 +24,15 @@ namespace Com.AimUI.TagCore.Tags
 
         public T tagContext { get; set; }
 
-        public void OnInit()
+        public virtual void OnInit()
         {
         }
 
-        public void OnStart()
+        public virtual void OnStart()
         {
         }
 
-        public void OnTag(OnTagDelegate tagDelegate = null)
+        public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (tagDelegate == null) return;
             if (list != null)
@@ -58,11 +58,11 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public void OnEnd()
+        public virtual void OnEnd()
         {
         }
 
-        public void SetAttribute(string paramName, object value)
+        public virtual void SetAttribute(string paramName, object value)
         {
             switch (paramName)
             {
@@ -93,13 +93,10 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] userData = null)
         {
             switch (paramName)
             {
-                case "item":
-                    if (userData == null) return item;
-                    break;
                 case "list":
                     return list;
                 case "i":
@@ -117,30 +114,39 @@ namespace Com.AimUI.TagCore.Tags
                         }
                     }
                     return count;
+                default:
+                    return GetValue(paramName, userData);
             }
+        }
+
+        protected virtual object GetValue(string paramName, object[] userData, GetValueDelegate getValueFunc = null)
+        {
             if (item != null)
             {
-                if (paramName == "item" && (userData == null)) return null;
+                if (paramName == "item" && (userData == null)) return item;
                 try
                 {
-                    string prop = (paramName == "item" ? Convert.ToString(userData[0]) : paramName);
-                    if (string.IsNullOrEmpty(prop)) return null;
-                    IDictionary<string, object> colls = item as IDictionary<string, object>;
-                    if (colls != null)
+                    string prop = paramName;
+                    int inx = 0;
+                    if (paramName == "item")
                     {
-                        object outObj;
-                        if (colls.TryGetValue(prop, out outObj)) return outObj;
-                        foreach (KeyValuePair<string, object> kv in colls)
-                        {
-                            if (string.Compare(kv.Key, prop, true) == 0)
-                            {
-                                return kv.Value;
-                            }
-                        }
+                        prop = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(prop)) return null;
+                        inx = 1;
                     }
-                    return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(item, null);
+                    if (getValueFunc == null) getValueFunc = Set<T>.GetValue;
+                    object obj = getValueFunc(item, prop);
+                    if (userData == null || inx >= userData.Length) return obj;
+                    for (; inx < userData.Length; inx++)
+                    {
+                        paramName = Convert.ToString(userData[inx]);
+                        if (string.IsNullOrEmpty(paramName)) return null;
+                        obj = getValueFunc(obj, paramName);
+                        if (obj == null) return null;
+                    }
+                    return obj;
                 }
-                catch (Exception)
+                catch
                 {
                     return null;
                 }
@@ -148,17 +154,17 @@ namespace Com.AimUI.TagCore.Tags
             return null;
         }
 
-        public bool ExistAttribute(string paramName)
+        public virtual bool ExistAttribute(string paramName)
         {
             return true;
         }
 
-        public ITag<T> Create()
+        public virtual ITag<T> Create()
         {
             return new Each<T>();
         }
 
-        public TagEvents events
+        public virtual TagEvents events
         {
             get { return TagEvents.Tag; }
         }

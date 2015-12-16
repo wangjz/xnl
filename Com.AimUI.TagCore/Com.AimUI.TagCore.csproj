@@ -49,6 +49,7 @@
     <Compile Include="Exceptions\TagParseException.cs" />
     <Compile Include="Exceptions\TagStopException.cs" />
     <Compile Include="IParser.cs" />
+    <Compile Include="Tags\Date.cs" />
     <Compile Include="Tags\Each.cs" />
     <Compile Include="Tags\Exp.cs" />
     <Compile Include="Tags\For.cs" />

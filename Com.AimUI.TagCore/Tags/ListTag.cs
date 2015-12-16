@@ -121,7 +121,8 @@ namespace Com.AimUI.TagCore.Tags
             if (count < 0) count = obj.Length;
             if (start + count > obj.Length) count = obj.Length - start;
             if (count < 0) return;
-            for(int i=start;i<count;i++){
+            for (int i = start; i < start + count; i++)
+            {
                 list.Insert(inx + (i - start), obj[i]);
             }
         }
@@ -165,6 +166,7 @@ namespace Com.AimUI.TagCore.Tags
                     //removeAt
                     return null;
                 case "get":
+                case "gets":
                     if (userData == null || userData.Length == 0) return list;
                     if (list == null) return null;
                     int start = 0;
@@ -175,10 +177,10 @@ namespace Com.AimUI.TagCore.Tags
                     if (userData.Length > 1) int.TryParse(Convert.ToString(userData[1]), out count);
                     if (start + count > list.Count) count = list.Count - start;
                     if (count <= 0) return null;
-                    object[] objs=new object[count-start];
-                    for (int i = start; i < count; i++)
+                    object[] objs=new object[count];
+                    for (int i = 0; i < count; i++)
                     {
-                        objs[i] = list[i];
+                        objs[i] = list[start + i];
                     }
                     return objs;
                 case "clear":
@@ -224,9 +226,36 @@ namespace Com.AimUI.TagCore.Tags
                 case "include":
                     return null;
                 case "set":
+                case "sets":
                     if (userData == null || userData.Length == 0) return null;
-                    IEnumerable<object> _list = userData[0] as IEnumerable<object>;
-                    if (_list != null) list = new List<object>(_list);
+                    IEnumerable<object> _list;
+                    if (userData.Length == 1)
+                    {
+                        _list = userData[0] as IEnumerable<object>;
+                        if (_list != null)
+                        {
+                            list = new List<object>(_list);
+                        }
+                        else
+                        {
+                            if (list == null) list = new List<object>();
+                            list.Add(userData[0]);
+                        }
+                        return null;
+                    }
+                    if (list == null) list = new List<object>(userData.Length);
+                    for (int i = 0; i < userData.Length; i++)
+                    {
+                        _list = userData[i] as IEnumerable<object>;
+                        if (_list != null)
+                        {
+                            foreach (object obj in _list) list.Add(obj);
+                        }
+                        else
+                        {
+                            list.Add(userData[i]);
+                        }
+                    }
                     return null;
             }
             return null;

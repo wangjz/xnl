@@ -31,22 +31,22 @@ namespace Com.AimUI.TagCore.Tags
             isChange = false;
         }
 
-        public void OnInit()
+        public virtual void OnInit()
         {
 
         }
 
-        public virtual void OnStart()
+        public  virtual void OnStart()
         {
 
         }
 
-        public void OnEnd()
+        public virtual void OnEnd()
         {
 
         }
 
-        public void OnTag(OnTagDelegate tagDelegate = null)
+        public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (_break == 2) return;
             if (tagDelegate == null) return;
@@ -91,7 +91,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public void SetAttribute(string paramName, object value)
+        public virtual void SetAttribute(string paramName, object value)
         {
             isChange = true;
             switch (paramName)
@@ -133,7 +133,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] userData = null)
         {
             switch (paramName)
             {
@@ -177,18 +177,18 @@ namespace Com.AimUI.TagCore.Tags
         }
 
         //创建 
-        public ITag<T> Create()
+        public virtual ITag<T> Create()
         {
             return new If<T>();
         }
 
-        public bool ExistAttribute(string paramName)
+        public virtual bool ExistAttribute(string paramName)
         {
             if (paramName == "a" || paramName == "b" || paramName == "test" || paramName == "value") return true;
             return false;
         }
 
-        public string subTagNames
+        public virtual string subTagNames
         {
             get
             {
@@ -196,21 +196,15 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public ParseMode parseMode
-        {
-            get;
-            set;
-        }
-
         public static bool LogicTest(object v1, object v2, string test)
         {
             if (v1 == null && v2 == null)
             {
-                if (test == "=")
+                if (test == "="||test=="eq")
                 {
                     return true;
                 }
-                else if (test == "!=")
+                else if (test == "!=" || test == "ne")
                 {
                     return false;
                 }
@@ -223,6 +217,7 @@ namespace Com.AimUI.TagCore.Tags
                 switch (test)
                 {
                     case "=":
+                    case "eq":
                         if (v1.GetType() == v2.GetType())
                         {
                             if (v1.Equals(v2)) return true;
@@ -233,6 +228,7 @@ namespace Com.AimUI.TagCore.Tags
                         }
                         break;
                     case "!=":
+                    case "ne":
                         if (v1.GetType() == v2.GetType())
                         {
                             if (!v1.Equals(v2)) return true;
@@ -242,6 +238,7 @@ namespace Com.AimUI.TagCore.Tags
                             return true;
                         }
                         break;
+                    case "gt":
                     case ">":
                     case "&gt;":
                         if (v2 == null) return true;
@@ -260,6 +257,7 @@ namespace Com.AimUI.TagCore.Tags
                             }
                         }
                         break;
+                    case "lt":
                     case "<":
                     case "&lt;":
                         if (v2 == null) return false;
@@ -277,6 +275,7 @@ namespace Com.AimUI.TagCore.Tags
                             }
                         }
                         break;
+                    case "ge":
                     case ">=":
                     case "&gt;=":
                         if (v2 == null) return true;
@@ -294,6 +293,7 @@ namespace Com.AimUI.TagCore.Tags
                             }
                         }
                         break;
+                    case "le":
                     case "<=":
                     case "&lt;=":
                         if (v2 == null) return false;
@@ -322,7 +322,7 @@ namespace Com.AimUI.TagCore.Tags
             return false;
         }
 
-        public TagEvents events
+        public virtual TagEvents events
         {
             get { return TagEvents.Tag; }
         }

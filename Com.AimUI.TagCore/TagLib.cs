@@ -35,7 +35,7 @@ namespace Com.AimUI.TagCore
             tagConstructor = _tagConstruct;
         }
 
-        private ITag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
+        public ITag<T> GetTagInstanceFromAssembly(string nameSpace, string tagName)
         {
             if (libAssembly == null)
             {
@@ -161,13 +161,15 @@ namespace Com.AimUI.TagCore
             tagParser = parser;
             if (tagCache == null) tagCache = new TagCache<T>();
             tagCache.Add("at:if", new If<T>());
-            tagCache.Add("at:set", new Set<T>());
+            var setTag = new Set<T>();
+            tagCache.Add("at:set", setTag);
             tagCache.Add("at:list", new ListTag<T>());
             tagCache.Add("at:for", new For<T>());
             tagCache.Add("at:exp", new Exp<T>());
             tagCache.Add("at:inc", new Inc<T>());
             tagCache.Add("at:each", new Each<T>());
-            tagCache.Add("at:pre", new Pre<T>());
+            tagCache.Add("at:date", new Date<T>());
+            tagCache.Add("at:pre", setTag);
             if (tagLibs != null)
             {
                 foreach (TagLib<T> lib in tagLibs)
@@ -212,6 +214,7 @@ namespace Com.AimUI.TagCore
             {
                 return false;
             }
+            if (tagCache == null) throw new Exception("please call after Initialize");
             tagCache[nameSpace.ToLower() + ":" + tagName.ToLower()] = destTag;
             return true;
         }

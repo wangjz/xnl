@@ -12,7 +12,7 @@ namespace Com.AimUI.TagCore.Tags
     {
         DataTable dt;
         static readonly char[] chars = { '"', '\'' };
-        public string subTagNames
+        public virtual string subTagNames
         {
             get { return null; }
         }
@@ -35,32 +35,32 @@ namespace Com.AimUI.TagCore.Tags
             set;
         }
 
-        public void OnInit()
+        public virtual void OnInit()
         {
 
         }
 
-        public void OnStart()
+        public virtual void OnStart()
         {
 
         }
 
-        public void OnTag(OnTagDelegate tagDelegate = null)
+        public virtual void OnTag(OnTagDelegate tagDelegate = null)
+        {
+            if (tagDelegate != null) tagDelegate();
+        }
+
+        public virtual void OnEnd()
         {
 
         }
 
-        public void OnEnd()
+        public virtual void SetAttribute(string paramName, object value)
         {
 
         }
 
-        public void SetAttribute(string paramName, object value)
-        {
-
-        }
-
-        public object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] userData = null)
         {
             if (string.IsNullOrEmpty(paramName)) return null;
             switch (paramName[0])
@@ -73,46 +73,32 @@ namespace Com.AimUI.TagCore.Tags
                             return HttpContext.Current.Request.QueryString[userData[0].ToString()];
                         case "getvalue":
                             if (userData == null || userData.Length < 2 || userData[0] == null) return null;
-                            string _name = Convert.ToString(userData[1]);
-                            if (string.IsNullOrEmpty(_name)) return null;
                             try
                             {
                                 object obj = userData[0];
-
-                                if (obj is Array)
+                                string _name = Convert.ToString(userData[1]);
+                                if (string.IsNullOrEmpty(_name)) return null;
+                                obj = Set<T>.GetValue(obj, _name);
+                                if (userData.Length == 2)
                                 {
-                                    int inx;
-                                    if (int.TryParse(_name, out inx))
-                                    {
-                                        object[] _arr = obj as object[];
-                                        if (_arr == null) return null;
-                                        return _arr[inx];
-                                    }
+                                    return obj;
                                 }
                                 else
                                 {
-                                    if (string.IsNullOrEmpty(_name)) return null;
-                                    IDictionary<string, object> colls = obj as IDictionary<string, object>;
-                                    if (colls != null)
+                                    for (int i = 2; i < userData.Length; i++)
                                     {
-                                        object outObj;
-                                        if (colls.TryGetValue(_name, out outObj)) return outObj;
-                                        foreach (KeyValuePair<string, object> kv in colls)
-                                        {
-                                            if (string.Compare(kv.Key, _name, true) == 0)
-                                            {
-                                                return kv.Value;
-                                            }
-                                        }
+                                        _name = Convert.ToString(userData[i]);
+                                        if (string.IsNullOrEmpty(_name)) return null;
+                                        obj = Set<T>.GetValue(obj, _name);
+                                        if (obj == null) return null;
                                     }
+                                    return obj;
                                 }
-                                return obj.GetType().GetProperty(_name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
                             }
-                            catch (Exception)
+                            catch
                             {
                                 return null;
                             }
-
                     }
                     break;
                 case 'p':
@@ -305,7 +291,8 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         case "bit":
                             if (userData == null || userData.Length < 2) return null;
-                            char bitAction = Convert.ToChar(userData[1]);
+                            string _s=Convert.ToString(userData[1]);
+                            char bitAction = (string.IsNullOrEmpty(_s) ? '&' : _s[0]);
                             int left = Convert.ToInt32(userData[0]);
                             switch (bitAction)
                             {
@@ -362,17 +349,17 @@ namespace Com.AimUI.TagCore.Tags
             return null;
         }
 
-        public bool ExistAttribute(string paramName)
+        public virtual bool ExistAttribute(string paramName)
         {
             return false;
         }
 
-        public ITag<T> Create()
+        public virtual ITag<T> Create()
         {
             return new Exp<T>();
         }
 
-        public TagEvents events
+        public virtual TagEvents events
         {
             get { return TagEvents.Tag; }
         }

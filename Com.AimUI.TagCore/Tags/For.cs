@@ -43,7 +43,7 @@ namespace Com.AimUI.TagCore.Tags
             end = -1;
             split = ",";
         }
-        public void OnInit()
+        public virtual void OnInit()
         {
 
         }
@@ -66,12 +66,12 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public void OnEnd()
+        public virtual void OnEnd()
         {
 
         }
 
-        public void OnTag(OnTagDelegate tagDelegate = null)
+        public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
             if (step == 0) return;
 
@@ -98,7 +98,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public void SetAttribute(string paramName, object value)
+        public virtual void SetAttribute(string paramName, object value)
         {
             switch (paramName)
             {
@@ -153,15 +153,12 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
+        public virtual object GetAttribute(string paramName, object[] userData = null) //, bool byRef = false
         {
             switch (paramName)
             {
                 case "i":
                     return i;
-                case "item":
-                    if (userData == null) return item;
-                    break;
                 case "pos":
                     return pos;
                 case "start":
@@ -177,30 +174,39 @@ namespace Com.AimUI.TagCore.Tags
                     return split;
                 case "step":
                     return step;
+                default:
+                    return GetValue(paramName, userData);
             }
+        }
+
+        protected virtual object GetValue(string paramName, object[] userData, GetValueDelegate getValueFunc = null)
+        {
             if (item != null)
             {
-                if (paramName == "item" && (userData == null || userData.Length == 0)) return null;
+                if (paramName == "item" && (userData == null)) return item;
                 try
                 {
-                    string prop = (paramName == "item" ? Convert.ToString(userData[0]) : paramName);
-                    if (string.IsNullOrEmpty(prop)) return null;
-                    IDictionary<string, object> colls = item as IDictionary<string, object>;
-                    if (colls != null)
+                    string prop = paramName;
+                    int inx = 0;
+                    if (paramName == "item")
                     {
-                        object outObj;
-                        if (colls.TryGetValue(prop, out outObj)) return outObj;
-                        foreach (KeyValuePair<string, object> kv in colls)
-                        {
-                            if (string.Compare(kv.Key, prop, true) == 0)
-                            {
-                                return kv.Value;
-                            }
-                        }
+                        prop = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(prop)) return null;
+                        inx = 1;
                     }
-                    return item.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty).GetValue(item, null);
+                    if (getValueFunc == null) getValueFunc = Set<T>.GetValue;
+                    object obj = getValueFunc(item, prop);
+                    if (userData == null || inx >= userData.Length) return obj;
+                    for (; inx < userData.Length; inx++)
+                    {
+                        paramName = Convert.ToString(userData[inx]);
+                        if (string.IsNullOrEmpty(paramName)) return null;
+                        obj = getValueFunc(obj, paramName);
+                        if (obj == null) return null;
+                    }
+                    return obj;
                 }
-                catch (Exception)
+                catch
                 {
                     return null;
                 }
@@ -208,23 +214,22 @@ namespace Com.AimUI.TagCore.Tags
             return null;
         }
 
-
         //创建 
-        public ITag<T> Create()
+        public virtual ITag<T> Create()
         {
             return new For<T>();
         }
-        public bool ExistAttribute(string paramName)
+        public virtual bool ExistAttribute(string paramName)
         {
             return true;
         }
 
-        public string subTagNames
+        public virtual string subTagNames
         {
             get { return null; }
         }
 
-        public TagEvents events
+        public virtual TagEvents events
         {
             get { return TagEvents.Start | TagEvents.Tag; }
         }
