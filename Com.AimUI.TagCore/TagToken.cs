@@ -106,10 +106,6 @@ namespace Com.AimUI.TagCore
         /// 参数列表
         /// </summary>
         public IList<TagToken> args { get; set; }
-        /// <summary>
-        /// 是否占位符模式
-        /// </summary>
-        public bool notPlaceHolderMode { get; set; }
 
         public TagToken()
         {

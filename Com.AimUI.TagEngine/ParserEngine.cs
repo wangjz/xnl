@@ -292,10 +292,8 @@ namespace Com.AimUI.TagEngine
                             else if (IsNullOrWhiteSpace(instanceName))
                             {
                                 string oldInsName = tagObj.instanceName;
-                                //instanceName = oldInsName;
                                 if (tagObj.tagContext==null)
                                 {
-                                    //isTagNew = true;
                                     tagObj.tagContext = tagContext;
                                     instanceName = "__" + tagId;
                                     tagId += 1;
@@ -308,6 +306,10 @@ namespace Com.AimUI.TagEngine
                                     {
                                         if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
                                     }
+                                }
+                                else
+                                {
+                                    instanceName = oldInsName;
                                 }
                                 if (isDynamic)
                                 {
