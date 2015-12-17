@@ -59,6 +59,28 @@ namespace Com.AimUI.TagCore.Tags
         {
 
         }
+        protected virtual object GetValue(object[] userData, ComplexQueryDelegate complexQueryFunc = null)
+        {
+            if (userData == null || userData.Length < 2 || userData[0] == null) return null;
+            try
+            {
+                object obj = userData[0];
+                if (complexQueryFunc == null) complexQueryFunc = Set<T>.ComplexQueryValue;
+                string[] props=new string[userData.Length-1];
+                string prop = null;
+                for (int i = 1; i < userData.Length; i++)
+                {
+                    prop = Convert.ToString(userData[i]);
+                    if (string.IsNullOrEmpty(prop)) return null;
+                    props[i - 1] = prop;
+                }
+                return complexQueryFunc(obj, props);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public virtual object GetAttribute(string paramName, object[] userData = null)
         {
@@ -72,33 +94,7 @@ namespace Com.AimUI.TagCore.Tags
                             if (userData == null || userData.Length < 1 || userData[0] == null) return null;
                             return HttpContext.Current.Request.QueryString[userData[0].ToString()];
                         case "getvalue":
-                            if (userData == null || userData.Length < 2 || userData[0] == null) return null;
-                            try
-                            {
-                                object obj = userData[0];
-                                string _name = Convert.ToString(userData[1]);
-                                if (string.IsNullOrEmpty(_name)) return null;
-                                obj = Set<T>.GetValue(obj, _name);
-                                if (userData.Length == 2)
-                                {
-                                    return obj;
-                                }
-                                else
-                                {
-                                    for (int i = 2; i < userData.Length; i++)
-                                    {
-                                        _name = Convert.ToString(userData[i]);
-                                        if (string.IsNullOrEmpty(_name)) return null;
-                                        obj = Set<T>.GetValue(obj, _name);
-                                        if (obj == null) return null;
-                                    }
-                                    return obj;
-                                }
-                            }
-                            catch
-                            {
-                                return null;
-                            }
+                            return GetValue(userData);
                     }
                     break;
                 case 'p':
@@ -316,9 +312,9 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "jsonencode":
-                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Serialize, (byte)':');
+                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Serialize);
                         case "jsondecode":
-                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Deserialize, (byte)';');
+                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Deserialize);
                     }
                     break;
             }

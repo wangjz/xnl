@@ -17,12 +17,12 @@ namespace Com.AimUI.TagCore
     public enum ValuePreAction : byte
     {
         NONE = 0,
-        JSON_Serialize = 1, // :
-        JSON_Deserialize = 2, // ;
-        USER_Defined = 3
+        JSON_Serialize = 58, // :
+        JSON_Deserialize = 59, // ;
+        USER_Defined = 1
     }
 
-    public delegate object OnValuePreActionDelegate(object value, ValuePreAction actionCode, byte charCode);
+    public delegate object OnValuePreActionDelegate(object value, ValuePreAction actionCode);
 
     public class TagContext
     {
@@ -39,9 +39,9 @@ namespace Com.AimUI.TagCore
             return response;
         }
 
-        public static object OnValuePreAction(object value, ValuePreAction actionCode, byte charCode = 0)
+        public static object OnValuePreAction(object value, ValuePreAction actionCode)
         {
-            if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode, charCode);
+            if (onValuePreActionDelegate != null) return onValuePreActionDelegate(value, actionCode);
             return value;
         }
 

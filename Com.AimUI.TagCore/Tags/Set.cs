@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Com.AimUI.TagCore.Tags
 {
-    public delegate object GetValueDelegate(object obj, string prop);
+    public delegate object ComplexQueryDelegate(object obj, string[] props);
     public class Set<T> : ITag<T> where T : TagContext
     {
         protected IDictionary<string, object> sets;
@@ -175,7 +175,7 @@ namespace Com.AimUI.TagCore.Tags
             return colls;
         }
 
-        protected virtual object GetValue(string paramName, object[] userData, GetValueDelegate getValueFunc = null)
+        protected virtual object GetValue(string paramName, object[] userData,ComplexQueryDelegate complexQueryFunc=null)
         {
             object obj = null;
             int inx = 0;
@@ -211,15 +211,15 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     try
                     {
-                        if (getValueFunc == null) getValueFunc = GetValue;
-                        for (; inx < userData.Length; inx++)
+                        string[] props = new string[userData.Length - inx];
+                        for (int i = inx; i < userData.Length; i++)
                         {
-                            paramName = Convert.ToString(userData[inx]);
+                            paramName = Convert.ToString(userData[i]);
                             if (string.IsNullOrEmpty(paramName)) return null;
-                            obj = getValueFunc(obj, paramName);
-                            if (obj == null) return null;
+                            props[i - inx] = paramName;
                         }
-                        return obj;
+                        if (complexQueryFunc == null) complexQueryFunc = ComplexQueryValue;
+                        return complexQueryFunc(obj, props);
                     }
                     catch
                     {
@@ -253,12 +253,133 @@ namespace Com.AimUI.TagCore.Tags
             get { return TagEvents.Init | TagEvents.Tag; }
         }
 
+        public static object ComplexQueryValue(object obj, string[] props)
+        {
+            string prop;
+            if (obj is string)
+            {
+                prop = obj as string;
+                char firstChar = prop[0];
+                if (firstChar == '{' || firstChar == '[')
+                {
+                    try
+                    {
+                        obj = TagContext.OnValuePreAction(obj, ValuePreAction.JSON_Deserialize);
+                    }
+                    catch
+                    {
+                        obj = prop;
+                    }
+                    if (obj == null) obj = prop;
+                }
+            }
+            if (props.Length == 1) return GetValue(obj, props[0]);
+            for (int i = 0; i < props.Length; i++)
+            {
+                prop = props[i];
+                if (string.IsNullOrEmpty(prop)) return null;
+                obj = GetValue(obj, prop);
+                if (obj == null) return null;
+            }
+            return obj;
+        }
+
         public static object GetValue(object obj, string prop)
         {
             if (obj == null) return null;
             if (string.IsNullOrEmpty(prop)) return null;
             try
             {
+                int i;
+                if (prop.EndsWith("]"))
+                {
+                    int inx = prop.IndexOf('[');
+                    if (inx == -1) return null;
+                    string nextProp=null;
+                    if (inx == 0)
+                    {
+                        inx = prop.IndexOf(']');
+                        prop = prop.Substring(1, inx-1);
+                        if (inx < prop.Length - 1)
+                        {
+                            //多个索引
+                            nextProp = prop.Substring(inx + 1);
+                        }
+                    }
+                    else
+                    {
+                        //多个索引
+                        nextProp = prop.Substring(inx);
+                        prop = prop.Substring(0, inx);
+                    }
+                    if (prop.IndexOf(',') != -1)
+                    {
+                        string[] props = prop.Split(',');
+                        object[] objs=new object[props.Length];
+                        for (i = 0; i < props.Length; i++)
+                        {
+                            objs[i] = GetValue(obj, props[i]);
+                        }
+                        obj = objs;
+                    }
+                    if (nextProp != null)
+                    {
+                        obj = GetValue(obj, prop);
+                        if (obj == null) return null;
+                        obj = GetValue(obj, nextProp);
+                        return obj;
+                    }
+                }
+                if (int.TryParse(prop, out i))
+                {
+                    if (i < 0) return null;
+                    string str = obj as string;
+                    if (str != null)
+                    {
+                        if (i < str.Length)
+                        {
+                            return str[i];
+                        }
+                        return null;
+                    }
+                    IEnumerable itor = obj as IEnumerable;
+                    if (itor != null)
+                    {
+                        IList arr = obj as IList;
+                        if (arr != null)
+                        {
+                            if (i < arr.Count)
+                            {
+                                return arr[i];
+                            }
+                            return null;
+                        }
+                        int j = 0;
+                        ICollection coll = obj as ICollection;
+                        if (coll != null)
+                        {
+                            if (i < coll.Count)
+                            {
+                                
+                                foreach (object o in coll)
+                                {
+                                    if (i == j) return o;
+                                    j++;
+                                }
+                                return null;
+                            }
+                            return null;
+                        }
+                        j = 0;
+                        foreach (object o in itor)
+                        {
+                            if (i == j) return o;
+                            j++;
+                        }
+                        return null;
+                    }
+                }
+
                 IDictionary<string, object> colls = obj as IDictionary<string, object>;
                 if (colls != null)
                 {
@@ -274,47 +395,7 @@ namespace Com.AimUI.TagCore.Tags
                         }
                     }
                 }
-                int i;
-                if (int.TryParse(prop, out i))
-                {
-                    if (i < 0) return null;
-                    IList arr = obj as IList;
-                    if (arr != null)
-                    {
-                        if (i < arr.Count)
-                        {
-                            return arr[i];
-                        }
-                        return null;
-                    }
-                    ICollection coll = obj as ICollection;
-                    if (coll != null)
-                    {
-                        if (i < coll.Count)
-                        {
-                            int j = 0;
-                            foreach (object o in coll)
-                            {
-                                if (i == j) return o;
-                                j++;
-                            }
-                            return null;
-                        }
-                        return null;
-                    }
-                    IEnumerable itor = obj as IEnumerable;
-                    if (itor != null)
-                    {
-                        int j = 0;
-                        foreach (object o in itor)
-                        {
-                            if (i == j) return o;
-                            j++;
-                        }
-                        return null;
-                    }
-                    return null;
-                }
+                
                 return obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
             }
             catch

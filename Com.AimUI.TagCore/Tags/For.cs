@@ -179,7 +179,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        protected virtual object GetValue(string paramName, object[] userData, GetValueDelegate getValueFunc = null)
+        protected virtual object GetValue(string paramName, object[] userData, ComplexQueryDelegate complexQueryFunc = null)
         {
             if (item != null)
             {
@@ -188,23 +188,22 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     string prop = paramName;
                     int inx = 0;
-                    if (paramName == "item")
+                    if (paramName != "item")
                     {
-                        prop = Convert.ToString(userData[0]);
-                        if (string.IsNullOrEmpty(prop)) return null;
                         inx = 1;
                     }
-                    if (getValueFunc == null) getValueFunc = Set<T>.GetValue;
-                    object obj = getValueFunc(item, prop);
-                    if (userData == null || inx >= userData.Length) return obj;
-                    for (; inx < userData.Length; inx++)
+                    int len = (userData == null ? 0 : userData.Length) + inx;
+                    string[] props = new string[len];
+                    if (inx == 1) props[0] = paramName;
+                    if (complexQueryFunc == null) complexQueryFunc = Set<T>.ComplexQueryValue;
+                    if (userData == null) return complexQueryFunc(item, props);
+                    for (int i = 0; i < userData.Length; i++)
                     {
-                        paramName = Convert.ToString(userData[inx]);
+                        paramName = Convert.ToString(userData[i]);
                         if (string.IsNullOrEmpty(paramName)) return null;
-                        obj = getValueFunc(obj, paramName);
-                        if (obj == null) return null;
+                        props[i + inx] = paramName;
                     }
-                    return obj;
+                    return complexQueryFunc(item, props);
                 }
                 catch
                 {

@@ -8,9 +8,30 @@ namespace Com.AimUI.TagCore
         Attribute, //属性 @
         Express //= 2,  //表达式 $
     }
+
+    public enum TagScopeType
+    {
+        /// <summary>
+        /// 当前域
+        /// </summary>
+        Current,
+        /// <summary>
+        /// 命名空间域 匿名
+        /// </summary>
+        NameScape,
+        /// <summary>
+        /// 标签实例 命名
+        /// </summary>
+        Instance
+    }
+
     public class TagToken
     {
         public TagTokenType type { get; set; }
+        /// <summary>
+        /// 标签域类型
+        /// </summary>
+        public TagScopeType scopeType { get; set; }
 
         private string _name;
         //名称
@@ -54,6 +75,7 @@ namespace Com.AimUI.TagCore
                 }
             }
         }
+
         //在内容中的位置
         public int index { get; set; }
         //在内容中的长度
@@ -64,14 +86,16 @@ namespace Com.AimUI.TagCore
         /// </summary>
         public ValuePreAction action { get; set; }
 
-        public byte actionCharCode { get; set; }
-
         public string value { get; set; }
 
         /// <summary>
         /// 参数列表
         /// </summary>
         public IList<TagToken> args { get; set; }
+        /// <summary>
+        /// 是否占位符模式
+        /// </summary>
+        public bool isPlaceHolderMode { get; set; }
 
         public TagToken()
         {

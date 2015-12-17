@@ -95,7 +95,7 @@ namespace Com.AimUI.TagCore
         }
 
         private static string tagNameSpacesStr = "at";
-        private static Dictionary<string, TagLib<T>> tagLibColls = new Dictionary<string, TagLib<T>>();
+        private static Dictionary<string, TagLib<T>> tagLibColls = new Dictionary<string, TagLib<T>>(StringComparer.OrdinalIgnoreCase);
 
         private static void UpdateTagNameSpacesStr()
         {

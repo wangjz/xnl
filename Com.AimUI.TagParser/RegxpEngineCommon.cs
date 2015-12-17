@@ -14,7 +14,7 @@ namespace Com.AimUI.TagParser
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
         internal static string RegexStr_TagGroupAll;
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>(?:\r\n|)";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+[a-zA-Z0-9_]*|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>(?:\r\n|)";
 
         internal static string RegexStr_SubTagName2GroupAll;
         internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>(?:\r\n|)";
@@ -298,7 +298,7 @@ namespace Com.AimUI.TagParser
                         token.type = TagTokenType.Express;
                         break;
                 }
-                if (valuePreAction != ValuePreAction.NONE) token.actionCharCode = (byte)act_char;
+                //if (valuePreAction != ValuePreAction.NONE) token.actionCharCode = (byte)act_char;
                 token.value = match.Value;
                 token.action = valuePreAction;
                 token.index = match.Index;
@@ -422,7 +422,7 @@ namespace Com.AimUI.TagParser
                                 }
                                 names = names.Substring(1);
                                 tagToken.value = m.Value.Substring(2);
-                                tagToken.actionCharCode = (byte)act_char;
+                                //tagToken.actionCharCode = (byte)act_char;
                             }
                             else
                             {
@@ -559,7 +559,7 @@ namespace Com.AimUI.TagParser
                                             {
                                                 _token.action = ValuePreAction.USER_Defined;
                                             }
-                                            _token.actionCharCode = (byte)act_char;
+                                            //_token.actionCharCode = (byte)act_char;
                                             _token.value = _s.Substring(2);
                                         }
                                         else
@@ -720,7 +720,7 @@ namespace Com.AimUI.TagParser
                             {
                                 e_token.action = ValuePreAction.USER_Defined;
                             }
-                            e_token.actionCharCode = (byte)act_char;
+                            //e_token.actionCharCode = (byte)act_char;
                             e_token.value = e_s.Substring(2);
                         }
                         else
