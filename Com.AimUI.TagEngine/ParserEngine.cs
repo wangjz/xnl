@@ -210,7 +210,7 @@ namespace Com.AimUI.TagEngine
                                     {
                                         throw new TagParseException("tag " + fullTagName + "#" + instanceName + ":命名冲突");
                                     }
-                                    tagObj.tagContext = tagContext;
+                                    //tagObj.tagContext = tagContext;
                                     tagObj.instanceName = instanceName;
                                     tagObj = tagObj.Create();
                                     var fullInsName = fullTagName + "_" + instanceName;
@@ -292,10 +292,11 @@ namespace Com.AimUI.TagEngine
                             else if (IsNullOrWhiteSpace(instanceName))
                             {
                                 string oldInsName = tagObj.instanceName;
-                                instanceName = oldInsName;
-                                if (instanceName.StartsWith("__") == false)
+                                //instanceName = oldInsName;
+                                if (tagObj.tagContext==null)
                                 {
                                     //isTagNew = true;
+                                    tagObj.tagContext = tagContext;
                                     instanceName = "__" + tagId;
                                     tagId += 1;
                                     tagObj.instanceName = instanceName;
@@ -961,37 +962,42 @@ namespace Com.AimUI.TagEngine
             }
             else
             {
-                string instanceName = tagObj.instanceName;
-                if (instanceName.StartsWith("__") == false)
+                isNew = (tagObj.tagContext == null);
+                string firstName = null;
+                if (isNew)
                 {
+                    firstName = tagObj.instanceName;
                     tagObj.instanceName = expVarName;
-                    if (isDynamic)
+                    tagObj.tagContext = tagContext;
+                }
+                if (isDynamic)
+                {
+                    if (isNew)
                     {
                         strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + expVarName + "= null;\n");
-                        if (instanceName != expVarName)
-                        {
-                            strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + expVarName + " = (" + instanceName + "!=null?" + instanceName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
-                        }
-                        else
-                        {
-                            strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + expVarName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
-                        }
-                        strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
-                        strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
-                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
-                        {
-                            strBuilder.AppendLine(expVarName + ".OnInit();\n}");
-                        }
-                        else
-                        {
-                            strBuilder.AppendLine("}");
-                        }
+                        strBuilder.AppendLine("\nif(" + expVarName + " == null){\n" + expVarName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
                     }
                     else
                     {
-                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
+                        strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
+                    }
+       
+                    strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
+                    strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
+                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                    {
+                        strBuilder.AppendLine(expVarName + ".OnInit();\n}");
+                    }
+                    else
+                    {
+                        strBuilder.AppendLine("}");
                     }
                 }
+                else if (isNew)
+                {
+                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init) tagObj.OnInit();
+                }
+                isNew = false;
             }
             return isNew;
         }

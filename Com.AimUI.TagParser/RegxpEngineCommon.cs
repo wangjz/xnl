@@ -111,7 +111,7 @@ namespace Com.AimUI.TagParser
                 regStr = RegexTemplate_SubTagName2GroupAll.Replace("AT", tagName.Replace(".", "\\."));
             }
 
-            if (string.IsNullOrEmpty(tagObjName) || tagObjName.StartsWith("t__"))
+            if (string.IsNullOrEmpty(tagObjName) || tagObjName.StartsWith("__"))
             {
                 regStr = regStr.Replace(@"\#NAME|", "");
             }
