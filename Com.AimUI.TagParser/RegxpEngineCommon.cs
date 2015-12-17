@@ -19,17 +19,19 @@ namespace Com.AimUI.TagParser
         internal static string RegexStr_SubTagName2GroupAll;
         internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>(?:\r\n|)";
 
-        private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z]+.*?);{0,1}}(?:(?<=;})\r\n|)";
+        private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z0-9]+.*?)(;{0,1})}(?:(?<=;})\r\n|)";
         internal static string RegexStr_TagToken = RegexStr_TagToken_Template;
 
-        internal static string RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:\[\]]*?)\s*\(([^\(\)]*?)\)";
+        private const string RegexStr_NestedToken_Template = @"[@$]([:;]{0,1}[_a-zA-Z0-9]+[_a-zA-Z0-9\.:\[\]]*?)\s*\(([^\(\)]*?)\)";
+        internal static string RegexStr_NestedToken = RegexStr_NestedToken_Template;
 
-        internal static string RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:\[\]]*$";
+        private const string RegexStr_TokenBody_Template = @"^[@$][:;]{0,1}[_a-zA-Z0-9]+[_a-zA-Z0-9\.:\[\]]*$";
+        internal static string RegexStr_TokenBody = RegexStr_TokenBody_Template;
 
         private static string ValuePreActionChars = ":;";
 
         private static readonly char[] Char_Dot = new char[] { '.' };
-        private static readonly char[] Chains_Char = new char[] { '.','[' };
+        private static readonly char[] Chains_Char = new char[] { '.', '[' };
         /// <summary>
         /// 清除注释标签
         /// </summary>
@@ -50,8 +52,8 @@ namespace Com.AimUI.TagParser
                 {
                     ValuePreActionChars += valuePreActionChar;
                     RegexStr_TagToken = RegexStr_TagToken_Template.Replace("[:;]", "[" + ValuePreActionChars + "]");
-                    RegexStr_NestedToken = @"[@$]([:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*?)\s*\(([^\(\)]*?)\)".Replace("[:;]", "[" + ValuePreActionChars + "]");
-                    RegexStr_TokenBody = @"^[@$][:;]{0,1}[_a-zA-Z]+[_a-zA-Z0-9\.:]*$".Replace("[:;]", "[" + ValuePreActionChars + "]");
+                    RegexStr_NestedToken = RegexStr_NestedToken_Template.Replace("[:;]", "[" + ValuePreActionChars + "]");
+                    RegexStr_TokenBody = RegexStr_TokenBody_Template.Replace("[:;]", "[" + ValuePreActionChars + "]");
                 }
             }
             else
@@ -265,12 +267,12 @@ namespace Com.AimUI.TagParser
 
                 tokenValue = match.Groups[2].Value;
                 char act_char = tokenValue[0];
-                if (act_char == 58)
+                if (act_char == (char)ValuePreAction.JSON_Serialize)
                 {
                     valuePreAction = ValuePreAction.JSON_Serialize;
                     tokenValue = tokenValue.Remove(0, 1);
                 }
-                else if (act_char == 59)
+                else if (act_char == (char)ValuePreAction.JSON_Deserialize)
                 {
                     valuePreAction = ValuePreAction.JSON_Deserialize;
                     tokenValue = tokenValue.Remove(0, 1);
@@ -298,7 +300,7 @@ namespace Com.AimUI.TagParser
                         token.type = TagTokenType.Express;
                         break;
                 }
-                //if (valuePreAction != ValuePreAction.NONE) token.actionCharCode = (byte)act_char;
+                if (match.Groups[3].Value == ";") token.notPlaceHolderMode = true;
                 token.value = match.Value;
                 token.action = valuePreAction;
                 token.index = match.Index;
@@ -338,10 +340,20 @@ namespace Com.AimUI.TagParser
 
                 if (token.args == null || token.args.Count == 0)
                 {
-                    dotInx = token.name.IndexOfAny(Chains_Char);
+                    if (string.IsNullOrEmpty(token.scope) == false)
+                    {
+                        tokenValue = token.scope + "." + token.name;
+                        token.scope = string.Empty;
+                    }
+                    else
+                    {
+                        tokenValue = token.name;
+                    }
+                    dotInx = tokenValue.IndexOfAny(Chains_Char);
                     if (dotInx != -1)
                     {
-                        token.args = GetChains(token.name, dotInx);
+                        token.args = GetChains(tokenValue, dotInx);
+                        token.name = tokenValue.Substring(0, dotInx);
                     }
                 }
                 return token;
@@ -350,7 +362,7 @@ namespace Com.AimUI.TagParser
             return null;
         }
 
-        internal static IList<TagToken> GetChains(string tokenString,int inx)
+        internal static IList<TagToken> GetChains(string tokenString, int inx)
         {
             string name = tokenString.Substring(0, inx);
             string args = tokenString.Substring(tokenString[inx] == '.' ? inx + 1 : inx);
@@ -382,7 +394,7 @@ namespace Com.AimUI.TagParser
                 int random = ra.Next(10000, 90000);
                 while (true)
                 {
-                    //匹配嵌套表达式  @"[@$]([_a-zA-Z0-9\.:]+)\(([^\(\)]*?)\)"
+                    //匹配嵌套表达式
                     tokenMatchs = Regex.Matches(match_args, RegexStr_NestedToken, Tag_RegexOptions);
                     if (tokenMatchs.Count > 0)
                     {
@@ -406,13 +418,13 @@ namespace Com.AimUI.TagParser
                             }
 
                             char act_char = m.Value[1];
-                            if (act_char == 58 || act_char == 59 || (act_char > 32 && act_char < 48))
+                            if (act_char == (char)ValuePreAction.JSON_Serialize || act_char == (char)ValuePreAction.JSON_Deserialize || (act_char > 32 && act_char < 48))
                             {
-                                if (act_char == 58)
+                                if (act_char == (char)ValuePreAction.JSON_Serialize)
                                 {
                                     tagToken.action = ValuePreAction.JSON_Serialize;
                                 }
-                                else if (act_char == 59)
+                                else if (act_char == (char)ValuePreAction.JSON_Deserialize)
                                 {
                                     tagToken.action = ValuePreAction.JSON_Deserialize;
                                 }
@@ -422,7 +434,6 @@ namespace Com.AimUI.TagParser
                                 }
                                 names = names.Substring(1);
                                 tagToken.value = m.Value.Substring(2);
-                                //tagToken.actionCharCode = (byte)act_char;
                             }
                             else
                             {
@@ -468,10 +479,7 @@ namespace Com.AimUI.TagParser
                             //解析参数
                             if (string.IsNullOrEmpty(_args.Trim()) == false)
                             {
-
                                 List<string> arg_list = GetArgList(_args);
-
-                                //string[] s_arr = _args.Split(',');
 
                                 tagToken.args = new List<TagToken>(arg_list.Count);
                                 string _s;
@@ -479,7 +487,7 @@ namespace Com.AimUI.TagParser
                                 for (var i = 0; i < arg_list.Count; i++)
                                 {
                                     _s = arg_list[i].Trim();
-                                    if (_s.Length > 1 && Regex.IsMatch(_s, RegexStr_TokenBody)) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
+                                    if (_s.Length > 1 && Regex.IsMatch(_s, RegexStr_TokenBody))
                                     {
                                         if (_s.StartsWith("@"))
                                         {
@@ -545,13 +553,13 @@ namespace Com.AimUI.TagParser
                                     if (_token.type != TagTokenType.Common)
                                     {
                                         act_char = _s[1];
-                                        if (act_char == 58 || act_char == 59 || (act_char > 32 && act_char < 48))
+                                        if (act_char == (char)ValuePreAction.JSON_Serialize || act_char == (char)ValuePreAction.JSON_Deserialize || (act_char > 32 && act_char < 48))
                                         {
-                                            if (act_char == 58)
+                                            if (act_char == (char)ValuePreAction.JSON_Serialize)
                                             {
                                                 _token.action = ValuePreAction.JSON_Serialize;
                                             }
-                                            else if (act_char == 59)
+                                            else if (act_char == (char)ValuePreAction.JSON_Deserialize)
                                             {
                                                 _token.action = ValuePreAction.JSON_Deserialize;
                                             }
@@ -559,7 +567,6 @@ namespace Com.AimUI.TagParser
                                             {
                                                 _token.action = ValuePreAction.USER_Defined;
                                             }
-                                            //_token.actionCharCode = (byte)act_char;
                                             _token.value = _s.Substring(2);
                                         }
                                         else
@@ -642,7 +649,7 @@ namespace Com.AimUI.TagParser
                 for (var i = 0; i < e_arr.Count; i++)
                 {
                     e_s = e_arr[i].Trim();
-                    if (e_s.Length > 1 && Regex.IsMatch(e_s, RegexStr_TokenBody)) //@"^[@$][_a-zA-Z:]+[_a-zA-Z0-9\.:]+$"
+                    if (e_s.Length > 1 && Regex.IsMatch(e_s, RegexStr_TokenBody))
                     {
                         if (e_s.StartsWith("@"))
                         {
@@ -706,13 +713,13 @@ namespace Com.AimUI.TagParser
                     if (e_token.type != TagTokenType.Common)
                     {
                         char act_char = e_s[1];
-                        if (act_char == 58 || act_char == 59 || (act_char > 32 && act_char < 48))
+                        if (act_char == (char)ValuePreAction.JSON_Serialize || act_char == (char)ValuePreAction.JSON_Deserialize || (act_char > 32 && act_char < 48))
                         {
-                            if (act_char == 58)
+                            if (act_char == (char)ValuePreAction.JSON_Serialize)
                             {
                                 e_token.action = ValuePreAction.JSON_Serialize;
                             }
-                            else if (act_char == 59)
+                            else if (act_char == (char)ValuePreAction.JSON_Deserialize)
                             {
                                 e_token.action = ValuePreAction.JSON_Deserialize;
                             }
@@ -720,7 +727,6 @@ namespace Com.AimUI.TagParser
                             {
                                 e_token.action = ValuePreAction.USER_Defined;
                             }
-                            //e_token.actionCharCode = (byte)act_char;
                             e_token.value = e_s.Substring(2);
                         }
                         else
@@ -823,6 +829,7 @@ namespace Com.AimUI.TagParser
                     if (inx != -1)
                     {
                         express.args = GetChains(express.name, inx);
+                        express.name = express.name.Substring(0, inx);
                     }
                 }
                 return express;

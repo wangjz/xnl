@@ -5,8 +5,14 @@ namespace Com.AimUI.TagCore
     public enum TagTokenType
     {
         Common,
-        Attribute, //属性 @
-        Express //= 2,  //表达式 $
+        /// <summary>
+        /// 属性 @
+        /// </summary>
+        Attribute,
+        /// <summary>
+        /// 表达式 $
+        /// </summary>
+        Express, 
     }
 
     public enum TagScopeType
@@ -27,14 +33,15 @@ namespace Com.AimUI.TagCore
 
     public class TagToken
     {
-        public TagTokenType type { get; set; }
         /// <summary>
-        /// 标签域类型
+        /// 类型
         /// </summary>
-        public TagScopeType scopeType { get; set; }
+        public TagTokenType type { get; set; }
 
         private string _name;
-        //名称
+        /// <summary>
+        /// 名称
+        /// </summary>
         public string name
         {
             get
@@ -55,7 +62,9 @@ namespace Com.AimUI.TagCore
         }
 
         private string _scope;
-        //域名称  标签所在实例名称  或 标签名称
+        /// <summary>
+        /// 域名称  标签所在实例名称  或 标签名称
+        /// </summary>
         public virtual string scope 
         {
             get
@@ -64,7 +73,7 @@ namespace Com.AimUI.TagCore
             }
             set
             {
-                if (string.IsNullOrEmpty(value)==false)
+                if (string.IsNullOrEmpty(value) == false)
                 {
                     char c = value[0];
                     if (c > 47 && c < 58)
@@ -73,12 +82,17 @@ namespace Com.AimUI.TagCore
                     }
                     else _scope = value;
                 }
+                else _scope = value;
             }
         }
 
-        //在内容中的位置
+        /// <summary>
+        /// 在内容中的位置
+        /// </summary>
         public int index { get; set; }
-        //在内容中的长度
+        /// <summary>
+        /// 在内容中的长度
+        /// </summary>
         public int length { get; set; }
 
         /// <summary>
@@ -95,7 +109,7 @@ namespace Com.AimUI.TagCore
         /// <summary>
         /// 是否占位符模式
         /// </summary>
-        public bool isPlaceHolderMode { get; set; }
+        public bool notPlaceHolderMode { get; set; }
 
         public TagToken()
         {
