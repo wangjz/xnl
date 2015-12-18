@@ -7,14 +7,14 @@ namespace Com.AimUI.TagParser
     public class RegxpEngineCommon<T> where T : TagContext
     {
         internal static string TagRegNames;
-        internal const RegexOptions Tag_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);//|RegexOptions.Compiled
+        internal const RegexOptions Tag_RegexOptions = (((RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline) | RegexOptions.Multiline) | RegexOptions.IgnoreCase);
 
         internal const string RegexStr_TagNotes = @"<\!--\#.*?\#-->(?:\r\n|)";  //匹配 aim 标签注释
 
         internal const string RegexStr_TagInnerTagParams = "([^\\s]+?)=\"([.\\s\\S]*?)\"";
 
         internal static string RegexStr_TagGroupAll;
-        internal const string RegexTemplate_TagGroupAll = @"<(AT):([_a-zA-Z0-9]+)(\#[a-zA-Z0-9]+[a-zA-Z0-9_]*|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>(?:\r\n|)";
+        internal const string RegexTemplate_TagGroupAll = @"<(AT):([a-zA-Z0-9]+)(\#[a-zA-Z0-9][a-zA-Z0-9_]*|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1:\2\3(?:\s*|\s+.+?""\s*)>(?<n>)|</\1:\2\3>(?<-n>)|(?!<\1:\2\3(?:\s*|\s+.+?""\s*)>|</\1:\2\3>)[.\s\S])*(?(n)(?!)))</\1:\2\3>(?:\r\n|)";
 
         internal static string RegexStr_SubTagName2GroupAll;
         internal const string RegexTemplate_SubTagName2GroupAll = @"<(AT)(\#NAME|)(\s*|\s+.+?""\s*)>(?:\r\n|)((?><\1\2(?:\s*|\s+.+?""\s*)>(?<n>)|</\1\2>(?<-n>)|(?!<\1\2(?:\s*|\s+.+?""\s*)>|</\1\2>)[.\s\S])*(?(n)(?!)))</\1\2>(?:\r\n|)";
@@ -22,10 +22,10 @@ namespace Com.AimUI.TagParser
         private const string RegexStr_TagToken_Template = @"{([@$])([:;]{0,1}[_a-zA-Z0-9]+.*?);{0,1}}(?:(?<=;})\r\n|)";
         internal static string RegexStr_TagToken = RegexStr_TagToken_Template;
 
-        private const string RegexStr_NestedToken_Template = @"[@$]([:;]{0,1}[_a-zA-Z0-9]+[_a-zA-Z0-9\.:\[\]]*?)\s*\(([^\(\)]*?)\)";
+        private const string RegexStr_NestedToken_Template = @"[@$]([:;]{0,1}[_a-zA-Z0-9][_a-zA-Z0-9\.:\[\]]*?)\s*\(([^\(\)]*?)\)";
         internal static string RegexStr_NestedToken = RegexStr_NestedToken_Template;
 
-        private const string RegexStr_TokenBody_Template = @"^[@$][:;]{0,1}[_a-zA-Z0-9]+[_a-zA-Z0-9\.:\[\]]*$";
+        private const string RegexStr_TokenBody_Template = @"^[@$][:;]{0,1}[_a-zA-Z0-9][_a-zA-Z0-9\.:\[\]]*$";
         internal static string RegexStr_TokenBody = RegexStr_TokenBody_Template;
 
         private static string ValuePreActionChars = ":;";
