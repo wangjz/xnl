@@ -22,6 +22,8 @@ namespace Com.AimUI.TagCore
 
         private TagConstructorDelegate<T> tagConstructor;
 
+        private static readonly object syncRoot = new object();
+
         public TagLib(string _nameSpace, bool _isCache, TagConstructorDelegate<T> _tagConstructor = null)
         {
             nameSpace = _nameSpace;
@@ -60,20 +62,24 @@ namespace Com.AimUI.TagCore
                 obj = tagCache[_n];
                 if (obj == null)
                 {
-                    if (tagConstructor != null)
+                    obj = tagCache[_n];
+                    if(obj==null)
                     {
-                        obj = tagConstructor(tagName);
+                        if (tagConstructor != null)
+                        {
+                            obj = tagConstructor(tagName);
+                            if (obj != null)
+                            {
+                                tagCache[_n] = obj;
+                                return isCreateNew ? obj.Create() : obj;
+                            }
+                        }
+                        obj = GetTagInstanceFromAssembly(nameSpace, tagName);
                         if (obj != null)
                         {
                             tagCache[_n] = obj;
                             return isCreateNew ? obj.Create() : obj;
                         }
-                    }
-                    obj = GetTagInstanceFromAssembly(nameSpace, tagName);
-                    if (obj != null)
-                    {
-                        tagCache[_n] = obj;
-                        return isCreateNew ? obj.Create() : obj;
                     }
                     return null;
                 }
@@ -95,7 +101,7 @@ namespace Com.AimUI.TagCore
         }
 
         private static string tagNameSpacesStr = "at";
-        private static Dictionary<string, TagLib<T>> tagLibColls = new Dictionary<string, TagLib<T>>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, TagLib<T>> tagLibColls = new Dictionary<string, TagLib<T>>(StringComparer.OrdinalIgnoreCase);
 
         private static void UpdateTagNameSpacesStr()
         {
@@ -128,16 +134,11 @@ namespace Com.AimUI.TagCore
         public static void RegisterTagLib(TagLib<T> tagLib)
         {
             string tagNameSpace = tagLib.nameSpace.ToLower();
-            if (tagLibColls.ContainsKey(tagNameSpace))
+            lock (syncRoot)
             {
                 tagLibColls[tagNameSpace] = tagLib;
+                UpdateTagNameSpacesStr();
             }
-            else
-            {
-                tagLibColls.Add(tagNameSpace, tagLib);
-            }
-
-            UpdateTagNameSpacesStr();
         }
         /// <summary>
         /// 取消注册标签命名空间
@@ -145,14 +146,11 @@ namespace Com.AimUI.TagCore
         /// <param name="tagNameSpace"></param>
         public static void UnRegisterTagNameSpace(string tagNameSpace)
         {
-            tagNameSpace = tagNameSpace.ToLower();
-            if (tagLibColls.ContainsKey(tagNameSpace))
+            if (string.IsNullOrEmpty(tagNameSpace)) return;
+            lock (syncRoot)
             {
-                TagLib<T> tagLib = tagLibColls[tagNameSpace];
-
                 tagLibColls.Remove(tagNameSpace);
             }
-            UpdateTagNameSpacesStr();
         }
 
 
@@ -185,9 +183,14 @@ namespace Com.AimUI.TagCore
 
         public static TagLib<T> GetTagLib(string tagNameSpace)
         {
-            TagLib<T> tagLib;
-            tagLibColls.TryGetValue(tagNameSpace, out tagLib);
-            return tagLib;
+            try
+            {
+                return tagLibColls[tagNameSpace];
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static ITag<T> GetTagInstance(string nameSpace, string tagName, bool isCreateNew = true)

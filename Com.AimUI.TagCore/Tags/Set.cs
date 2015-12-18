@@ -110,10 +110,20 @@ namespace Com.AimUI.TagCore.Tags
                     if (userData == null) return null;
                     SetValues(userData);
                     return null;
+                case "get":
                 case "gets":
                     if (userData == null) return sets;
                     if (sets == null) return null;
-                    return GetValues(userData);
+                    if (userData.Length == 1 && paramName=="get")
+                    {
+                        string n = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(n)) return n;
+                        return GetValue(n);
+                    }
+                    else
+                    {
+                        return GetValues(userData);
+                    }
                 case "set":
                     if (userData != null && userData.Length == 2)
                     {
@@ -158,12 +168,17 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        IDictionary<string,object> GetValues(params object[] names)
+        object GetValue(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+            return GetValue(name, null);
+        }
+        IDictionary<string, object> GetValues(object[] names)
         {
             if (names == null || names.Length == 0) return null;
             if (sets == null) return null;
-            IDictionary<string, object> colls = new Dictionary<string, object>(names.Length, StringComparer.OrdinalIgnoreCase);
             string name;
+            IDictionary<string, object> colls = new Dictionary<string, object>(names.Length, StringComparer.OrdinalIgnoreCase);
             foreach (object o in names)
             {
                 name = Convert.ToString(o);

@@ -3,44 +3,57 @@ using System.Collections.Generic;
 
 namespace Com.AimUI.TagCore
 {
-    public class TagCache<T> : Dictionary<string, ITag<T>> where T : TagContext
+    public class TagCache<T> where T : TagContext
     {
+        private readonly object syncRoot = new object();
+        private readonly Dictionary<string, ITag<T>> innerD = new Dictionary<string, ITag<T>>(StringComparer.OrdinalIgnoreCase);
         public TagCache()
-            : base(StringComparer.OrdinalIgnoreCase)
         {
         }
-        public new ITag<T> this[string Key]
+        public ITag<T> this[string Key]
         {
             get
             {
-                ITag<T> ret;
-                if (base.TryGetValue(Key, out ret)) //查找标签缓存
+                try
                 {
-                    return ret;
+                    return innerD[Key];
                 }
-                else
+                catch
                 {
                     return null;
                 }
             }
             set
             {
-                ITag<T> ret;
-                if (base.TryGetValue(Key, out ret))
+                lock (syncRoot)
                 {
-                    base[Key] = value;
-                }
-                else
-                {
-                    base.Add(Key, value);
+                    innerD[Key] = value;
                 }
             }
 
         }
-
-        public void RemoveXNLTag(string XNLKey)
+        public void Add(string key, ITag<T> value)
         {
-            this.Remove(XNLKey);
+            lock (syncRoot)
+            {
+                innerD.Add(key, value);
+            }
+        }
+
+        public bool Remove(string key)
+        {
+            lock (syncRoot)
+            {
+                return innerD.Remove(key);
+            }
+        }
+
+        public bool Remove(KeyValuePair<string, ITag<T>> item)
+        {
+            lock (syncRoot)
+            {
+                return ((ICollection<KeyValuePair<string, ITag<T>>>)innerD).Remove(item);
+            }
         }
     }
 }
