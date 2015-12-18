@@ -398,9 +398,10 @@ namespace Com.AimUI.TagCore.Tags
                 IDictionary<string, object> colls = obj as IDictionary<string, object>;
                 if (colls != null)
                 {
-                    if (colls.TryGetValue(prop, out obj))
+                    object outObj;
+                    if (colls.TryGetValue(prop, out outObj))
                     {
-                        return obj;
+                        return outObj;
                     }
                     foreach (KeyValuePair<string, object> kv in colls)
                     {
@@ -409,9 +410,11 @@ namespace Com.AimUI.TagCore.Tags
                             return kv.Value;
                         }
                     }
+                    return null;
                 }
-                
-                return obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Instance).GetValue(obj, null);
+                PropertyInfo propertyInfo=obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty|BindingFlags.GetField | BindingFlags.Instance);
+                if (propertyInfo != null) return propertyInfo.GetValue(obj, null);
+                return null;
             }
             catch
             {

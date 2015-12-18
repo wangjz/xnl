@@ -15,12 +15,12 @@ namespace Com.AimUI.TagCore
             get
             {
                 string tagParam;
-                this.TryGetValue(key, out tagParam);
+                base.TryGetValue(key, out tagParam);
                 return tagParam;
             }
             set
             {
-                this[key] = value;
+                base[key] = value;
             }
         }
     }
