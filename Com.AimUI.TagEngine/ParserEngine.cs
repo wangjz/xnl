@@ -292,7 +292,7 @@ namespace Com.AimUI.TagEngine
                             else if (IsNullOrWhiteSpace(instanceName))
                             {
                                 string oldInsName = tagObj.instanceName;
-                                if (tagObj.tagContext==null)
+                                if (tagObj.tagContext == null)
                                 {
                                     tagObj.tagContext = tagContext;
                                     instanceName = "__" + tagId;
@@ -983,7 +983,7 @@ namespace Com.AimUI.TagEngine
                     {
                         strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
                     }
-       
+
                     strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
                     strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
@@ -1388,7 +1388,7 @@ namespace Com.AimUI.TagEngine
             return _count;
         }
 
-        static ITag<T> FindTag(Dictionary<string, ITag<T>> tags,string tagOrInstanceName,string fullTagName=null)
+        static ITag<T> FindTag(Dictionary<string, ITag<T>> tags, string tagOrInstanceName, string fullTagName = null)
         {
             if (tags == null) return null;
             ITag<T> tag;
@@ -1444,7 +1444,7 @@ namespace Com.AimUI.TagEngine
                 }
             }
             isOk = tag != null;
-            
+
             if (isOk)
             {
                 string args_str = null;
