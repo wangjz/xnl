@@ -977,13 +977,12 @@ namespace Com.AimUI.TagEngine
                     if (isNew)
                     {
                         strBuilder.Insert(0, "Com.AimUI.TagCore.ITag<T> " + expVarName + "= null;\n");
-                        strBuilder.AppendLine("\nif(" + expVarName + " == null){\n" + expVarName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
+                        strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
                     }
                     else
                     {
-                        strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
+                        strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
                     }
-
                     strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
                     strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
