@@ -47,7 +47,7 @@ namespace Com.AimUI.TagCore.Tags
             _tagDelegate = tagDelegate;
         }
 
-        private string GetBody()
+        protected string GetBody()
         {
             if (_tagDelegate == null) return null;
             if (body != null) return body;

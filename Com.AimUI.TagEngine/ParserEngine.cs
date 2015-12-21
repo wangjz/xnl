@@ -983,11 +983,11 @@ namespace Com.AimUI.TagEngine
                     {
                         strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
                     }
-                    strBuilder.AppendLine(expVarName + ".tagContext = tagContext;");
-                    strBuilder.AppendLine(expVarName + ".instanceName = \"" + expVarName + "\";");
+                    strBuilder.AppendLine(tagObj.instanceName + ".tagContext = tagContext;");
+                    strBuilder.AppendLine(tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";");
                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
                     {
-                        strBuilder.AppendLine(expVarName + ".OnInit();\n}");
+                        strBuilder.AppendLine(tagObj.instanceName + ".OnInit();\n}");
                     }
                     else
                     {
