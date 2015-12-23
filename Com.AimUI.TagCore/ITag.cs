@@ -62,12 +62,6 @@ namespace Com.AimUI.TagCore
         /// <returns></returns>
         object GetAttribute(string paramName, object[] userData = null);
         /// <summary>
-        /// 是否支持某属性
-        /// </summary>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-        bool ExistAttribute(string paramName);
-        /// <summary>
         /// 创建
         /// </summary>
         /// <returns></returns>

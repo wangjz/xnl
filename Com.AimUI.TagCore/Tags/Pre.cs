@@ -53,11 +53,6 @@ namespace Com.AimUI.TagCore.Tags
             return null;
         }
 
-        public bool ExistAttribute(string paramName)
-        {
-            return false;
-        }
-
         public ITag<T> Create()
         {
             return new Pre<T>();

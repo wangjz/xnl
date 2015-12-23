@@ -15,21 +15,21 @@ namespace Com.AimUI.TagCore
         Express, 
     }
 
-    public enum TagScopeType
-    {
-        /// <summary>
-        /// 当前域
-        /// </summary>
-        Current,
-        /// <summary>
-        /// 命名空间域 匿名
-        /// </summary>
-        NameScape,
-        /// <summary>
-        /// 标签实例 命名
-        /// </summary>
-        Instance
-    }
+    //public enum TagScopeType
+    //{
+    //    /// <summary>
+    //    /// 当前域
+    //    /// </summary>
+    //    Current,
+    //    /// <summary>
+    //    /// 命名空间域 匿名
+    //    /// </summary>
+    //    NameScape,
+    //    /// <summary>
+    //    /// 标签实例 命名
+    //    /// </summary>
+    //    Instance
+    //}
 
     public class TagToken
     {
@@ -38,11 +38,14 @@ namespace Com.AimUI.TagCore
         /// </summary>
         public TagTokenType type { get; set; }
 
-        private string _name;
+        protected string _tagName;
+        public virtual string tagName { get; set; }
+
+        protected string _name;
         /// <summary>
         /// 名称
         /// </summary>
-        public string name
+        public virtual string name
         {
             get
             {
@@ -61,15 +64,20 @@ namespace Com.AimUI.TagCore
             }
         }
 
-        private string _scope;
         /// <summary>
-        /// 域名称  标签所在实例名称  或 标签名称
+        /// 域名称  标签所在命名空间
         /// </summary>
-        public virtual string scope 
+        public virtual string scope { get; set; }
+
+        protected string _instance;
+        /// <summary>
+        /// 实例名称
+        /// </summary>
+        public virtual string instanceName 
         {
             get
             {
-                return _scope;
+                return _instance;
             }
             set
             {
@@ -78,14 +86,13 @@ namespace Com.AimUI.TagCore
                     char c = value[0];
                     if (c > 47 && c < 58)
                     {
-                        _scope = "_" + value;
+                        _instance = "_" + value;
                     }
-                    else _scope = value;
+                    else _instance = value;
                 }
-                else _scope = value;
+                else _instance = value;
             }
         }
-
         /// <summary>
         /// 在内容中的位置
         /// </summary>

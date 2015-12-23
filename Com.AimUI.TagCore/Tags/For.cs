@@ -17,15 +17,15 @@ namespace Com.AimUI.TagCore.Tags
 
         public string str { get; set; }
 
-        private bool isChange = false;
+        protected bool isChange = false;
 
         public int step = 1;
 
-        private int pos = 0;
+        protected int pos = 0;
 
-        private IList list;
+        protected IList list;
 
-        private object item;
+        protected object item;
 
         //private bool _break = false;
         public T tagContext
@@ -169,6 +169,17 @@ namespace Com.AimUI.TagCore.Tags
                     if (list != null) return list.Count;
                     return 0;
                 case "list":
+                    if (userData != null)
+                    {
+                        string[] props = new string[userData.Length];
+                        for (int j = 0; j < userData.Length; j++)
+                        {
+                            paramName = Convert.ToString(userData[j]);
+                            if (string.IsNullOrEmpty(paramName)) return null;
+                            props[j] = paramName;
+                        }
+                        return Set<T>.ComplexQueryValue(list, props);
+                    }
                     return list;
                 case "split":
                     return split;
@@ -217,10 +228,6 @@ namespace Com.AimUI.TagCore.Tags
         public virtual ITag<T> Create()
         {
             return new For<T>();
-        }
-        public virtual bool ExistAttribute(string paramName)
-        {
-            return true;
         }
 
         public virtual string subTagNames

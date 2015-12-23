@@ -98,6 +98,17 @@ namespace Com.AimUI.TagCore.Tags
             switch (paramName)
             {
                 case "list":
+                    if (userData != null)
+                    {
+                        string[] props = new string[userData.Length];
+                        for (int j = 0; j < userData.Length; j++)
+                        {
+                            paramName = Convert.ToString(userData[j]);
+                            if (string.IsNullOrEmpty(paramName)) return null;
+                            props[j] = paramName;
+                        }
+                        return Set<T>.ComplexQueryValue(list, props);
+                    }
                     return list;
                 case "i":
                     return i;
@@ -151,11 +162,6 @@ namespace Com.AimUI.TagCore.Tags
                 }
             }
             return null;
-        }
-
-        public virtual bool ExistAttribute(string paramName)
-        {
-            return true;
         }
 
         public virtual ITag<T> Create()

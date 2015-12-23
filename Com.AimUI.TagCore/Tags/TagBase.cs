@@ -58,11 +58,6 @@ namespace Com.AimUI.TagCore.Tags
             return null;
         }
 
-        public virtual bool ExistAttribute(string paramName)
-        {
-            return true;
-        }
-
         public virtual ITag<T> Create()
         {
             return Activator.CreateInstance(this.GetType()) as TagBase<T>;

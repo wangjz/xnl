@@ -182,12 +182,6 @@ namespace Com.AimUI.TagCore.Tags
             return new If<T>();
         }
 
-        public virtual bool ExistAttribute(string paramName)
-        {
-            if (paramName == "a" || paramName == "b" || paramName == "test" || paramName == "value") return true;
-            return false;
-        }
-
         public virtual string subTagNames
         {
             get

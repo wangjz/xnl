@@ -239,6 +239,24 @@ namespace Com.AimUI.TagCore.Tags
                                 to += src;
                             }
                             return to;
+                        case "redirect":
+                            if (userData == null) return null;
+                            string url = Convert.ToString(userData[0]);
+                            bool end = true;
+                            if (userData.Length > 1)
+                            {
+                                if (userData[1] is bool)
+                                {
+                                    end = Convert.ToBoolean(userData[1]);
+                                }
+                                else
+                                {
+                                    string s = Convert.ToString(userData[1]);
+                                    end = (s == "1" || string.Compare(s, "true", true) == 0);
+                                }
+                            }
+                            HttpContext.Current.Response.Redirect(url, end);
+                            return null;
                     }
                     break;
                 case 'n':
@@ -343,11 +361,6 @@ namespace Com.AimUI.TagCore.Tags
                 }
             }
             return null;
-        }
-
-        public virtual bool ExistAttribute(string paramName)
-        {
-            return false;
         }
 
         public virtual ITag<T> Create()

@@ -3,15 +3,16 @@ namespace Com.AimUI.TagCore
 {
     public class TagExpression : TagToken
     {
+
+        protected string _scope;
         /// <summary>
-        /// 标签名称
+        /// 域名称 
         /// </summary>
-        private string _scope = "at";
         public override string scope
         {
             get
             {
-                return _scope;
+                return string.IsNullOrEmpty(_scope) ? "at" : _scope;
             }
             set
             {
@@ -26,12 +27,14 @@ namespace Com.AimUI.TagCore
             }
         }
 
-        private string _tagName = "exp";
-        public string tagName
+        /// <summary>
+        /// 标签名称
+        /// </summary>
+        public override string tagName
         {
             get
             {
-                return _tagName;
+                return _tagName ?? "exp";
             }
             set
             {

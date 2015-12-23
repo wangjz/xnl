@@ -250,11 +250,6 @@ namespace Com.AimUI.TagCore.Tags
             return new Set<T>();
         }
 
-        public virtual bool ExistAttribute(string paramName)
-        {
-            return true;
-        }
-
         public virtual string subTagNames
         {
             get
