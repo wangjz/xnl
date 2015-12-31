@@ -469,11 +469,11 @@ namespace Com.AimUI.TagEngine
                                         tagObj.curTag = tmpSubTag.tagName;
                                         if (tmpSubTag.tagParams != null)
                                         {
+                                            if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
                                             ParseTagParams(tagContext, strBuilder, tmpSubTag.tagParams, tagObj, instanceName, tmpSubTag, tagsObj, isDynamic);
                                         }
                                         if (isDynamic)
                                         {
-                                            strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
                                             if ((tagObj.events & TagEvents.Tag) == TagEvents.Tag)
                                             {
                                                 if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
