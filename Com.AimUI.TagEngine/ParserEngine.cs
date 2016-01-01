@@ -457,7 +457,8 @@ namespace Com.AimUI.TagEngine
                                     tmpSubTag.tagObj = tagObj;
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
-                                        tagObj.curTag = "";
+                                        tagObj.curTag = null;
+                                        if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = null;");
                                         if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
                                         {
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
@@ -467,9 +468,9 @@ namespace Com.AimUI.TagEngine
                                     else
                                     {
                                         tagObj.curTag = tmpSubTag.tagName;
+                                        if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
                                         if (tmpSubTag.tagParams != null)
                                         {
-                                            if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = @\"" + tmpSubTag.tagName + "\";");
                                             ParseTagParams(tagContext, strBuilder, tmpSubTag.tagParams, tagObj, instanceName, tmpSubTag, tagsObj, isDynamic);
                                         }
                                         if (isDynamic)
