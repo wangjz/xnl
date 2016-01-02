@@ -457,10 +457,10 @@ namespace Com.AimUI.TagEngine
                                     tmpSubTag.tagObj = tagObj;
                                     if (string.IsNullOrEmpty(tmpSubTag.tagName))
                                     {
-                                        tagObj.curTag = null;
-                                        if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = null;");
                                         if (IsNullOrWhiteSpace(tmpSubTag.bodyContent) == false)
                                         {
+                                            tagObj.curTag = null;
+                                            if (isDynamic) strBuilder.AppendLine(instanceName + ".curTag = null;");
                                             TagContext.SetItem(tagContext, "$__tagid", tagId);
                                             OnTagAction(tagObj, tmpSubTag, tagsObj, isDynamic);
                                         }
