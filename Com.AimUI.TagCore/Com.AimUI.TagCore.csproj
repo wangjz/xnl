@@ -53,6 +53,7 @@
     <Compile Include="Tags\Each.cs" />
     <Compile Include="Tags\Exp.cs" />
     <Compile Include="Tags\For.cs" />
+    <Compile Include="Tags\Func.cs" />
     <Compile Include="Tags\If.cs" />
     <Compile Include="Tags\IInclude.cs" />
     <Compile Include="Tags\ListTag.cs" />
