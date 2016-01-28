@@ -7,13 +7,14 @@ namespace Com.AimUI.TagCore.Tags
         /// <summary>
         /// 是否输出
         /// </summary>
-        bool output = true;
+        protected bool output = true;
+        protected string src;
         public override ITag<T> Create()
         {
             return new Inc<T>();
         }
 
-        public virtual string GetTagBody(string src)
+        public virtual string GetTagBody(string innerBody)
         {
             if (string.IsNullOrEmpty(src)) return null;
             if (src.EndsWith(".ascx") == false) return null;
@@ -49,6 +50,11 @@ namespace Com.AimUI.TagCore.Tags
                 output = (v == "1" || string.Compare(v, "true", true) == 0);
                 return;
             }
+            else if (paramName == "src")
+            {
+                src = Convert.ToString(value);
+                return;
+            }
             base.SetAttribute(paramName, value);
         }
 
@@ -62,6 +68,10 @@ namespace Com.AimUI.TagCore.Tags
             else if (paramName == "output")
             {
                 return output;
+            }
+            else if (paramName == "src")
+            {
+                return src;
             }
             return base.GetAttribute(paramName, userData);
         }

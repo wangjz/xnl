@@ -347,7 +347,7 @@ namespace Com.AimUI.TagEngine
 
                                 if (IsNullOrWhiteSpace(incSrc) == false)
                                 {
-                                    string include = (tagObj as IInclude).GetTagBody(incSrc);
+                                    string include = (tagObj as IInclude).GetTagBody(curStruct.bodyContent);
 
                                     if (IsNullOrWhiteSpace(include) == false)
                                     {
@@ -925,7 +925,7 @@ namespace Com.AimUI.TagEngine
             return isTagNew;
         }
 
-        static bool InitExpressTagObj(string nameSpace, string tagName,string tokenInsName, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, out ITag<T> tagObj)
+        static bool InitExpressTagObj(string nameSpace, string tagName, string tokenInsName, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, out ITag<T> tagObj)
         {
             bool isNew = false;
             string expVarName = null;
@@ -934,6 +934,13 @@ namespace Com.AimUI.TagEngine
                 Dictionary<string, ITag<T>> nameTags = (Dictionary<string, ITag<T>>)TagContext.GetItem(tagContext, "$__nameTags");
                 tagObj = FindTag(nameTags, tagsObj, nameSpace, tagName, tokenInsName);
                 isNew = (tagObj == null);
+                if (isNew)
+                {
+                    GetTagInstance(nameSpace, tagName, tagsObj, out tagObj);
+                    tagObj = tagObj.Create();
+                    nameTags[nameSpace + ":" + tagName + "_" + tokenInsName] = tagObj;
+                    nameTags[tokenInsName] = tagObj;
+                }
                 expVarName = tokenInsName;
             }
             else
@@ -977,32 +984,25 @@ namespace Com.AimUI.TagEngine
                         if (string.IsNullOrEmpty(firstName) && firstName != tagObj.instanceName)
                         {
                             code += "if(" + tagObj.instanceName + " == null){\r\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));\r\n";
-                            //strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = (" + firstName + "!=null?" + firstName + ".Create():Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\"));");
                         }
                         else
                         {
                             code += "if(" + tagObj.instanceName + " == null){\r\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");\r\n";
-                            //strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
                         }
                     }
                     else
                     {
                         code += "if(" + tagObj.instanceName + " == null){\r\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");\r\n";
-                        //strBuilder.AppendLine("\nif(" + tagObj.instanceName + " == null){\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");");
                     }
                     code += tagObj.instanceName + ".tagContext = tagContext;\r\n";
                     code += tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";\r\n";
-                    //strBuilder.AppendLine(tagObj.instanceName + ".tagContext = tagContext;");
-                    //strBuilder.AppendLine(tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";");
                     if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
                     {
                         code += tagObj.instanceName + ".OnInit();\r\n}\r\n";
-                        //strBuilder.AppendLine(tagObj.instanceName + ".OnInit();\n}");
                     }
                     else
                     {
                         code += "}\r\n";
-                        //strBuilder.AppendLine("}");
                     }
                     if (strBuilder.Length >= code.Length)
                     {
@@ -1014,7 +1014,7 @@ namespace Com.AimUI.TagEngine
                     else
                     {
                         strBuilder.Append(code);
-                    }  
+                    }
                 }
                 else if (isNew)
                 {
@@ -1523,6 +1523,19 @@ namespace Com.AimUI.TagEngine
             string tagName = token.tagName;
             if (token.type == TagTokenType.Express)
             {
+                if (token.name == "null" && string.Compare("at", ns, true) == 0 && string.Compare("exp",tagName, true) == 0)
+                {
+                    if (isDynamic)
+                    {
+                        if (token.action == ValuePreAction.NONE) return "null";
+                        return "Com.AimUI.TagCore.TagContext.OnValuePreAction(null,Com.AimUI.TagCore.ValuePreAction." + token.action + ")";
+                    }
+                    else
+                    {
+                        if (token.action == ValuePreAction.NONE) return null;
+                        return TagContext.OnValuePreAction(null, token.action);
+                    }
+                }
                 InitExpressTagObj(ns, tagName,token.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj);
             }
 
@@ -1573,7 +1586,32 @@ namespace Com.AimUI.TagEngine
                                 ns = curToken.scope;
 
                                 tagName = curToken.tagName;
-
+                                if (curToken.name == "null" && string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
+                                {
+                                    if (isDynamic)
+                                    {
+                                        if (curToken.action == ValuePreAction.NONE)
+                                        {
+                                            args.Push("null");
+                                        }
+                                        else
+                                        {
+                                            args.Push("Com.AimUI.TagCore.TagContext.OnValuePreAction(null,Com.AimUI.TagCore.ValuePreAction." + curToken.action + ")");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (curToken.action == ValuePreAction.NONE)
+                                        {
+                                            args.Push(null);
+                                        }
+                                        else
+                                        {
+                                            args.Push(TagContext.OnValuePreAction(null, curToken.action));
+                                        }
+                                    }
+                                    continue;
+                                }
                                 InitExpressTagObj(ns, tagName,curToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
 
                                 if (curToken.name == "this")
@@ -1859,7 +1897,7 @@ namespace Com.AimUI.TagEngine
                 {
                     return ParseAttribule(token, tagObj, tagStruct, isDynamic, tagContext, tagsObj);
                 }
-
+                
                 if (token.name == "this")
                 {
                     return GetTagSelf(token, tagObj, isDynamic);

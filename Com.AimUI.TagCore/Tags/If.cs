@@ -43,12 +43,21 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual void OnEnd()
         {
-
+            if (_break > 1) _break = 1;
         }
 
         public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
-            if (_break == 2) return;
+            if (_break >= 2 & _break < 3)
+            {
+                _break += 1;
+                return;
+            }
+            else if (_break >= 3)
+            {
+                tagContext.GetTagResponse().Stop();
+                return;
+            }
             if (tagDelegate == null) return;
             if ("if" == curTag)
             {
@@ -318,7 +327,7 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual TagEvents events
         {
-            get { return TagEvents.Tag; }
+            get { return TagEvents.Tag | TagEvents.End; }
         }
     }
 }

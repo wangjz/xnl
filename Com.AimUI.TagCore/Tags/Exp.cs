@@ -208,13 +208,20 @@ namespace Com.AimUI.TagCore.Tags
                                 if ("isnull" == paramName) return (userData[0] == null ? userData[userData.Length - 1] : userData[0]);
                                 return string.IsNullOrEmpty(Convert.ToString(userData[0])) ? userData[userData.Length - 1] : userData[0];
                             }
-                            catch (Exception)
+                            catch
                             {
                                 return null;
                             }
                         case "int":
                             if (userData == null || userData.Length == 0) return null;
-                            return Convert.ToInt32(userData[0]);
+                            try
+                            {
+                                return Convert.ToInt32(userData[0]);
+                            }
+                            catch 
+                            {
+                                return 0;
+                            }
                     }
                     break;
                 case 'r':
