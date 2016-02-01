@@ -140,6 +140,39 @@ namespace Com.AimUI.TagCore.Tags
                 case "colls":
                 case "attrs":
                     return sets;
+                case "clear":
+                    sets.Clear();
+                    return null;
+                case "keys":
+                    return sets.Keys;
+                case "values":
+                    return sets.Values;
+                case "count":
+                    return sets.Count;
+                case "remove":
+                    if (userData == null) return null;
+                    if (userData.Length == 1)
+                    {
+                        string s = Convert.ToString(userData[0]);
+                        if (string.IsNullOrEmpty(s) == false)
+                        {
+                            return sets.Remove(s);
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        string s = null;
+                        foreach (object o in userData)
+                        {
+                            s = Convert.ToString(o);
+                            if (string.IsNullOrEmpty(s) == false)
+                            {
+                                sets.Remove(s);
+                            }
+                        }
+                    }
+                    return null;
                 default:
                     return GetValue(paramName, userData);
             }

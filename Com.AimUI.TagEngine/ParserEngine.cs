@@ -347,7 +347,7 @@ namespace Com.AimUI.TagEngine
 
                                 if (IsNullOrWhiteSpace(incSrc) == false)
                                 {
-                                    string include = (tagObj as IInclude).GetTagBody(curStruct.bodyContent);
+                                    string include = (tagObj as IInclude).GetTagBody(incSrc,curStruct.bodyContent);
 
                                     if (IsNullOrWhiteSpace(include) == false)
                                     {
@@ -1523,17 +1523,39 @@ namespace Com.AimUI.TagEngine
             string tagName = token.tagName;
             if (token.type == TagTokenType.Express)
             {
-                if (token.name == "null" && string.Compare("at", ns, true) == 0 && string.Compare("exp",tagName, true) == 0)
+                if (string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
                 {
-                    if (isDynamic)
+                    object baseValue = null;
+                    bool isBaseType = false;
+                    string baseValueS = "null";
+                    if (token.name == "null")
                     {
-                        if (token.action == ValuePreAction.NONE) return "null";
-                        return "Com.AimUI.TagCore.TagContext.OnValuePreAction(null,Com.AimUI.TagCore.ValuePreAction." + token.action + ")";
+                        isBaseType = true;
                     }
-                    else
+                    else if (token.name == "true")
                     {
-                        if (token.action == ValuePreAction.NONE) return null;
-                        return TagContext.OnValuePreAction(null, token.action);
+                        isBaseType = true;
+                        baseValue = true;
+                        baseValueS = "true";
+                    }
+                    else if (token.name == "false")
+                    {
+                        isBaseType = true;
+                        baseValue = false;
+                        baseValueS = "false";
+                    }
+                    if (isBaseType)
+                    {
+                        if (isDynamic)
+                        {
+                            if (token.action == ValuePreAction.NONE) return baseValueS;
+                            return "Com.AimUI.TagCore.TagContext.OnValuePreAction(" + baseValueS + ",Com.AimUI.TagCore.ValuePreAction." + token.action + ")";
+                        }
+                        else
+                        {
+                            if (token.action == ValuePreAction.NONE) return baseValue;
+                            return TagContext.OnValuePreAction(baseValue, token.action);
+                        }
                     }
                 }
                 InitExpressTagObj(ns, tagName,token.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj);
@@ -1586,31 +1608,53 @@ namespace Com.AimUI.TagEngine
                                 ns = curToken.scope;
 
                                 tagName = curToken.tagName;
-                                if (curToken.name == "null" && string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
+                                if (string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
                                 {
-                                    if (isDynamic)
+                                    object baseValue = null;
+                                    bool isBaseType = false;
+                                    string baseValueS = "null";
+                                    if (token.name == "null")
                                     {
-                                        if (curToken.action == ValuePreAction.NONE)
+                                        isBaseType = true;
+                                    }
+                                    else if (token.name == "true")
+                                    {
+                                        isBaseType = true;
+                                        baseValue = true;
+                                        baseValueS = "true";
+                                    }
+                                    else if (token.name == "false")
+                                    {
+                                        isBaseType = true;
+                                        baseValue = false;
+                                        baseValueS = "false";
+                                    }
+                                    if (isBaseType)
+                                    {
+                                        if (isDynamic)
                                         {
-                                            args.Push("null");
+                                            if (curToken.action == ValuePreAction.NONE)
+                                            {
+                                                args.Push(baseValueS);
+                                            }
+                                            else
+                                            {
+                                                args.Push("Com.AimUI.TagCore.TagContext.OnValuePreAction(" + baseValueS + ",Com.AimUI.TagCore.ValuePreAction." + curToken.action + ")");
+                                            }
                                         }
                                         else
                                         {
-                                            args.Push("Com.AimUI.TagCore.TagContext.OnValuePreAction(null,Com.AimUI.TagCore.ValuePreAction." + curToken.action + ")");
+                                            if (curToken.action == ValuePreAction.NONE)
+                                            {
+                                                args.Push(baseValue);
+                                            }
+                                            else
+                                            {
+                                                args.Push(TagContext.OnValuePreAction(baseValue, curToken.action));
+                                            }
                                         }
+                                        continue;
                                     }
-                                    else
-                                    {
-                                        if (curToken.action == ValuePreAction.NONE)
-                                        {
-                                            args.Push(null);
-                                        }
-                                        else
-                                        {
-                                            args.Push(TagContext.OnValuePreAction(null, curToken.action));
-                                        }
-                                    }
-                                    continue;
                                 }
                                 InitExpressTagObj(ns, tagName,curToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
 

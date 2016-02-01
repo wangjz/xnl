@@ -14,8 +14,9 @@ namespace Com.AimUI.TagCore.Tags
             return new Inc<T>();
         }
 
-        public virtual string GetTagBody(string innerBody)
+        public virtual string GetTagBody(string _src, string innerBody)
         {
+            if (string.IsNullOrEmpty(src) && string.IsNullOrEmpty(_src) == false) src = _src;
             if (string.IsNullOrEmpty(src)) return null;
             if (src.EndsWith(".ascx") == false) return null;
             return System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + src);
