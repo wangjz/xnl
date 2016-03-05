@@ -912,14 +912,7 @@ namespace Com.AimUI.TagEngine
             if (tagsObj.TryGetValue(fullTagName, out tagObj) == false)
             {
                 isTagNew = true;
-                try
-                {
-                    tagObj = TagLib<T>.GetTagInstance(nameSpace, tagName);
-                }
-                catch
-                {
-                    throw (new TagParseException("未找到标签" + fullTagName + "的实现"));
-                }
+                tagObj = TagLib<T>.GetTagInstance(nameSpace, tagName);
                 tagsObj[fullTagName] = tagObj;
             }
             return isTagNew;

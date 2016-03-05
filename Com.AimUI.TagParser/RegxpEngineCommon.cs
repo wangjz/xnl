@@ -266,6 +266,33 @@ namespace Com.AimUI.TagParser
             {
 
                 tokenValue = match.Groups[2].Value;
+                //临时性修复包含 '}' 字符 解析错误
+                int rInx = (match.Index + match.Value.Length);
+                string trueValue = null;
+                int? trueLen = null;
+                if (tokenValue.IndexOf('(') != -1 && tokenValue.IndexOf(')') == -1 && contentStr.Length > rInx)
+                {
+                    int _inx1 = contentStr.IndexOf(')', rInx);
+                    if (_inx1 != -1)
+                    {
+                        int _inx2 = contentStr.IndexOf('}', _inx1 + 1);
+                        if (_inx2 != -1)
+                        {
+                            if (_inx2 - _inx1 == 1 || (_inx2 - _inx1 > 1 && contentStr.Substring(_inx1 + 1, _inx2 - _inx1 - 1).Trim().Length == 0))
+                            {
+                                int addLen = _inx2 - rInx + 1;
+                                if (contentStr.Length > (_inx2 + 1) && contentStr[_inx2 + 1] == ';')
+                                {
+                                    addLen += 1;
+                                }
+                                trueLen = match.Length + addLen;
+                                string added=contentStr.Substring(rInx, addLen);
+                                trueValue = match.Value + added;
+                                tokenValue = tokenValue + "}" + added.Substring(0, _inx1 - rInx + 1);
+                            }
+                        }
+                    }
+                }
                 char act_char = tokenValue[0];
                 if (act_char == (char)ValuePreAction.JSON_Serialize)
                 {
@@ -300,10 +327,10 @@ namespace Com.AimUI.TagParser
                         token.type = TagTokenType.Express;
                         break;
                 }
-                token.value = match.Value;
+                token.value = trueValue ?? match.Value;
                 token.action = valuePreAction;
                 token.index = match.Index;
-                token.length = match.Length;
+                token.length = trueLen ?? match.Length;
                 tokens.Add(token);
             }
             return tokens;
