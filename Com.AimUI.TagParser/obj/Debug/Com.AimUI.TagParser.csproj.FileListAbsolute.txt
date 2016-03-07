@@ -9,6 +9,6 @@ C:\WorkSpace\AimUITag\Com.AimUI.TagParser\bin\Debug\Com.AimUI.TagParser.dll
 C:\WorkSpace\AimUITag\Com.AimUI.TagParser\bin\Debug\Com.AimUI.TagParser.pdb
 C:\WorkSpace\AimUITag\Com.AimUI.TagParser\bin\Debug\Com.AimUI.TagCore.dll
 C:\WorkSpace\AimUITag\Com.AimUI.TagParser\bin\Debug\Com.AimUI.TagCore.pdb
-C:\WorkSpace\AimUITag\Com.AimUI.TagParser\obj\Debug\Com.AimUI.TagParser.csprojResolveAssemblyReference.cache
 C:\WorkSpace\AimUITag\Com.AimUI.TagParser\obj\Debug\Com.AimUI.TagParser.dll
 C:\WorkSpace\AimUITag\Com.AimUI.TagParser\obj\Debug\Com.AimUI.TagParser.pdb
+C:\WorkSpace\AimUITag\Com.AimUI.TagParser\obj\Debug\Com.AimUI.TagParser.csprojResolveAssemblyReference.cache

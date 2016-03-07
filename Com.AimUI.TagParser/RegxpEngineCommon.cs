@@ -278,17 +278,36 @@ namespace Com.AimUI.TagParser
                         int _inx2 = contentStr.IndexOf('}', _inx1 + 1);
                         if (_inx2 != -1)
                         {
-                            if (_inx2 - _inx1 == 1 || (_inx2 - _inx1 > 1 && contentStr.Substring(_inx1 + 1, _inx2 - _inx1 - 1).Trim().Length == 0))
+                            int subLen = _inx2 - _inx1;
+                            if (subLen >= 1)
                             {
-                                int addLen = _inx2 - rInx + 1;
-                                if (contentStr.Length > (_inx2 + 1) && contentStr[_inx2 + 1] == ';')
+                                string sub = (subLen == 1 ? "" : null);
+                                if (subLen > 1)
                                 {
-                                    addLen += 1;
+                                    sub = contentStr.Substring(_inx1 + 1, _inx2 - _inx1 - 1).Trim();
                                 }
-                                trueLen = match.Length + addLen;
-                                string added=contentStr.Substring(rInx, addLen);
-                                trueValue = match.Value + added;
-                                tokenValue = tokenValue + "}" + added.Substring(0, _inx1 - rInx + 1);
+                                if (sub == "" || sub == ";")
+                                {
+                                    int addLen = _inx2 - rInx + 1;
+                                    trueLen = match.Length + addLen;
+                                    string added = contentStr.Substring(rInx, addLen);
+                                    trueValue = match.Value + added;
+                                    tokenValue = tokenValue + "}" + added.Substring(0, _inx1 - rInx + 1);
+                                    if (sub == ";")
+                                    {
+                                        int newline = contentStr.Length - _inx2 - 1;
+                                        if (newline >= 1 && contentStr[_inx2 + 1] == '\r')
+                                        {
+                                            trueLen += 1;
+                                            trueValue += "\r";
+                                            if (newline > 1 && contentStr[_inx2 + 2] == '\n')
+                                            {
+                                                trueLen += 1;
+                                                trueValue += "\n";
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
