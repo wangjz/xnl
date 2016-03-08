@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Com.AimUI.TagEngine", "Com.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Com.AimUI.TagParser", "Com.AimUI.TagParser\Com.AimUI.TagParser.csproj", "{8349CBF6-7F34-47C2-99DE-E3227516316F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Com.AimUI.Utils", "Com.AimUI.Utils\Com.AimUI.Utils.csproj", "{77C58368-3EDF-4C0B-BD22-7AEB1D4DFD5E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8349CBF6-7F34-47C2-99DE-E3227516316F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77C58368-3EDF-4C0B-BD22-7AEB1D4DFD5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77C58368-3EDF-4C0B-BD22-7AEB1D4DFD5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77C58368-3EDF-4C0B-BD22-7AEB1D4DFD5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77C58368-3EDF-4C0B-BD22-7AEB1D4DFD5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
