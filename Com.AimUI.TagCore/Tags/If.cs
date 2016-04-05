@@ -201,18 +201,21 @@ namespace Com.AimUI.TagCore.Tags
 
         public static bool LogicTest(object v1, object v2, string test)
         {
-            if (v1 == null && v2 == null)
+            if (v1 == null || v2 == null)
             {
-                if (test == "="||test=="eq")
+                if (test == "=" || test == "eq")
                 {
-                    return true;
+                    return (v1 == v2);
                 }
                 else if (test == "!=" || test == "ne")
+                {
+                    return (v1 != v2);
+                }
+                else
                 {
                     return false;
                 }
             }
-            if (v1 == null) return false;
             try
             {
                 double v;

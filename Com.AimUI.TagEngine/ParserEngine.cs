@@ -546,7 +546,7 @@ namespace Com.AimUI.TagEngine
                         }
                         catch (Exception e)
                         {
-                            throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (curStruct.instanceName == null ? "" : "#" + curStruct.instanceName) + "]:" + e.Message, e);
+                            throw new Exception("标签[" + curStruct.nameSpace + ":" + curStruct.tagName + (string.IsNullOrEmpty(curStruct.instanceName) ? "" : "#" + curStruct.instanceName) + "]:" + e.Message, e);
                         }
                     }
                 TagNext:
@@ -719,12 +719,16 @@ namespace Com.AimUI.TagEngine
                         var str = body.Substring(index, len);
                         if (isDynamic)
                         {
-                            strBuilder.Append("buffer.Append(@\"");
-                            strBuilder.Append(str.Replace("\"", "\"\""));
-                            strBuilder.AppendLine("\");");
+                            //if (str != "null")
+                            //{
+                                strBuilder.Append("buffer.Append(@\"");
+                                strBuilder.Append(str.Replace("\"", "\"\""));
+                                strBuilder.AppendLine("\");");
+                            //}
                         }
                         else
                         {
+                            //if (str != null && str.Length > 0) 
                             strBuilder.Append(str);
                         }
                     }
@@ -735,13 +739,13 @@ namespace Com.AimUI.TagEngine
                         object result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic, tagStruct, tagObj);
                         if (isDynamic)
                         {
+                            //if (result != null && result.ToString() != "null") 
                             strBuilder.AppendLine("buffer.Append(" + result + ");");
                         }
                         else
                         {
-                            strBuilder.Append(result);
+                            if (result != null) strBuilder.Append(result);
                         }
-
                     }
                     else
                     {
@@ -757,10 +761,12 @@ namespace Com.AimUI.TagEngine
 
                         if (isDynamic)
                         {
+                            //if (ret != null && ret.ToString() != "null") 
                             strBuilder.AppendLine("buffer.Append(" + ret + ");");
                         }
                         else
                         {
+                            //if (ret != null) 
                             strBuilder.Append(ret);
                         }
                     }
@@ -839,10 +845,12 @@ namespace Com.AimUI.TagEngine
                             object result = ParseTagToken(token, strBuilder, tagsObj, tagContext, isDynamic);
                             if (isDynamic)
                             {
+                                //if (result != null && result.ToString() != "null") 
                                 strBuilder.Append("buffer.Append(" + result + ");");
                             }
                             else
                             {
+                                //if (result != null) 
                                 strBuilder.Append(result);
                             }
                             break;
@@ -857,9 +865,12 @@ namespace Com.AimUI.TagEngine
                                 {
                                     if (isOk)
                                     {
-                                        strBuilder.Append("buffer.Append(");
-                                        strBuilder.Append(s);
-                                        strBuilder.AppendLine(");");
+                                        //if (s != null && s.ToString() != "null")
+                                        //{
+                                            strBuilder.Append("buffer.Append(");
+                                            strBuilder.Append(s);
+                                            strBuilder.AppendLine(");");
+                                        //}
                                     }
                                     else
                                     {
@@ -1183,7 +1194,8 @@ namespace Com.AimUI.TagEngine
                 {
                     if (string.IsNullOrEmpty(token.scope))
                     {
-                        return null;
+                        throw new Exception("无效表达式:{@" + token.value + "}");
+                        //return null;
                     }
                     else
                     {
@@ -1516,7 +1528,7 @@ namespace Com.AimUI.TagEngine
             string tagName = token.tagName;
             if (token.type == TagTokenType.Express)
             {
-                if (string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
+                if (token.args == null && string.Compare("at", ns, true) == 0 && string.Compare("exp", tagName, true) == 0)
                 {
                     object baseValue = null;
                     bool isBaseType = false;
@@ -1914,7 +1926,7 @@ namespace Com.AimUI.TagEngine
                         args_str = "new object[] { ";
                         for (var i = 0; i < _count; i++)
                         {
-                            string str = _args[i].ToString();
+                            string str = (_args[i] == null ? null : _args[i].ToString());
                             args_str += (i > 0 ? "," : "") + (string.IsNullOrEmpty(str) ? "\"\"" : str);
                         }
                         args_str += "}";
