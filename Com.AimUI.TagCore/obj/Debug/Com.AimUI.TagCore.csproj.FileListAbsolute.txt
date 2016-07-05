@@ -7,3 +7,4 @@ C:\WorkSpace\AimUITag\Com.AimUI.TagCore\bin\Debug\Com.AimUI.TagCore.dll
 C:\WorkSpace\AimUITag\Com.AimUI.TagCore\bin\Debug\Com.AimUI.TagCore.pdb
 C:\WorkSpace\AimUITag\Com.AimUI.TagCore\obj\Debug\Com.AimUI.TagCore.dll
 C:\WorkSpace\AimUITag\Com.AimUI.TagCore\obj\Debug\Com.AimUI.TagCore.pdb
+C:\WorkSpace\AimUITag\Com.AimUI.TagCore\obj\Debug\Com.AimUI.TagCore.csprojResolveAssemblyReference.cache

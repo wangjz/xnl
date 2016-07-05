@@ -11,32 +11,32 @@ namespace Com.AimUI.TagCore.Tags
             return new Date<T>();
         }
 
-        public override object GetAttribute(string paramName, object[] userData = null)
+        public override object GetAttribute(string paramName, object[] args = null)
         {
             switch (paramName)
             {
                 case "now":
-                    if (userData == null) return DateTime.Now.ToLocalTime();
+                    if (args == null) return DateTime.Now.ToLocalTime();
                     DateTime dt;
-                    DateTime.TryParse(Convert.ToString(userData[0]), out dt);
+                    DateTime.TryParse(Convert.ToString(args[0]), out dt);
                     return dt;
                 case "year":
-                    if (userData == null) return DateTime.Now.Year;
-                    DateTime.TryParse(Convert.ToString(userData[0]), out dt);
+                    if (args == null) return DateTime.Now.Year;
+                    DateTime.TryParse(Convert.ToString(args[0]), out dt);
                     return dt.Year;
                 case "month":
-                    if (userData == null) return DateTime.Now.Month;
-                    DateTime.TryParse(Convert.ToString(userData[0]), out dt);
+                    if (args == null) return DateTime.Now.Month;
+                    DateTime.TryParse(Convert.ToString(args[0]), out dt);
                     return dt.Month;
                 case "day":
-                    if (userData == null) return DateTime.Now.Day;
-                    DateTime.TryParse(Convert.ToString(userData[0]), out dt);
+                    if (args == null) return DateTime.Now.Day;
+                    DateTime.TryParse(Convert.ToString(args[0]), out dt);
                     return dt.Day;
                 case "today":
                     return DateTime.Today;
                 case "week":
-                    if (userData == null) return DateTime.Now.DayOfWeek;
-                    DateTime.TryParse(Convert.ToString(userData[0]), out dt);
+                    if (args == null) return DateTime.Now.DayOfWeek;
+                    DateTime.TryParse(Convert.ToString(args[0]), out dt);
                     return dt.DayOfWeek;
                 case "hour":
                     return DateTime.Now.Hour;

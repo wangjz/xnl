@@ -93,17 +93,17 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public virtual object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] args = null)
         {
             switch (paramName)
             {
                 case "list":
-                    if (userData != null)
+                    if (args != null)
                     {
-                        string[] props = new string[userData.Length];
-                        for (int j = 0; j < userData.Length; j++)
+                        string[] props = new string[args.Length];
+                        for (int j = 0; j < args.Length; j++)
                         {
-                            paramName = Convert.ToString(userData[j]);
+                            paramName = Convert.ToString(args[j]);
                             if (string.IsNullOrEmpty(paramName)) return null;
                             props[j] = paramName;
                         }
@@ -126,7 +126,7 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     return count;
                 default:
-                    return GetValue(paramName, userData);
+                    return GetValue(paramName, args);
             }
         }
 

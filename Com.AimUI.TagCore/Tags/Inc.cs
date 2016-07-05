@@ -59,7 +59,7 @@ namespace Com.AimUI.TagCore.Tags
             base.SetAttribute(paramName, value);
         }
 
-        public override object GetAttribute(string paramName, object[] userData = null)
+        public override object GetAttribute(string paramName, object[] args = null)
         {
             if (paramName == "body")
             {
@@ -74,7 +74,7 @@ namespace Com.AimUI.TagCore.Tags
             {
                 return src;
             }
-            return base.GetAttribute(paramName, userData);
+            return base.GetAttribute(paramName, args);
         }
     }
 }

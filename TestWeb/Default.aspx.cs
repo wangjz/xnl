@@ -30,14 +30,14 @@ namespace TestWeb
     </else>
 </at:if>";
             
-            var str = ParserEngine<TagContext>.Parse(temp, context);
+            var str = ParserEngine<TagContext>.ParseToString(temp, context);
             
             Response.Write(str);
 
             Response.Write("\n");
 
-            context.response.buffer.Remove(0, context.response.buffer.Length);
-            str = ParserEngine<TagContext>.Parse(temp, context, ParseMode.Dynamic);
+            context.GetTagResponse().buffer.Remove(0, context.GetTagResponse().buffer.Length);
+            str = ParserEngine<TagContext>.ParseToString(temp, context, ParseMode.Dynamic);
 
             Response.Write(str);
         }

@@ -142,7 +142,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public virtual object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] args = null)
         {
             switch (paramName)
             {
@@ -151,33 +151,33 @@ namespace Com.AimUI.TagCore.Tags
                 case "b":
                     return b;
                 case "test":
-                    if (userData == null) return test;
-                    if (userData.Length > 2) test = userData[2].ToString();
-                    bool _b = LogicTest(userData[0], userData.Length > 1 ? userData[1] : null, test);
-                    if (userData.Length <= 3) return _b;
+                    if (args == null) return test;
+                    if (args.Length > 2) test = args[2].ToString();
+                    bool _b = LogicTest(args[0], args.Length > 1 ? args[1] : null, test);
+                    if (args.Length <= 3) return _b;
                     if (_b)
                     {
-                        return userData[3];
+                        return args[3];
                     }
                     else
                     {
-                        if (userData.Length > 4) return userData[4];
+                        if (args.Length > 4) return args[4];
                     }
                     return null;
                 case "value":
                     return value;
                 case "iif":
-                    if (userData == null || userData.Length < 2) return null;
-                    if (userData[0] is bool)
+                    if (args == null || args.Length < 2) return null;
+                    if (args[0] is bool)
                     {
-                        _b = (bool)userData[0];
+                        _b = (bool)args[0];
                         if (_b)
                         {
-                            return userData[1];
+                            return args[1];
                         }
                         else
                         {
-                            if (userData.Length > 2) return userData[2];
+                            if (args.Length > 2) return args[2];
                         }
                     }
                     return null;

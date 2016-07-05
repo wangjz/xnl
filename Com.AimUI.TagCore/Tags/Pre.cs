@@ -48,7 +48,7 @@ namespace Com.AimUI.TagCore.Tags
         {
         }
 
-        public object GetAttribute(string paramName, object[] userData = null)
+        public object GetAttribute(string paramName, object[] args = null)
         {
             return null;
         }

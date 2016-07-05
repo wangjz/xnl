@@ -149,15 +149,15 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public override object GetAttribute(string paramName, object[] userData = null)
+        public override object GetAttribute(string paramName, object[] args = null)
         {
             switch (paramName)
             {
                 case "add":
-                    add(userData);
+                    add(args);
                     return null;
                 case "remove":
-                    remove(userData);
+                    remove(args);
                     return null;
                 case "addat":
                     //addAt()
@@ -167,14 +167,14 @@ namespace Com.AimUI.TagCore.Tags
                     return null;
                 case "get":
                 case "gets":
-                    if (userData == null || userData.Length == 0) return list;
+                    if (args == null || args.Length == 0) return list;
                     if (list == null) return null;
                     int start = 0;
-                    int.TryParse(Convert.ToString(userData[0]), out start);
+                    int.TryParse(Convert.ToString(args[0]), out start);
                     if (start >= list.Count) start = list.Count - 1;
                     if (start < 0) start = 0;
                     int count = list.Count;
-                    if (userData.Length > 1) int.TryParse(Convert.ToString(userData[1]), out count);
+                    if (args.Length > 1) int.TryParse(Convert.ToString(args[1]), out count);
                     if (start + count > list.Count) count = list.Count - start;
                     if (count <= 0) return null;
                     object[] objs=new object[count];
@@ -189,7 +189,7 @@ namespace Com.AimUI.TagCore.Tags
                 case "join":
                     if (list != null)
                     {
-                        if (userData == null)
+                        if (args == null)
                         {
                             return join(list);
                         }
@@ -197,23 +197,23 @@ namespace Com.AimUI.TagCore.Tags
                         {
                             start = -1;
                             count = -1;
-                            if (userData.Length > 1)
+                            if (args.Length > 1)
                             {
-                                if (userData[1] is int)
+                                if (args[1] is int)
                                 {
-                                    start = (int)userData[1];
+                                    start = (int)args[1];
                                 }
-                                else int.TryParse(Convert.ToString(userData[1]), out start);
+                                else int.TryParse(Convert.ToString(args[1]), out start);
                             }
-                            if (userData.Length > 2)
+                            if (args.Length > 2)
                             {
-                                if (userData[2] is int)
+                                if (args[2] is int)
                                 {
-                                    start = (int)userData[2];
+                                    start = (int)args[2];
                                 }
-                                else int.TryParse(Convert.ToString(userData[2]), out start);
+                                else int.TryParse(Convert.ToString(args[2]), out start);
                             }
-                            return join(list, userData.Length > 0 ? Convert.ToString(userData[0]) : ",", start, count);
+                            return join(list, args.Length > 0 ? Convert.ToString(args[0]) : ",", start, count);
                         }
                     }
                     return null;
@@ -227,11 +227,11 @@ namespace Com.AimUI.TagCore.Tags
                     return null;
                 case "set":
                 case "sets":
-                    if (userData == null || userData.Length == 0) return null;
+                    if (args == null || args.Length == 0) return null;
                     IEnumerable<object> _list;
-                    if (userData.Length == 1)
+                    if (args.Length == 1)
                     {
-                        _list = userData[0] as IEnumerable<object>;
+                        _list = args[0] as IEnumerable<object>;
                         if (_list != null)
                         {
                             list = new List<object>(_list);
@@ -239,21 +239,21 @@ namespace Com.AimUI.TagCore.Tags
                         else
                         {
                             if (list == null) list = new List<object>();
-                            list.Add(userData[0]);
+                            list.Add(args[0]);
                         }
                         return null;
                     }
-                    if (list == null) list = new List<object>(userData.Length);
-                    for (int i = 0; i < userData.Length; i++)
+                    if (list == null) list = new List<object>(args.Length);
+                    for (int i = 0; i < args.Length; i++)
                     {
-                        _list = userData[i] as IEnumerable<object>;
+                        _list = args[i] as IEnumerable<object>;
                         if (_list != null)
                         {
                             foreach (object obj in _list) list.Add(obj);
                         }
                         else
                         {
-                            list.Add(userData[i]);
+                            list.Add(args[i]);
                         }
                     }
                     return null;

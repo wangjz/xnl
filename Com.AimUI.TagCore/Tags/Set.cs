@@ -13,7 +13,7 @@ namespace Com.AimUI.TagCore.Tags
         protected string body;
         protected StringBuilder buffer;
         protected OnTagDelegate _tagDelegate;
-        protected object[] args;
+        protected object[] tagArgs;
         public T tagContext
         {
             get;
@@ -85,14 +85,14 @@ namespace Com.AimUI.TagCore.Tags
                     {
                         if (paramName == "args" && value is Array)
                         {
-                            args = value as object[];
+                            tagArgs = value as object[];
                         }
-                        else if (args != null)
+                        else if (tagArgs != null)
                         {
                             int i = -1;
-                            if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < args.Length)
+                            if (int.TryParse(paramName.Substring(3), out i) && i > 0 && (i - 1) < tagArgs.Length)
                             {
-                                args[i] = value;
+                                tagArgs[i] = value;
                                 return;
                             }
                         }
@@ -102,39 +102,39 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public virtual object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] args = null)
         {
             switch (paramName)
             {
                 case "sets":
-                    if (userData == null) return null;
-                    SetValues(userData);
+                    if (args == null) return null;
+                    SetValues(args);
                     return null;
                 case "get":
                 case "gets":
-                    if (userData == null) return sets;
+                    if (args == null) return sets;
                     if (sets == null) return null;
-                    if (userData.Length == 1 && paramName=="get")
+                    if (args.Length == 1 && paramName == "get")
                     {
-                        string n = Convert.ToString(userData[0]);
+                        string n = Convert.ToString(args[0]);
                         if (string.IsNullOrEmpty(n)) return n;
                         return GetValue(n);
                     }
                     else
                     {
-                        return GetValues(userData);
+                        return GetValues(args);
                     }
                 case "set":
-                    if (userData != null && userData.Length == 2)
+                    if (args != null && args.Length == 2)
                     {
-                        string key = Convert.ToString(userData[0]);
-                        if (string.IsNullOrEmpty(key) == false) sets[key] = userData[1];
+                        string key = Convert.ToString(args[0]);
+                        if (string.IsNullOrEmpty(key) == false) sets[key] = args[1];
                     }
                     return null;
                 case "body":
                     return GetBody();
                 case "call":
-                    args = userData;
+                    tagArgs = args;
                     body = null;
                     return GetBody();
                 case "colls":
@@ -149,11 +149,13 @@ namespace Com.AimUI.TagCore.Tags
                     return sets.Values;
                 case "count":
                     return sets.Count;
+                case "mix": //混合另一个集合
+                    return null;
                 case "remove":
-                    if (userData == null) return null;
-                    if (userData.Length == 1)
+                    if (args == null) return null;
+                    if (args.Length == 1)
                     {
-                        string s = Convert.ToString(userData[0]);
+                        string s = Convert.ToString(args[0]);
                         if (string.IsNullOrEmpty(s) == false)
                         {
                             return sets.Remove(s);
@@ -163,7 +165,7 @@ namespace Com.AimUI.TagCore.Tags
                     else
                     {
                         string s = null;
-                        foreach (object o in userData)
+                        foreach (object o in args)
                         {
                             s = Convert.ToString(o);
                             if (string.IsNullOrEmpty(s) == false)
@@ -174,7 +176,7 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     return null;
                 default:
-                    return GetValue(paramName, userData);
+                    return GetValue(paramName, args);
             }
         }
 
@@ -206,6 +208,7 @@ namespace Com.AimUI.TagCore.Tags
             if (string.IsNullOrEmpty(name)) return null;
             return GetValue(name, null);
         }
+
         IDictionary<string, object> GetValues(object[] names)
         {
             if (names == null || names.Length == 0) return null;
@@ -223,7 +226,7 @@ namespace Com.AimUI.TagCore.Tags
             return colls;
         }
 
-        protected virtual object GetValue(string paramName, object[] userData,ComplexQueryDelegate complexQueryFunc=null)
+        protected virtual object GetValue(string paramName, object[] args, ComplexQueryDelegate complexQueryFunc = null)
         {
             object obj = null;
             int inx = 0;
@@ -232,37 +235,37 @@ namespace Com.AimUI.TagCore.Tags
                 int i = -1;
                 if (paramName == "args")
                 {
-                    if (userData == null)
+                    if (args == null)
                     {
-                        obj = args;
+                        obj = tagArgs;
                     }
-                    else if (args != null && int.TryParse(userData[0].ToString(), out i) && i > 0 && (i - 1) < args.Length)
+                    else if (tagArgs != null && int.TryParse(args[0].ToString(), out i) && i > 0 && (i - 1) < tagArgs.Length)
                     {
-                        obj = args[i];
+                        obj = tagArgs[i];
                         inx = 1;
                     }
                 }
-                else if (int.TryParse(paramName.Substring(3), out i) && args != null && i > 0)
+                else if (int.TryParse(paramName.Substring(3), out i) && tagArgs != null && i > 0)
                 {
                     i = i - 1;
-                    if (i < args.Length) obj = args[i];
+                    if (i < tagArgs.Length) obj = tagArgs[i];
                 }
             }
             else
             {
                 sets.TryGetValue(paramName, out obj);
             }
-            if (userData == null) return obj;
+            if (args == null) return obj;
             if (obj != null)
             {
-                if (userData.Length > inx)
+                if (args.Length > inx)
                 {
                     try
                     {
-                        string[] props = new string[userData.Length - inx];
-                        for (int i = inx; i < userData.Length; i++)
+                        string[] props = new string[args.Length - inx];
+                        for (int i = inx; i < args.Length; i++)
                         {
-                            paramName = Convert.ToString(userData[i]);
+                            paramName = Convert.ToString(args[i]);
                             if (string.IsNullOrEmpty(paramName)) return null;
                             props[i - inx] = paramName;
                         }
@@ -338,11 +341,11 @@ namespace Com.AimUI.TagCore.Tags
                 {
                     int inx = prop.IndexOf('[');
                     if (inx == -1) return null;
-                    string nextProp=null;
+                    string nextProp = null;
                     if (inx == 0)
                     {
                         inx = prop.IndexOf(']');
-                        prop = prop.Substring(1, inx-1);
+                        prop = prop.Substring(1, inx - 1);
                         if (inx < prop.Length - 1)
                         {
                             //多个索引
@@ -358,7 +361,7 @@ namespace Com.AimUI.TagCore.Tags
                     if (prop.IndexOf(',') != -1)
                     {
                         string[] props = prop.Split(',');
-                        object[] objs=new object[props.Length];
+                        object[] objs = new object[props.Length];
                         for (i = 0; i < props.Length; i++)
                         {
                             objs[i] = GetValue(obj, props[i]);
@@ -403,7 +406,7 @@ namespace Com.AimUI.TagCore.Tags
                         {
                             if (i < coll.Count)
                             {
-                                
+
                                 foreach (object o in coll)
                                 {
                                     if (i == j) return o;
@@ -440,7 +443,7 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     return null;
                 }
-                PropertyInfo propertyInfo=obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty|BindingFlags.GetField | BindingFlags.Instance);
+                PropertyInfo propertyInfo = obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.GetField | BindingFlags.Instance);
                 if (propertyInfo != null) return propertyInfo.GetValue(obj, null);
                 return null;
             }

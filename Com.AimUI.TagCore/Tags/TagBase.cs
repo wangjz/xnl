@@ -53,7 +53,7 @@ namespace Com.AimUI.TagCore.Tags
             
         }
 
-        public virtual object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] args = null)
         {
             return null;
         }

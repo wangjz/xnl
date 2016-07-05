@@ -60,7 +60,7 @@ namespace Com.AimUI.TagCore
         /// <param name="paramName"></param>
         /// <param name="userData"></param>
         /// <returns></returns>
-        object GetAttribute(string paramName, object[] userData = null);
+        object GetAttribute(string paramName, object[] args = null);
         /// <summary>
         /// 创建
         /// </summary>

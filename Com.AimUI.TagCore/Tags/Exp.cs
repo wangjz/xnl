@@ -82,7 +82,7 @@ namespace Com.AimUI.TagCore.Tags
             }
         }
 
-        public virtual object GetAttribute(string paramName, object[] userData = null)
+        public virtual object GetAttribute(string paramName, object[] args = null)
         {
             if (string.IsNullOrEmpty(paramName)) return null;
             switch (paramName[0])
@@ -91,17 +91,17 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "get":
-                            if (userData == null || userData.Length < 1 || userData[0] == null) return null;
-                            return HttpContext.Current.Request.QueryString[userData[0].ToString()];
+                            if (args == null || args.Length < 1 || args[0] == null) return null;
+                            return HttpContext.Current.Request.QueryString[args[0].ToString()];
                         case "getvalue":
-                            return GetValue(userData);
+                            return GetValue(args);
                     }
                     break;
                 case 'p':
                     switch (paramName)
                     {
                         case "post":
-                            if (userData == null || userData.Length == 0 || userData[0] == null)
+                            if (args == null || args.Length == 0 || args[0] == null)
                             {
                                 HttpRequest req = HttpContext.Current.Request;
                                 int len = (int)req.InputStream.Length;
@@ -109,40 +109,121 @@ namespace Com.AimUI.TagCore.Tags
                                 req.InputStream.Read(buffer, 0, len);
                                 return req.ContentEncoding.GetString(buffer);
                             }
-                            return HttpContext.Current.Request.Form[userData[0].ToString()];
+                            return HttpContext.Current.Request.Form[args[0].ToString()];
                     }
                     break;
                 case 'l':
                     switch (paramName)
                     {
                         case "lower":
-                            if (userData == null || userData.Length < 1 || userData[0] == null) return null;
-                            return userData[0].ToString().ToLower();
+                            if (args == null || args.Length < 1 || args[0] == null) return null;
+                            return args[0].ToString().ToLower();
+                        case "list":
+                            if (args == null || args.Length < 2 || args[0] == null || args[1] == null) return null;
+                            IEnumerable<object> list = args[0] as IEnumerable<object>;
+                            if (list == null) return null;
+                            string key = Convert.ToString(args[1]);
+                            int intKey;
+                            bool isIntKey = int.TryParse(key, out intKey);
+                            if (isIntKey && intKey < 0) return null;
+                            bool isDistinct = true;
+                            if (args.Length > 2)
+                            {
+                                string v = Convert.ToString(args[2]);
+                                if (v == "0" || string.Compare("false", v, true) == 0)
+                                {
+                                    isDistinct = false;
+                                }
+                            }
+                            ArrayList newList = null;
+                            foreach (var item in list)
+                            {
+                                if (isIntKey)
+                                {
+                                    IList<object> _list = item as IList<object>;
+                                    if (_list != null)
+                                    {
+                                        if (intKey < _list.Count)
+                                        {
+                                            if (newList == null) newList = new ArrayList();
+                                            if (isDistinct)
+                                            {
+                                                object o=_list[intKey];
+                                                bool isHas = false;
+                                                for (int i = 0; i < newList.Count; i++)
+                                                {
+                                                    if (object.Equals(newList[i], o))
+                                                    {
+                                                        isHas = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (isHas == false) newList.Add(o);
+                                            }
+                                            else
+                                            {
+                                                newList.Add(_list[intKey]);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    IDictionary<string, object> _colls = item as IDictionary<string, object>;
+                                    if (_colls != null)
+                                    {
+                                        object o;
+                                        if (_colls.TryGetValue(key, out o))
+                                        {
+                                            if (newList == null) newList = new ArrayList();
+                                            if (isDistinct)
+                                            {
+                                                bool isHas = false;
+                                                for (int i = 0; i < newList.Count; i++)
+                                                {
+                                                    if (object.Equals(newList[i], o))
+                                                    {
+                                                        isHas = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if (isHas == false) newList.Add(o);
+                                            }
+                                            else
+                                            {
+                                                newList.Add(o);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (newList != null && newList.Count > 0) return newList;
+                            return null;
                     }
                     break;
                 case 'i':
                     switch (paramName)
                     {
                         case "indexof":
-                            if (userData == null || userData.Length < 2 || userData[0] == null) return null;
-                            if (userData[1] == null) return -1;
-                            return userData[0].ToString().IndexOf(userData[1].ToString());
+                            if (args == null || args.Length < 2 || args[0] == null) return -1;
+                            if (args[1] == null) return -1;
+                            return args[0].ToString().IndexOf(args[1].ToString());
                         case "iif":
-                            if (userData == null || userData.Length < 3) return null;
+                            if (args == null || args.Length < 3) return null;
                             if (dt == null) dt = new DataTable();
-                            if (userData.Length > 3)
+                            if (args.Length > 3)
                             {
                                 string str = "";
-                                for (int i = 0; i <= userData.Length - 3; i++)
+                                for (int i = 0; i <= args.Length - 3; i++)
                                 {
-                                    if (userData[i] == null)
+                                    if (args[i] == null)
                                     {
                                         str += "null";
                                     }
                                     else
                                     {
                                         int _v;
-                                        string _s = Convert.ToString(userData[i]);
+                                        string _s = Convert.ToString(args[i]);
                                         if (int.TryParse(_s, out _v) == false)
                                         {
                                             if (_s.IndexOfAny(chars) == -1)
@@ -157,14 +238,14 @@ namespace Com.AimUI.TagCore.Tags
                                     }
 
                                 }
-                                userData[0] = str;
+                                args[0] = str;
                             }
 
                             try
                             {
-                                string exp_s = Convert.ToString(userData[0]);
-                                string left_s = Convert.ToString(userData[userData.Length - 2]);
-                                string right_s = Convert.ToString(userData[userData.Length - 1]);
+                                string exp_s = Convert.ToString(args[0]);
+                                string left_s = Convert.ToString(args[args.Length - 2]);
+                                string right_s = Convert.ToString(args[args.Length - 1]);
 
                                 if (exp_s.IndexOfAny(chars) != -1)
                                 {
@@ -193,32 +274,32 @@ namespace Com.AimUI.TagCore.Tags
                             }
                         case "isnull":
                         case "isempty":
-                            if (userData == null || userData.Length < 2) return null;
-                            if (userData.Length > 2)
+                            if (args == null || args.Length < 2) return null;
+                            if (args.Length > 2)
                             {
                                 string str = "";
-                                for (int i = 0; i <= userData.Length - 2; i++)
+                                for (int i = 0; i <= args.Length - 2; i++)
                                 {
-                                    if (userData[i] != null) str += userData[i];
+                                    if (args[i] != null) str += args[i];
                                 }
-                                userData[0] = str;
+                                args[0] = str;
                             }
                             try
                             {
-                                if ("isnull" == paramName) return (userData[0] == null ? userData[userData.Length - 1] : userData[0]);
-                                return string.IsNullOrEmpty(Convert.ToString(userData[0])) ? userData[userData.Length - 1] : userData[0];
+                                if ("isnull" == paramName) return (args[0] == null ? args[args.Length - 1] : args[0]);
+                                return string.IsNullOrEmpty(Convert.ToString(args[0])) ? args[args.Length - 1] : args[0];
                             }
                             catch
                             {
                                 return null;
                             }
                         case "int":
-                            if (userData == null || userData.Length == 0) return null;
+                            if (args == null || args.Length == 0) return null;
                             try
                             {
-                                return Convert.ToInt32(userData[0]);
+                                return Convert.ToInt32(args[0]);
                             }
-                            catch 
+                            catch
                             {
                                 return 0;
                             }
@@ -228,18 +309,18 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "replace":
-                            if (userData == null || userData.Length < 3 || userData[0] == null) return null;
-                            if (userData[1] == null || userData[2] == null) return userData[0];
-                            return userData[0].ToString().Replace(userData[1].ToString(), userData[2].ToString());
+                            if (args == null || args.Length < 3 || args[0] == null) return null;
+                            if (args[1] == null || args[2] == null) return args[0];
+                            return args[0].ToString().Replace(args[1].ToString(), args[2].ToString());
                         case "request":
-                            if (userData == null || userData.Length < 1 || userData[0] == null) return null;
-                            return HttpContext.Current.Request[userData[0].ToString()];
+                            if (args == null || args.Length < 1 || args[0] == null) return null;
+                            return HttpContext.Current.Request[args[0].ToString()];
                         case "repeat":
-                            if (userData == null || userData.Length < 2 || userData[0] == null) return null;
-                            string src = Convert.ToString(userData[0]);
+                            if (args == null || args.Length < 2 || args[0] == null) return null;
+                            string src = Convert.ToString(args[0]);
                             if (string.IsNullOrEmpty(src)) return src;
                             int repeat = 1;
-                            int.TryParse(Convert.ToString(userData[1]), out repeat);
+                            int.TryParse(Convert.ToString(args[1]), out repeat);
                             string to = src;
                             for (int i = 0; i < repeat; i++)
                             {
@@ -247,18 +328,18 @@ namespace Com.AimUI.TagCore.Tags
                             }
                             return to;
                         case "redirect":
-                            if (userData == null) return null;
-                            string url = Convert.ToString(userData[0]);
+                            if (args == null) return null;
+                            string url = Convert.ToString(args[0]);
                             bool end = true;
-                            if (userData.Length > 1)
+                            if (args.Length > 1)
                             {
-                                if (userData[1] is bool)
+                                if (args[1] is bool)
                                 {
-                                    end = Convert.ToBoolean(userData[1]);
+                                    end = Convert.ToBoolean(args[1]);
                                 }
                                 else
                                 {
-                                    string s = Convert.ToString(userData[1]);
+                                    string s = Convert.ToString(args[1]);
                                     end = (s == "1" || string.Compare(s, "true", true) == 0);
                                 }
                             }
@@ -279,8 +360,8 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "session":
-                            if (userData == null || userData.Length < 1 || userData[0] == null) return null;
-                            return HttpContext.Current.Session[userData[0].ToString()];
+                            if (args == null || args.Length < 1 || args[0] == null) return null;
+                            return HttpContext.Current.Session[args[0].ToString()];
                         case "stop":
                             tagContext.GetTagResponse().Stop();
                             return null;
@@ -311,24 +392,24 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "bit":
-                            if (userData == null || userData.Length < 2) return null;
-                            string _s=Convert.ToString(userData[1]);
+                            if (args == null || args.Length < 2) return null;
+                            string _s = Convert.ToString(args[1]);
                             char bitAction = (string.IsNullOrEmpty(_s) ? '&' : _s[0]);
-                            int left = Convert.ToInt32(userData[0]);
+                            int left = Convert.ToInt32(args[0]);
                             switch (bitAction)
                             {
                                 case '&':
-                                    return left & Convert.ToInt32(userData[2]);
+                                    return left & Convert.ToInt32(args[2]);
                                 case '|':
-                                    return left | Convert.ToInt32(userData[2]);
+                                    return left | Convert.ToInt32(args[2]);
                                 case '^':
-                                    return left ^ Convert.ToInt32(userData[2]);
+                                    return left ^ Convert.ToInt32(args[2]);
                                 case '~':
                                     return ~left;
                                 case '<':  //左移
-                                    return left << Convert.ToInt32(userData[2]);
+                                    return left << Convert.ToInt32(args[2]);
                                 case '>': //右移
-                                    return left >> Convert.ToInt32(userData[2]);
+                                    return left >> Convert.ToInt32(args[2]);
                             }
                             return null;
                     }
@@ -337,9 +418,59 @@ namespace Com.AimUI.TagCore.Tags
                     switch (paramName)
                     {
                         case "jsonencode":
-                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Serialize);
+                            return TagContext.OnValuePreAction(args[0], ValuePreAction.JSON_Serialize);
                         case "jsondecode":
-                            return TagContext.OnValuePreAction(userData[0], ValuePreAction.JSON_Deserialize);
+                            return TagContext.OnValuePreAction(args[0], ValuePreAction.JSON_Deserialize);
+                    }
+                    break;
+                case 'm':
+                    switch (paramName)
+                    {
+                        case "mixsets":
+                            if (args == null || args.Length < 4) return null;
+                            var set1 = args[0] as IEnumerable<IDictionary<string, object>>;
+                            if (set1 == null) return set1;
+                            var set2 = args[1] as IEnumerable<IDictionary<string, object>>;
+                            if (set2 == null) return set1;
+                            string key = Convert.ToString(args[2]);
+                            if (string.IsNullOrEmpty(key)) return set1;
+                            string leftKey = Convert.ToString(args[3]);
+                            if (string.IsNullOrEmpty(leftKey)) return set1;
+                            string rightKey = (args.Length > 4 ? Convert.ToString(args[4]) : leftKey);
+                            if (string.IsNullOrEmpty(rightKey)) return set1;
+                            object obj1 = null;
+                            object obj2 = null;
+                            bool isCheckLeft = false;
+                            bool isCheckRight = false;
+                            foreach (var item1 in set1)
+                            {
+                                if (isCheckLeft == false)
+                                {
+                                    isCheckLeft = true;
+                                    if (item1.ContainsKey(leftKey) == false) return set1;
+                                }
+                                item1.TryGetValue(leftKey, out obj1);
+                                if (obj1 == null)
+                                {
+                                    item1[key] = null;
+                                    continue;
+                                }
+                                foreach (var item2 in set2)
+                                {
+                                    if (isCheckRight == false)
+                                    {
+                                        isCheckRight = true;
+                                        if (item2.ContainsKey(rightKey) == false) return set1;
+                                    }
+                                    item2.TryGetValue(rightKey, out obj2);
+                                    if (object.Equals(obj1, obj2))
+                                    {
+                                        item1[key] = item2;
+                                        break;
+                                    }
+                                }
+                            }
+                            return set1;
                     }
                     break;
             }
@@ -348,16 +479,16 @@ namespace Com.AimUI.TagCore.Tags
                 try
                 {
                     if (dt == null) dt = new DataTable();
-                    if (userData.Length < 2)
+                    if (args.Length < 2)
                     {
-                        return dt.Compute(userData[0].ToString(), "");
+                        return dt.Compute(args[0].ToString(), "");
                     }
                     else
                     {
                         string _s = "";
-                        for (int i = 0; i < userData.Length; i++)
+                        for (int i = 0; i < args.Length; i++)
                         {
-                            _s += userData[i].ToString();
+                            _s += args[i].ToString();
                         }
                         return dt.Compute(_s, "");
                     }

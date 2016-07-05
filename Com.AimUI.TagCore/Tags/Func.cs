@@ -12,7 +12,7 @@ namespace Com.AimUI.TagCore.Tags
             return new Func<T>();
         }
 
-        public override object GetAttribute(string paramName, object[] userData = null)
+        public override object GetAttribute(string paramName, object[] args = null)
         {
             return null;
         }
