@@ -608,7 +608,6 @@ namespace Com.AimUI.TagEngine
             return false;
         }
 
-
         static void OnTagAction(ITag<T> tagObj, TagStruct curStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             T tagContext = tagObj.tagContext;
@@ -670,7 +669,6 @@ namespace Com.AimUI.TagEngine
             }
         }
 
-
         static void ParseAction(T tagContext, ITag<T> tagObj, string body, TagStruct tagStruct, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
             if (string.IsNullOrEmpty(body)) return;
@@ -695,7 +693,6 @@ namespace Com.AimUI.TagEngine
                 }
             }
         }
-
 
         static void ParseTokens(T tagContext, ITag<T> tagObj, List<TagToken> tokens, string body, TagStruct tagStruct, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, bool isDynamic)
         {
@@ -1023,14 +1020,15 @@ namespace Com.AimUI.TagEngine
 
         static bool MatchToken(TagToken token, string nameScape, string tagName, string instanceName)
         {
+            if (nameScape == null) return false;
             bool isNoScope = string.IsNullOrEmpty(token.scope);
             bool isNoTagName = string.IsNullOrEmpty(token.tagName);
-            if (string.IsNullOrEmpty(token.tagName) == false && string.Compare(token.tagName, tagName, true) != 0)
+            if (isNoTagName == false && string.Compare(token.tagName, tagName, true) != 0)
             {
                 return false;
             }
 
-            if (string.IsNullOrEmpty(token.scope) == false && string.Compare(token.scope, nameScape, true) != 0)
+            if (isNoScope == false && string.Compare(token.scope, nameScape, true) != 0)
             {
                 return false;
             }
@@ -1075,15 +1073,14 @@ namespace Com.AimUI.TagEngine
             {
                 return GetTagSelf(token, tagObj, isDynamic);
             }
-            TagStruct parentTag = tagStruct;
-            while (true)
-            {
-                if (string.IsNullOrEmpty(tagName) == false || parentTag == null) break;
-                nameScape = parentTag.nameSpace;
-                tagName = parentTag.tagName;
-                parentTag = parentTag.parent;
-            }
-            ITag<T> parentObj = null;
+            //TagStruct parentTag = tagStruct;
+            //while (true)
+            //{
+            //    if (string.IsNullOrEmpty(tagName) == false || parentTag == null) break;
+            //    nameScape = parentTag.nameSpace;
+            //    tagName = parentTag.tagName;
+            //    parentTag = parentTag.parent;
+            //}
 
             string args_str = null;
             if (isDynamic && args != null && args.Length > 0)
@@ -1135,8 +1132,9 @@ namespace Com.AimUI.TagEngine
             }
             else
             {
+                ITag<T> parentObj = null;
                 //遍历父级
-                parentTag = tagStruct.parent;
+                TagStruct parentTag = tagStruct.parent;
                 while (true)
                 {
                     if (parentTag == null) break;
