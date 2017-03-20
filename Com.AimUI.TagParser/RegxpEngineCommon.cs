@@ -406,6 +406,7 @@ namespace Com.AimUI.TagParser
             {
                 return;
             }
+            var oldValue = tokenValue;
             if (inx == -1)
             {
                 token.name = tokenValue;
@@ -413,7 +414,8 @@ namespace Com.AimUI.TagParser
             else
             {
                 token.tagName = tokenValue.Substring(0, inx);
-                token.name = tokenValue.Substring(inx + 1);
+                oldValue = tokenValue.Substring(inx + 1);
+                token.name = oldValue;
                 inx = token.tagName.LastIndexOf(':');
                 if (inx != -1)
                 {
@@ -435,11 +437,11 @@ namespace Com.AimUI.TagParser
 
             if (token.args == null || token.args.Count == 0)
             {
-                inx = token.name.IndexOfAny(Chains_Char);
+                inx = oldValue.IndexOfAny(Chains_Char);
                 if (inx != -1)
                 {
-                    token.chainsPath = GetChains(token.name, inx);
-                    token.name = token.name.Substring(0, inx);
+                    token.chainsPath = GetChains(oldValue, inx);
+                    token.name = oldValue.Substring(0, inx);
                 }
             }
         }

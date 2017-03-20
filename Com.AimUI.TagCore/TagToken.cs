@@ -12,11 +12,7 @@ namespace Com.AimUI.TagCore
         /// <summary>
         /// 表达式 $
         /// </summary>
-        Express = 1 << 1,
-        /// <summary>
-        /// 属性链
-        /// </summary>
-        //AttributeChains = Attribute | (1 << 2)
+        Express = 1 << 1
     }
 
     //public enum TagScopeType
@@ -126,11 +122,6 @@ namespace Com.AimUI.TagCore
         {
             action = ValuePreAction.NONE;
         }
-
-        //public bool IsAttributeToken()
-        //{
-        //    return ((byte)type & (byte)TagTokenType.Attribute) == (byte)TagTokenType.Attribute;
-        //}
 
         public bool IsChains()
         {
