@@ -29,9 +29,9 @@ namespace Com.AimUI.TagParser
             return RegxpEngineCommon<T>.RemoveTagNotes(contentStr);
         }
 
-        public List<TagToken> GetTagTokens(string contentStr)
+        public List<TagToken> GetTagTokens(string contentStr,TagStruct tagStruct)
         {
-            return RegxpEngineCommon<T>.GetTagTokens(contentStr);
+            return RegxpEngineCommon<T>.GetTagTokens(contentStr, tagStruct);
         }
         public void SetValuePreActionChar(char valuePreActionChar)
         {

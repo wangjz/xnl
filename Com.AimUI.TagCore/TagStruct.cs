@@ -8,10 +8,12 @@ namespace Com.AimUI.TagCore
     public class TagStruct
     {
         private string _bodyContent;
+
         /// <summary>
         /// 标签命名空间
         /// </summary>
         public string nameSpace { get; set; }
+
         /// <summary>
         /// 标签名
         /// </summary>

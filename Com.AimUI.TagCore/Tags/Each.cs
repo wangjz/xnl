@@ -98,17 +98,6 @@ namespace Com.AimUI.TagCore.Tags
             switch (paramName)
             {
                 case "list":
-                    if (args != null)
-                    {
-                        string[] props = new string[args.Length];
-                        for (int j = 0; j < args.Length; j++)
-                        {
-                            paramName = Convert.ToString(args[j]);
-                            if (string.IsNullOrEmpty(paramName)) return null;
-                            props[j] = paramName;
-                        }
-                        return Set<T>.ComplexQueryValue(list, props);
-                    }
                     return list;
                 case "i":
                     return i;
@@ -125,43 +114,11 @@ namespace Com.AimUI.TagCore.Tags
                         }
                     }
                     return count;
+                case "item":
+                    return item;
                 default:
-                    return GetValue(paramName, args);
-            }
-        }
-
-        protected virtual object GetValue(string paramName, object[] userData, ComplexQueryDelegate complexQueryFunc = null)
-        {
-            if (item != null)
-            {
-                if (paramName == "item" && (userData == null)) return item;
-                try
-                {
-                    string prop = paramName;
-                    int inx = 0;
-                    if (paramName != "item")
-                    {
-                        inx = 1;
-                    }
-                    int len = (userData == null ? 0 : userData.Length)+inx;
-                    string[] props = new string[len];
-                    if (inx == 1) props[0] = paramName;
-                    if (complexQueryFunc == null) complexQueryFunc = Set<T>.ComplexQueryValue;
-                    if (userData == null) return complexQueryFunc(item, props);
-                    for (int i = 0; i < userData.Length; i++)
-                    {
-                        paramName = Convert.ToString(userData[i]);
-                        if (string.IsNullOrEmpty(paramName)) return null;
-                        props[i + inx] = paramName;
-                    }
-                    return complexQueryFunc(item, props);
-                }
-                catch
-                {
                     return null;
-                }
             }
-            return null;
         }
 
         public virtual ITag<T> Create()

@@ -59,22 +59,16 @@ namespace Com.AimUI.TagCore.Tags
         {
 
         }
-        protected virtual object GetValue(object[] userData, ComplexQueryDelegate complexQueryFunc = null)
+        
+        protected virtual object GetValue(object[] userData)
         {
             if (userData == null || userData.Length < 2 || userData[0] == null) return null;
+            
             try
             {
+                if(userData[1]==null)return null;
                 object obj = userData[0];
-                if (complexQueryFunc == null) complexQueryFunc = Set<T>.ComplexQueryValue;
-                string[] props=new string[userData.Length-1];
-                string prop = null;
-                for (int i = 1; i < userData.Length; i++)
-                {
-                    prop = Convert.ToString(userData[i]);
-                    if (string.IsNullOrEmpty(prop)) return null;
-                    props[i - 1] = prop;
-                }
-                return complexQueryFunc(obj, props);
+                return TagHelper.ComplexQuery(obj, userData[1].ToString());
             }
             catch
             {

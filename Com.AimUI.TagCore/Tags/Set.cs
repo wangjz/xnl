@@ -14,6 +14,8 @@ namespace Com.AimUI.TagCore.Tags
         protected StringBuilder buffer;
         protected OnTagDelegate _tagDelegate;
         protected object[] tagArgs;
+        protected byte execute = 3; //1 run  2 output
+        protected bool innerTag = false;
         public T tagContext
         {
             get;
@@ -43,8 +45,14 @@ namespace Com.AimUI.TagCore.Tags
 
         public virtual void OnTag(OnTagDelegate tagDelegate = null)
         {
+            innerTag = true;
             body = null;
             _tagDelegate = tagDelegate;
+            if (execute > 0)
+            {
+                GetBody();
+            }
+            innerTag = false;
         }
 
         protected string GetBody()
@@ -57,7 +65,7 @@ namespace Com.AimUI.TagCore.Tags
             if (len > 0)
             {
                 body = buffer.ToString(inx, len);
-                buffer.Remove(inx, len);
+                if ((execute & 2) != 2) buffer.Remove(inx, len);
             }
             else
             {
@@ -70,13 +78,14 @@ namespace Com.AimUI.TagCore.Tags
         {
             switch (paramName)
             {
+                case "execute":
+                    byte.TryParse(Convert.ToString(value), out execute);
+                    return;
                 case "body":
                     body = value as string;
                     return;
                 case "call":
                     return;
-                case "colls":
-                case "attrs":
                 case "sets":
                     sets = value as IDictionary<string, object>;
                     return;
@@ -106,6 +115,8 @@ namespace Com.AimUI.TagCore.Tags
         {
             switch (paramName)
             {
+                case "execute":
+                    return execute;
                 case "sets":
                     if (args == null) return null;
                     SetValues(args);
@@ -132,14 +143,12 @@ namespace Com.AimUI.TagCore.Tags
                     }
                     return null;
                 case "body":
+                    if (innerTag) return null;
                     return GetBody();
                 case "call":
                     tagArgs = args;
                     body = null;
                     return GetBody();
-                case "colls":
-                case "attrs":
-                    return sets;
                 case "clear":
                     sets.Clear();
                     return null;
@@ -226,10 +235,9 @@ namespace Com.AimUI.TagCore.Tags
             return colls;
         }
 
-        protected virtual object GetValue(string paramName, object[] args, ComplexQueryDelegate complexQueryFunc = null)
+        protected virtual object GetValue(string paramName, object[] args)
         {
             object obj = null;
-            int inx = 0;
             if (paramName.StartsWith("arg"))
             {
                 int i = -1;
@@ -242,7 +250,6 @@ namespace Com.AimUI.TagCore.Tags
                     else if (tagArgs != null && int.TryParse(args[0].ToString(), out i) && i > 0 && (i - 1) < tagArgs.Length)
                     {
                         obj = tagArgs[i];
-                        inx = 1;
                     }
                 }
                 else if (int.TryParse(paramName.Substring(3), out i) && tagArgs != null && i > 0)
@@ -254,29 +261,6 @@ namespace Com.AimUI.TagCore.Tags
             else
             {
                 sets.TryGetValue(paramName, out obj);
-            }
-            if (args == null) return obj;
-            if (obj != null)
-            {
-                if (args.Length > inx)
-                {
-                    try
-                    {
-                        string[] props = new string[args.Length - inx];
-                        for (int i = inx; i < args.Length; i++)
-                        {
-                            paramName = Convert.ToString(args[i]);
-                            if (string.IsNullOrEmpty(paramName)) return null;
-                            props[i - inx] = paramName;
-                        }
-                        if (complexQueryFunc == null) complexQueryFunc = ComplexQueryValue;
-                        return complexQueryFunc(obj, props);
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-                }
             }
             return obj;
         }
@@ -297,160 +281,6 @@ namespace Com.AimUI.TagCore.Tags
         public virtual TagEvents events
         {
             get { return TagEvents.Init | TagEvents.Tag; }
-        }
-
-        public static object ComplexQueryValue(object obj, string[] props)
-        {
-            string prop;
-            if (obj is string)
-            {
-                prop = obj as string;
-                char firstChar = prop[0];
-                if (firstChar == '{' || firstChar == '[')
-                {
-                    try
-                    {
-                        obj = TagContext.OnValuePreAction(obj, ValuePreAction.JSON_Deserialize);
-                    }
-                    catch
-                    {
-                        obj = prop;
-                    }
-                    if (obj == null) obj = prop;
-                }
-            }
-            if (props.Length == 1) return GetValue(obj, props[0]);
-            for (int i = 0; i < props.Length; i++)
-            {
-                prop = props[i];
-                if (string.IsNullOrEmpty(prop)) return null;
-                obj = GetValue(obj, prop);
-                if (obj == null) return null;
-            }
-            return obj;
-        }
-
-        public static object GetValue(object obj, string prop)
-        {
-            if (obj == null) return null;
-            if (string.IsNullOrEmpty(prop)) return null;
-            try
-            {
-                int i;
-                if (prop.EndsWith("]"))
-                {
-                    int inx = prop.IndexOf('[');
-                    if (inx == -1) return null;
-                    string nextProp = null;
-                    if (inx == 0)
-                    {
-                        inx = prop.IndexOf(']');
-                        prop = prop.Substring(1, inx - 1);
-                        if (inx < prop.Length - 1)
-                        {
-                            //多个索引
-                            nextProp = prop.Substring(inx + 1);
-                        }
-                    }
-                    else
-                    {
-                        //多个索引
-                        nextProp = prop.Substring(inx);
-                        prop = prop.Substring(0, inx);
-                    }
-                    if (prop.IndexOf(',') != -1)
-                    {
-                        string[] props = prop.Split(',');
-                        object[] objs = new object[props.Length];
-                        for (i = 0; i < props.Length; i++)
-                        {
-                            objs[i] = GetValue(obj, props[i]);
-                        }
-                        obj = objs;
-                    }
-                    if (nextProp != null)
-                    {
-                        obj = GetValue(obj, prop);
-                        if (obj == null) return null;
-                        obj = GetValue(obj, nextProp);
-                        return obj;
-                    }
-                }
-                if (int.TryParse(prop, out i))
-                {
-                    if (i < 0) return null;
-                    string str = obj as string;
-                    if (str != null)
-                    {
-                        if (i < str.Length)
-                        {
-                            return str[i];
-                        }
-                        return null;
-                    }
-                    IEnumerable itor = obj as IEnumerable;
-                    if (itor != null)
-                    {
-                        IList arr = obj as IList;
-                        if (arr != null)
-                        {
-                            if (i < arr.Count)
-                            {
-                                return arr[i];
-                            }
-                            return null;
-                        }
-                        int j = 0;
-                        ICollection coll = obj as ICollection;
-                        if (coll != null)
-                        {
-                            if (i < coll.Count)
-                            {
-
-                                foreach (object o in coll)
-                                {
-                                    if (i == j) return o;
-                                    j++;
-                                }
-                                return null;
-                            }
-                            return null;
-                        }
-                        j = 0;
-                        foreach (object o in itor)
-                        {
-                            if (i == j) return o;
-                            j++;
-                        }
-                        return null;
-                    }
-                }
-
-                IDictionary<string, object> colls = obj as IDictionary<string, object>;
-                if (colls != null)
-                {
-                    object outObj;
-                    if (colls.TryGetValue(prop, out outObj))
-                    {
-                        return outObj;
-                    }
-                    foreach (KeyValuePair<string, object> kv in colls)
-                    {
-                        if (string.Compare(kv.Key, prop, true) == 0)
-                        {
-                            return kv.Value;
-                        }
-                    }
-                    return null;
-                }
-                PropertyInfo propertyInfo = obj.GetType().GetProperty(prop, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.GetField | BindingFlags.Instance);
-                if (propertyInfo != null) return propertyInfo.GetValue(obj, null);
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }

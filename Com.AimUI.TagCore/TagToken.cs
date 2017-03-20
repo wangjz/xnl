@@ -4,15 +4,19 @@ namespace Com.AimUI.TagCore
 {
     public enum TagTokenType
     {
-        Common,
+        Common = 0,
         /// <summary>
         /// 属性 @
         /// </summary>
-        Attribute,
+        //Attribute = 1,
         /// <summary>
         /// 表达式 $
         /// </summary>
-        Express, 
+        Express = 1 << 1,
+        /// <summary>
+        /// 属性链
+        /// </summary>
+        //AttributeChains = Attribute | (1 << 2)
     }
 
     //public enum TagScopeType
@@ -113,10 +117,24 @@ namespace Com.AimUI.TagCore
         /// 参数列表
         /// </summary>
         public IList<TagToken> args { get; set; }
+        /// <summary>
+        /// 链操作路径
+        /// </summary>
+        public string chainsPath { get; set; }
 
         public TagToken()
         {
             action = ValuePreAction.NONE;
+        }
+
+        //public bool IsAttributeToken()
+        //{
+        //    return ((byte)type & (byte)TagTokenType.Attribute) == (byte)TagTokenType.Attribute;
+        //}
+
+        public bool IsChains()
+        {
+            return chainsPath != null && chainsPath.Length > 0;
         }
     }
 }

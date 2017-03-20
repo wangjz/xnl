@@ -206,6 +206,7 @@ namespace Com.AimUI.TagCore
             }
             else
             {
+                if (isCreateNew == false) return obj;
                 return obj.Create();
             }
         }

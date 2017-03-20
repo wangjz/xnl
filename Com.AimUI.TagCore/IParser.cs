@@ -23,7 +23,7 @@ namespace Com.AimUI.TagCore
         TagStruct GetTagStruct(string contentStr);
 
 
-        List<TagToken> GetTagTokens(string contentStr);
+        List<TagToken> GetTagTokens(string contentStr, TagStruct tagStruct);
 
         //设置自定义返回值预处理符号
         void SetValuePreActionChar(char valuePreActionChar);
