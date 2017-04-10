@@ -46,11 +46,8 @@ namespace Com.AimUI.TagCore.Tags
                     return DateTime.Now.Second;
                 case "millisecond":
                     return DateTime.Now.Millisecond;
-                //case "time":
-                //  return DateTime.Today.TimeOfDay;
                 case "format":
                     return null;
-
             }
             return null;
         }

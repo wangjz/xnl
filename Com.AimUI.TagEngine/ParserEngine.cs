@@ -868,7 +868,7 @@ namespace Com.AimUI.TagEngine
             return isTagNew;
         }
 
-        static bool InitExpressTagObj(string nameSpace, string tagName, string tokenInsName, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, out ITag<T> tagObj)
+        static bool InitExpressTagObj(string nameSpace, string tagName, string tokenInsName, StringBuilder strBuilder, Dictionary<string, ITag<T>> tagsObj, T tagContext, bool isDynamic, out ITag<T> tagObj, TagStruct tagStruct = null)
         {
             bool isNew = false;
             string expVarName = null;
@@ -882,7 +882,6 @@ namespace Com.AimUI.TagEngine
                     GetTagInstance(nameSpace, tagName, tagsObj, out tagObj);
                     tagObj = tagObj.Create();
                     nameTags[nameSpace + ":" + tagName + "_" + tokenInsName] = tagObj;
-                    //nameTags[tokenInsName] = tagObj;
                 }
                 expVarName = nameSpace + "_" + tagName + "___" + tokenInsName;
             }
@@ -911,10 +910,9 @@ namespace Com.AimUI.TagEngine
             else
             {
                 isNew = (tagObj.tagContext == null);
-                string firstName = null;
+                string firstName = tagObj.instanceName;
                 if (isNew)
                 {
-                    firstName = tagObj.instanceName;
                     tagObj.instanceName = expVarName;
                     tagObj.tagContext = tagContext;
                 }
@@ -935,28 +933,48 @@ namespace Com.AimUI.TagEngine
                     }
                     else
                     {
-                        code += "if(" + tagObj.instanceName + " == null){\r\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");\r\n";
+                        bool isInner = false;
+                        if (tagStruct != null)
+                        {
+                            var curStruct = tagStruct;
+                            while (curStruct != null)
+                            {
+                                if (tagObj == curStruct.tagObj)
+                                {
+                                    isInner = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    curStruct = curStruct.parent;
+                                }
+                            }
+                        }
+                        if (isInner == false) code += "if(" + tagObj.instanceName + " == null){\r\n" + tagObj.instanceName + " = Com.AimUI.TagCore.TagLib<T>.GetTagInstance(\"" + nameSpace + "\",\"" + tagName + "\");\r\n";
                     }
-                    code += tagObj.instanceName + ".tagContext = tagContext;\r\n";
-                    code += tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";\r\n";
-                    if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                    if (code.Length > 0)
                     {
-                        code += tagObj.instanceName + ".OnInit();\r\n}\r\n";
-                    }
-                    else
-                    {
-                        code += "}\r\n";
-                    }
-                    if (strBuilder.Length >= code.Length)
-                    {
-                        if (strBuilder.ToString(strBuilder.Length - code.Length, code.Length) != code)
+                        code += tagObj.instanceName + ".tagContext = tagContext;\r\n";
+                        code += tagObj.instanceName + ".instanceName = \"" + tagObj.instanceName + "\";\r\n";
+                        if ((tagObj.events & TagEvents.Init) == TagEvents.Init)
+                        {
+                            code += tagObj.instanceName + ".OnInit();\r\n}\r\n";
+                        }
+                        else
+                        {
+                            code += "}\r\n";
+                        }
+                        if (strBuilder.Length >= code.Length)
+                        {
+                            if (strBuilder.ToString(strBuilder.Length - code.Length, code.Length) != code)
+                            {
+                                strBuilder.Append(code);
+                            }
+                        }
+                        else
                         {
                             strBuilder.Append(code);
                         }
-                    }
-                    else
-                    {
-                        strBuilder.Append(code);
                     }
                 }
                 else if (isNew)
@@ -1234,7 +1252,7 @@ namespace Com.AimUI.TagEngine
                         }
                     }
                 }
-                InitExpressTagObj(ns, tagName,token.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj);
+                InitExpressTagObj(ns, tagName, token.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out tagObj, tagStruct);
             }
 
             if (token.args != null && token.args.Count > 0 && (token.args.Count == 1 && token.args[0].type == TagTokenType.Common && token.args[0].value == string.Empty && token.args[0].args == null) == false)
@@ -1332,7 +1350,7 @@ namespace Com.AimUI.TagEngine
                                         continue;
                                     }
                                 }
-                                InitExpressTagObj(ns, tagName,curToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
+                                InitExpressTagObj(ns, tagName,curToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj,tagStruct);
 
                                 if (curToken.name == "this")
                                 {
@@ -1444,7 +1462,7 @@ namespace Com.AimUI.TagEngine
 
                                     tagName = prevToken.tagName;
 
-                                    InitExpressTagObj(ns, tagName,prevToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj);
+                                    InitExpressTagObj(ns, tagName, prevToken.instanceName, strBuilder, tagsObj, tagContext, isDynamic, out t_tagObj, tagStruct);
 
                                     if (isDynamic)
                                     {
